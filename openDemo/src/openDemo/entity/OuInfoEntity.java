@@ -3,7 +3,8 @@ package openDemo.entity;
 import java.util.List;
 
 /**
- * 组织单位
+ * 组织单位对象
+ * 
  * @author yaoj
  *
  */
@@ -13,19 +14,19 @@ public class OuInfoEntity {
 	 * 组织单位ID
 	 */
 	private String ID;
-	
+
 	/**
-	 * 组织单位名称 
+	 * 组织单位名称
 	 */
 	private String ouName;
 
 	/**
-	 * 父节点ID 
+	 * 父节点ID
 	 */
 	private String parentID;
 
 	/**
-	 * 描述  
+	 * 描述
 	 */
 	private String description;
 
@@ -37,7 +38,12 @@ public class OuInfoEntity {
 	/**
 	 * 是否分支机构
 	 */
-	private String isSub;
+	private boolean isSub;
+
+	/**
+	 * 排序索引?
+	 */
+	private int orderIndex;
 
 	public String getID() {
 		return ID;
@@ -79,12 +85,20 @@ public class OuInfoEntity {
 		this.users = users;
 	}
 
-	public String getIsSub() {
+	public boolean getIsSub() {
 		return isSub;
 	}
 
-	public void setIsSub(String isSub) {
+	public void setIsSub(boolean isSub) {
 		this.isSub = isSub;
 	}
-	
+
+	public int getOrderIndex() {
+		return orderIndex;
+	}
+
+	public void setOrderIndex(int orderIndex) {
+		this.orderIndex = orderIndex;
+	}
+
 }
