@@ -2,12 +2,18 @@ package openDemo.entity;
 
 import java.util.Date;
 
+/**
+ * 用户类对象
+ * 
+ * @author yanl
+ *
+ */
 public class UserEntity {
 
 	/**
 	 * 用户ID(同步必传)
 	 */
-	private String id;
+	private String ID;
 
 	/**
 	 * 用户名(同步必传)
@@ -92,12 +98,12 @@ public class UserEntity {
 
 	private String spare10;
 
-	public String getId() {
-		return id;
+	public String getID() {
+		return ID;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public void setID(String iD) {
+		ID = iD;
 	}
 
 	public String getUserName() {
