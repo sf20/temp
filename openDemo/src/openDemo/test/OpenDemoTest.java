@@ -8,7 +8,6 @@ import openDemo.entity.OuInfoEntity;
 import openDemo.entity.ResultEntity;
 import openDemo.entity.UserEntity;
 import openDemo.service.OrgService;
-import openDemo.service.RegisterService;
 import openDemo.service.RoleService;
 import openDemo.service.SsoService;
 import openDemo.service.UserService;
@@ -117,7 +116,7 @@ public class OpenDemoTest {
 		users.add("zhao11");
 		ouInfoEntity.setUsers(users);
 		ouInfoEntity.setOuName("JAVA一部");
-		ouInfoEntity.setIsSub("false");
+		ouInfoEntity.setIsSub(false);
 		ouInfos.add(ouInfoEntity);
 		ResultEntity resultEntity = orgService.ous(false, ouInfos);
 		print("同步组织单位",resultEntity);
