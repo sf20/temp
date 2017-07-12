@@ -1,12 +1,13 @@
 package openDemo.entity;
 
+import java.util.Date;
 
 public class UserEntity {
 
 	/**
-	 * 用户ID (同步必传)
+	 * 用户ID(同步必传)
 	 */
-	private String ID;
+	private String id;
 
 	/**
 	 * 用户名(同步必传)
@@ -14,99 +15,37 @@ public class UserEntity {
 	private String userName;
 
 	/**
-	 * 密码  
-	 * 备注：如果用MD5或者CMD5加密则必须使用标准MD5 
-	 * 32位小写加密的字符串（如果不传使用平台配置的默认密码）
-	 */
-	private String password;
-
-	/**
-	 * 姓名 (同步必传)
+	 * 中文姓名(同步必传)
 	 */
 	private String cnName;
 
 	/**
-	 * 性别 
+	 * 密码备注：如果用MD5或者CMD5加密则必须使用标准MD5 32位小写加密的字符串（如果不传使用平台配置的默认密码）
+	 */
+	private String password;
+
+	/**
+	 * 性别
 	 */
 	private String sex;
 
 	/**
-	 * 描述
-	 */
-	private String description;
-
-	/**
-	 * 英文缩写
-	 */
-	private String EName;
-
-	/**
-	 * 办公电话 
-	 */
-	private String officePhone;
-
-	/**
-	 * 家庭电话
-	 */
-	private String homePhone;
-
-	/**
-	 * 移动电话 
+	 * 移动电话
 	 */
 	private String mobile;
 
 	/**
-	 * 电子邮件  
+	 * 电子邮件
 	 */
 	private String mail;
 
 	/**
-	 * 个人主页  
-	 */
-	private String homePage;
-
-	/**
-	 * 省 
-	 */
-	private String province;
-
-	/**
-	 * 市 
-	 */
-	private String city;
-
-	/**
-	 * 街道  
-	 */
-	private String streetAddress;
-
-	/**
-	 * 传真
-	 */
-	private String fax;
-
-	/**
-	 * 职务名称
-	 */
-	private String jobName;
-
-	/**
-	 * 错误信息
-	 */
-	private String errorInfo;
-
-	/**
-	 * 是否是主管
-	 */
-	private boolean isManager;
-
-	/**
 	 * 部门编号
 	 */
-    private String orgOuCode;
+	private String orgOuCode;
 
 	/**
-	 * 密码加密方式： YXT(云学堂加密)、MD5 (密码MD5加密)、CMD5(用户名+密码MD5加密)
+	 * 密码加密方式： YXT(云学堂加密默认)、MD5 (密码MD5加密)、CMD5(用户名+密码MD5加密)
 	 */
 	private String encryptionType;
 
@@ -115,12 +54,50 @@ public class UserEntity {
 	 */
 	private String postionNo;
 
-	public String getID() {
-		return ID;
+	/**
+	 * 入职日期
+	 */
+	private Date entryTime;
+
+	/**
+	 * 出生日期
+	 */
+	private Date birthday;
+
+	/**
+	 * 过期日期
+	 */
+	private Date expireDate;
+
+	/**
+	 * 扩展字段 1~10
+	 */
+	private String spare1;
+
+	private String spare2;
+
+	private String spare3;
+
+	private String spare4;
+
+	private String spare5;
+
+	private String spare6;
+
+	private String spare7;
+
+	private String spare8;
+
+	private String spare9;
+
+	private String spare10;
+
+	public String getId() {
+		return id;
 	}
 
-	public void setID(String iD) {
-		ID = iD;
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public String getUserName() {
@@ -131,14 +108,6 @@ public class UserEntity {
 		this.userName = userName;
 	}
 
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
 	public String getCnName() {
 		return cnName;
 	}
@@ -147,44 +116,20 @@ public class UserEntity {
 		this.cnName = cnName;
 	}
 
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 	public String getSex() {
 		return sex;
 	}
 
 	public void setSex(String sex) {
 		this.sex = sex;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getEName() {
-		return EName;
-	}
-
-	public void setEName(String eName) {
-		EName = eName;
-	}
-
-	public String getOfficePhone() {
-		return officePhone;
-	}
-
-	public void setOfficePhone(String officePhone) {
-		this.officePhone = officePhone;
-	}
-
-	public String getHomePhone() {
-		return homePhone;
-	}
-
-	public void setHomePhone(String homePhone) {
-		this.homePhone = homePhone;
 	}
 
 	public String getMobile() {
@@ -201,62 +146,6 @@ public class UserEntity {
 
 	public void setMail(String mail) {
 		this.mail = mail;
-	}
-
-	public String getHomePage() {
-		return homePage;
-	}
-
-	public void setHomePage(String homePage) {
-		this.homePage = homePage;
-	}
-
-	public String getProvince() {
-		return province;
-	}
-
-	public void setProvince(String province) {
-		this.province = province;
-	}
-
-	public String getCity() {
-		return city;
-	}
-
-	public void setCity(String city) {
-		this.city = city;
-	}
-
-	public String getStreetAddress() {
-		return streetAddress;
-	}
-
-	public void setStreetAddress(String streetAddress) {
-		this.streetAddress = streetAddress;
-	}
-
-	public String getFax() {
-		return fax;
-	}
-
-	public void setFax(String fax) {
-		this.fax = fax;
-	}
-
-	public String getJobName() {
-		return jobName;
-	}
-
-	public void setJobName(String jobName) {
-		this.jobName = jobName;
-	}
-
-	public String getErrorInfo() {
-		return errorInfo;
-	}
-
-	public void setErrorInfo(String errorInfo) {
-		this.errorInfo = errorInfo;
 	}
 
 	public String getOrgOuCode() {
@@ -283,12 +172,108 @@ public class UserEntity {
 		this.postionNo = postionNo;
 	}
 
-	public boolean getIsManager() {
-		return isManager;
+	public Date getEntryTime() {
+		return entryTime;
 	}
 
-	public void setIsManager(boolean isManager) {
-		this.isManager = isManager;
+	public void setEntryTime(Date entryTime) {
+		this.entryTime = entryTime;
+	}
+
+	public Date getBirthday() {
+		return birthday;
+	}
+
+	public void setBirthday(Date birthday) {
+		this.birthday = birthday;
+	}
+
+	public Date getExpireDate() {
+		return expireDate;
+	}
+
+	public void setExpireDate(Date expireDate) {
+		this.expireDate = expireDate;
+	}
+
+	public String getSpare1() {
+		return spare1;
+	}
+
+	public void setSpare1(String spare1) {
+		this.spare1 = spare1;
+	}
+
+	public String getSpare2() {
+		return spare2;
+	}
+
+	public void setSpare2(String spare2) {
+		this.spare2 = spare2;
+	}
+
+	public String getSpare3() {
+		return spare3;
+	}
+
+	public void setSpare3(String spare3) {
+		this.spare3 = spare3;
+	}
+
+	public String getSpare4() {
+		return spare4;
+	}
+
+	public void setSpare4(String spare4) {
+		this.spare4 = spare4;
+	}
+
+	public String getSpare5() {
+		return spare5;
+	}
+
+	public void setSpare5(String spare5) {
+		this.spare5 = spare5;
+	}
+
+	public String getSpare6() {
+		return spare6;
+	}
+
+	public void setSpare6(String spare6) {
+		this.spare6 = spare6;
+	}
+
+	public String getSpare7() {
+		return spare7;
+	}
+
+	public void setSpare7(String spare7) {
+		this.spare7 = spare7;
+	}
+
+	public String getSpare8() {
+		return spare8;
+	}
+
+	public void setSpare8(String spare8) {
+		this.spare8 = spare8;
+	}
+
+	public String getSpare9() {
+		return spare9;
+	}
+
+	public void setSpare9(String spare9) {
+		this.spare9 = spare9;
+	}
+
+	public String getSpare10() {
+		return spare10;
+	}
+
+	public void setSpare10(String spare10) {
+		this.spare10 = spare10;
 	}
 
 }
