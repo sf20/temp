@@ -47,7 +47,7 @@ public class EsbService {
 		httpPost.addHeader("Authorization", getBasicAuthHeader(USERNAME, PASSWORD));
 
 		// 构建消息实体 发送Json格式的数据
-		StringEntity entity = new StringEntity(getJson(serviceOperation, mode), ContentType.APPLICATION_JSON);
+		StringEntity entity = new StringEntity(buildReqJson(serviceOperation, mode), ContentType.APPLICATION_JSON);
 		entity.setContentEncoding(CHARSET_UTF8);
 		httpPost.setEntity(entity);
 
@@ -108,7 +108,7 @@ public class EsbService {
 	 *            可在1（全量）和2（增量）中二选一。EMP拥有1和2两种模式。Org只有1，全量模式。
 	 * @return
 	 */
-	private String getJson(String serviceOperation, String mode) {
+	private String buildReqJson(String serviceOperation, String mode) {
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> map = new HashMap<>();
 
@@ -117,11 +117,10 @@ public class EsbService {
 		reqHeadMap.put(SERVICENAME, SERVICE_NAME);
 		reqHeadMap.put(SERVICEOPERATION, serviceOperation);
 		reqHeadMap.put(SERVICEVERSION, SERVICE_VERSION);
+		map.put(ESBREQHEAD, reqHeadMap);
 
 		Map<String, Object> reqDataMap = new HashMap<>();
 		reqDataMap.put(MODE, mode);
-
-		map.put(ESBREQHEAD, reqHeadMap);
 		map.put(ESBREQDATA, reqDataMap);
 
 		String str = "";
