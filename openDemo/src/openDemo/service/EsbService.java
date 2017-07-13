@@ -38,7 +38,7 @@ public class EsbService {
 
 	private final String CHARSET_UTF8 = "UTF-8";
 
-	public String sendPost(String serviceOperation, String mode) {
+	public String getJsonPost(String serviceOperation, String mode) {
 		HttpClient httpClient = HttpClientBuilder.create().build();
 
 		HttpPost httpPost = new HttpPost(REQUEST_URL);
