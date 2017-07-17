@@ -5,14 +5,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -24,17 +27,17 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import openDemo.entity.OuInfoEntity;
 import openDemo.entity.ResultEntity;
 import openDemo.entity.UserEntity;
-import openDemo.model.OpReqJsonModle;
+import openDemo.model.sync.OpOuInfoModel;
+import openDemo.model.sync.OpReqJsonModle;
+import openDemo.model.sync.OpUserInfoModel;
 import openDemo.service.OrgService;
 import openDemo.service.UserService;
 import openDemo.test.EsbServiceTest;
@@ -196,19 +199,22 @@ public class EsbService {
 
 		String jsonString = getFileStr("/new_depts.txt");
 
-		OpReqJsonModle<OuInfoEntity> modle = new OpReqJsonModle<>();
+		OpReqJsonModle<OpOuInfoModel> modle = new OpReqJsonModle<>();
 		try {
-			modle = mapper.readValue(jsonString, new TypeReference<OpReqJsonModle<OuInfoEntity>>() {
+			modle = mapper.readValue(jsonString, new TypeReference<OpReqJsonModle<OpOuInfoModel>>() {
 			});
-		} catch (JsonParseException e) {
+		} catch (IOException e1) {
+			// TODO
+			e1.printStackTrace();
+		}
+
+		List<OuInfoEntity> list = null;
+		try {
+			list = copyCreateEntityList(modle.getEsbResData().get(ORG_RES_DATA_KEY), OuInfoEntity.class);
+		} catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
 			// TODO
 			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
-		List<OuInfoEntity> list = modle.getEsbResData().get(ORG_RES_DATA_KEY);
 
 		replaceIllegalChar(list);
 
@@ -219,26 +225,59 @@ public class EsbService {
 	}
 
 	/**
+	 * 通过复制属性值的方法将json数据模型集合转换为同步用的对象集合
+	 * 
+	 * @param fromList
+	 *            json数据模型集合
+	 * @param toListClassType
+	 *            复制目标对象的类型
+	 * @return 复制后的对象集合
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 * @throws InstantiationException
+	 */
+	private <E, T> List<T> copyCreateEntityList(List<E> fromList, Class<T> toListClassType)
+			throws IllegalAccessException, InvocationTargetException, InstantiationException {
+		List<T> entityList = null;
+
+		int listSize = fromList.size();
+		if (fromList != null && listSize > 0) {
+			entityList = new ArrayList<T>(listSize);
+
+			for (int i = 0; i < listSize; i++) {
+				T instance = toListClassType.newInstance();
+				BeanUtils.copyProperties(instance, fromList.get(i));
+				entityList.add(instance);
+			}
+		}
+
+		return entityList;
+	}
+
+	/**
 	 * 用户同步
 	 */
 	public void opUserSync() {
 		// String jsonString = service.getJsonPost("QueryEmpInfo", "2");
 		// System.out.println(jsonString);
-		String jsonString = getFileStr("/new_empM2.txt");
+		String jsonString = getFileStr("/userM2.json");
 
-		OpReqJsonModle<UserEntity> modle = new OpReqJsonModle<>();
+		OpReqJsonModle<OpUserInfoModel> modle = new OpReqJsonModle<>();
 		try {
-			modle = mapper.readValue(jsonString, new TypeReference<OpReqJsonModle<UserEntity>>() {
+			modle = mapper.readValue(jsonString, new TypeReference<OpReqJsonModle<OpUserInfoModel>>() {
 			});
-		} catch (JsonParseException e) {
+		} catch (IOException e) {
 			// TODO
 			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		}
+
+		List<UserEntity> list = null;
+		try {
+			list = copyCreateEntityList(modle.getEsbResData().get(EMP_RES_DATA_KEY), UserEntity.class);
+		} catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+			// TODO
 			e.printStackTrace();
 		}
-		List<UserEntity> list = modle.getEsbResData().get(EMP_RES_DATA_KEY);
 
 		// TODO to delete
 		printUserInfo(list);
