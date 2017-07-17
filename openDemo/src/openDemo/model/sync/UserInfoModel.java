@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author yanl
  *
  */
-public class UserEntity {
+public class UserInfoModel {
 
 	/**
 	 * 用户ID(同步必传)

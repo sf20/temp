@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author yanl
  *
  */
-public class OuInfoEntity {
+public class OuInfoModel {
 
 	/**
 	 * 组织单位ID
