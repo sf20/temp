@@ -1,4 +1,4 @@
-package openDemo.model;
+package openDemo.model.sync;
 
 import java.util.HashMap;
 import java.util.List;

@@ -1,4 +1,4 @@
-package openDemo.entity.sync;
+package openDemo.model.sync;
 
 import java.util.List;
 
