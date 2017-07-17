@@ -6,12 +6,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * 组织单位对象
+ * 欧普公司组织单位json数据模型
  * 
  * @author yanl
  *
  */
-public class OuInfoModel {
+public class OpOuInfoModel {
 
 	/**
 	 * 组织单位ID

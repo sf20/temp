@@ -6,12 +6,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * 用户类对象
+ * 欧普公司用户json数据模型
  * 
  * @author yanl
  *
  */
-public class UserInfoModel {
+public class OpUserInfoModel {
 
 	/**
 	 * 用户ID(同步必传)
