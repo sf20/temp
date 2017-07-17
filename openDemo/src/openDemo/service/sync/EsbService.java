@@ -1,4 +1,4 @@
-package openDemo.service;
+package openDemo.service.sync;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,6 +35,8 @@ import openDemo.entity.OuInfoEntity;
 import openDemo.entity.ResultEntity;
 import openDemo.entity.UserEntity;
 import openDemo.model.OpReqJsonModle;
+import openDemo.service.OrgService;
+import openDemo.service.UserService;
 import openDemo.test.EsbServiceTest;
 
 public class EsbService {
