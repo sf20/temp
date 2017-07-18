@@ -38,12 +38,12 @@ public class OuInfoEntity {
 	/**
 	 * 是否分支机构
 	 */
-	private boolean isSub;
+	private String isSub;
 
 	/**
 	 * 排序索引?
 	 */
-	private int orderIndex;
+	private Integer orderIndex;
 
 	public String getID() {
 		return ID;
@@ -85,19 +85,19 @@ public class OuInfoEntity {
 		this.users = users;
 	}
 
-	public boolean getIsSub() {
+	public String getIsSub() {
 		return isSub;
 	}
 
-	public void setIsSub(boolean isSub) {
+	public void setIsSub(String isSub) {
 		this.isSub = isSub;
 	}
 
-	public int getOrderIndex() {
+	public Integer getOrderIndex() {
 		return orderIndex;
 	}
 
-	public void setOrderIndex(int orderIndex) {
+	public void setOrderIndex(Integer orderIndex) {
 		this.orderIndex = orderIndex;
 	}
 
