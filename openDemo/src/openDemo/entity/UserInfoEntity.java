@@ -8,7 +8,7 @@ import java.util.Date;
  * @author yanl
  *
  */
-public class UserEntity {
+public class UserInfoEntity {
 
 	/**
 	 * 用户ID(同步必传)
