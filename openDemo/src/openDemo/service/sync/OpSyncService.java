@@ -42,7 +42,7 @@ import openDemo.service.OrgService;
 import openDemo.service.UserService;
 import openDemo.test.EsbServiceTest;
 
-public class EsbService {
+public class OpSyncService {
 
 	private static final String REQUESTID = "RequestId";
 	private static final String SERVICENAME = "ServiceName";
@@ -75,7 +75,7 @@ public class EsbService {
 	private UserService userService = new UserService();
 	private ObjectMapper mapper;
 
-	public EsbService() {
+	public OpSyncService() {
 		// 创建用于json反序列化的对象
 		mapper = new ObjectMapper();
 		// 忽略json中多余的属性字段
