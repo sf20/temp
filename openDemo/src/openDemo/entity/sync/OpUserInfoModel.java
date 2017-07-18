@@ -1,4 +1,4 @@
-package openDemo.model.sync;
+package openDemo.entity.sync;
 
 import java.util.Date;
 
@@ -17,7 +17,7 @@ public class OpUserInfoModel {
 	 * 用户ID(同步必传)
 	 */
 	// TODO
-	@JsonProperty("OpUserId")
+	@JsonProperty("UserId")
 	private String ID;
 
 	/**
