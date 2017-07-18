@@ -9,7 +9,7 @@ import openDemo.common.Config;
 import openDemo.common.HttpResultUtil;
 import openDemo.common.JsonUtil;
 import openDemo.entity.ResultEntity;
-import openDemo.entity.UserEntity;
+import openDemo.entity.UserInfoEntity;
 
 
 /**
@@ -25,8 +25,8 @@ public class UserService {
 	 * @param users 用户信息以JSON格式
 	 * @return
 	 */
-	public ResultEntity userSync(boolean islink, List<UserEntity> users){
-		JsonConfig jsonConfig = JsonUtil.jsonConfig(UserEntity.class);
+	public ResultEntity userSync(boolean islink, List<UserInfoEntity> users){
+		JsonConfig jsonConfig = JsonUtil.jsonConfig(UserInfoEntity.class);
 		JSONArray array = JSONArray.fromObject(users, jsonConfig);
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
 		params.put("islink", islink);

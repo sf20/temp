@@ -34,10 +34,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import openDemo.entity.OuInfoEntity;
 import openDemo.entity.ResultEntity;
-import openDemo.entity.UserEntity;
-import openDemo.model.sync.OpOuInfoModel;
-import openDemo.model.sync.OpReqJsonModle;
-import openDemo.model.sync.OpUserInfoModel;
+import openDemo.entity.UserInfoEntity;
+import openDemo.entity.sync.OpOuInfoModel;
+import openDemo.entity.sync.OpReqJsonModle;
+import openDemo.entity.sync.OpUserInfoModel;
 import openDemo.service.OrgService;
 import openDemo.service.UserService;
 import openDemo.test.EsbServiceTest;
@@ -271,9 +271,9 @@ public class EsbService {
 			e.printStackTrace();
 		}
 
-		List<UserEntity> list = null;
+		List<UserInfoEntity> list = null;
 		try {
-			list = copyCreateEntityList(modle.getEsbResData().get(EMP_RES_DATA_KEY), UserEntity.class);
+			list = copyCreateEntityList(modle.getEsbResData().get(EMP_RES_DATA_KEY), UserInfoEntity.class);
 		} catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
 			// TODO
 			e.printStackTrace();
@@ -340,10 +340,10 @@ public class EsbService {
 		System.out.println("total size: " + list.size());
 	}
 
-	private void printUserInfo(List<UserEntity> list) {
+	private void printUserInfo(List<UserInfoEntity> list) {
 		System.out.println(
 				"ID == UserName == CnName == Password == Sex == Mobile == Mail == OrgOuCode == PostionNo == entryTime == Spare1");
-		for (UserEntity user : list) {
+		for (UserInfoEntity user : list) {
 			Date entryTime = user.getEntryTime();
 			String entryTimeStr = null;
 			if (entryTime != null) {
