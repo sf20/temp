@@ -20,14 +20,14 @@ public class UserInfoDao implements GenericDao<UserInfoEntity> {
 
 	@Override
 	public UserInfoEntity getById(String id) throws SQLException {
-		String sql = "SELECT t.* FROM user_info t where t.ID = ?";
+		String sql = "SELECT t.* FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` t where t.ID = ?";
 
 		return new QueryRunner().query(conn, sql, new BeanHandler<>(UserInfoEntity.class), id);
 	}
 
 	@Override
 	public List<UserInfoEntity> getAll() throws SQLException {
-		String sql = "SELECT t.* FROM user_info t";
+		String sql = "SELECT t.* FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` t";
 
 		return new QueryRunner().query(conn, sql, new BeanListHandler<>(UserInfoEntity.class));
 	}
@@ -44,7 +44,7 @@ public class UserInfoDao implements GenericDao<UserInfoEntity> {
 
 	@Override
 	public void deleteById(String id) throws SQLException {
-		String sql = "DELETE FROM user_info WHERE ID = ?";
+		String sql = "DELETE FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` WHERE ID = ?";
 
 		new QueryRunner().update(conn, sql, id);
 	}
@@ -73,7 +73,7 @@ public class UserInfoDao implements GenericDao<UserInfoEntity> {
 
 	@Override
 	public void deleteByIds(String[] ids) throws SQLException {
-		String sql = "DELETE FROM user_info WHERE ID = ?";
+		String sql = "DELETE FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` WHERE ID = ?";
 
 		int len = ids.length;
 		Object[][] params = new Object[len][];
@@ -91,7 +91,7 @@ public class UserInfoDao implements GenericDao<UserInfoEntity> {
 	 */
 	private String getInsertSql() {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append("INSERT INTO user_info ");
+		buffer.append("INSERT INTO `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` ");
 		buffer.append(
 				"(ID, UserName, CnName, Password, Sex, Mobile, Mail, OrgOuCode, EncryptionType, PostionNo, Entrytime,");
 		buffer.append(
@@ -109,7 +109,7 @@ public class UserInfoDao implements GenericDao<UserInfoEntity> {
 	 */
 	private String getUpdateSql() {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append("UPDATE user_info SET ");
+		buffer.append("UPDATE `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` SET ");
 		buffer.append("UserName = ?,");
 		buffer.append("CnName = ?,");
 		buffer.append("Password = ?,");
