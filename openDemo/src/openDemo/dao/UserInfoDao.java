@@ -1,95 +1,26 @@
 package openDemo.dao;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-
-import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.handlers.BeanHandler;
-import org.apache.commons.dbutils.handlers.BeanListHandler;
-
-import openDemo.common.JdbcUtil;
 import openDemo.entity.UserInfoEntity;
 
-public class UserInfoDao implements GenericDao<UserInfoEntity> {
-	private Connection conn;
+public class UserInfoDao extends GenericDaoImpl<UserInfoEntity> {
 
-	public UserInfoDao() {
-		conn = JdbcUtil.getConnection();
+	@Override
+	String generateGetByIdSql() {
+		return "SELECT t.* FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` t where t.ID = ?";
 	}
 
 	@Override
-	public UserInfoEntity getById(String id) throws SQLException {
-		String sql = "SELECT t.* FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` t where t.ID = ?";
-
-		return new QueryRunner().query(conn, sql, new BeanHandler<>(UserInfoEntity.class), id);
+	String generateGetAllSql() {
+		return "SELECT t.* FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` t";
 	}
 
 	@Override
-	public List<UserInfoEntity> getAll() throws SQLException {
-		String sql = "SELECT t.* FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` t";
-
-		return new QueryRunner().query(conn, sql, new BeanListHandler<>(UserInfoEntity.class));
+	String generateGetAllCountSql() {
+		return "SELECT count(*) FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128`";
 	}
 
 	@Override
-	public void insert(UserInfoEntity user) throws SQLException {
-		new QueryRunner().update(conn, getInsertSql(), getInsertObjectParamArray(user));
-	}
-
-	@Override
-	public void update(UserInfoEntity user) throws SQLException {
-		new QueryRunner().update(conn, getUpdateSql(), getUpdateObjectParamArray(user));
-	}
-
-	@Override
-	public void deleteById(String id) throws SQLException {
-		String sql = "DELETE FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` WHERE ID = ?";
-
-		new QueryRunner().update(conn, sql, id);
-	}
-
-	@Override
-	public void insertBatch(List<UserInfoEntity> list) throws SQLException {
-		int listSize = list.size();
-		Object[][] params = new Object[listSize][];
-		for (int i = 0; i < listSize; i++) {
-			params[i] = getInsertObjectParamArray(list.get(i));
-		}
-
-		new QueryRunner().batch(conn, getInsertSql(), params);
-	}
-
-	@Override
-	public void updateBatch(List<UserInfoEntity> list) throws SQLException {
-		int listSize = list.size();
-		Object[][] params = new Object[listSize][];
-		for (int i = 0; i < listSize; i++) {
-			params[i] = getUpdateObjectParamArray(list.get(i));
-		}
-
-		new QueryRunner().batch(conn, getUpdateSql(), params);
-	}
-
-	@Override
-	public void deleteByIds(String[] ids) throws SQLException {
-		String sql = "DELETE FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` WHERE ID = ?";
-
-		int len = ids.length;
-		Object[][] params = new Object[len][];
-		for (int i = 0; i < len; i++) {
-			params[i] = new Object[] { ids[i] };
-		}
-
-		new QueryRunner().batch(conn, sql, params);
-	}
-
-	/**
-	 * 新增sql
-	 * 
-	 * @return
-	 */
-	private String getInsertSql() {
+	String generateInsertSql() {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("INSERT INTO `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` ");
 		buffer.append(
@@ -102,12 +33,8 @@ public class UserInfoDao implements GenericDao<UserInfoEntity> {
 		return buffer.toString();
 	}
 
-	/**
-	 * 更新sql
-	 * 
-	 * @return
-	 */
-	private String getUpdateSql() {
+	@Override
+	String generateUpdateSql() {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("UPDATE `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` SET ");
 		buffer.append("UserName = ?,");
@@ -132,18 +59,18 @@ public class UserInfoDao implements GenericDao<UserInfoEntity> {
 		buffer.append("Spare8 = ?,");
 		buffer.append("Spare9 = ?,");
 		buffer.append("Spare10 = ?");
-		buffer.append(" WHERE ID = ?;");
+		buffer.append(" WHERE ID = ?");
 
 		return buffer.toString();
 	}
 
-	/**
-	 * 批量化新增的参数数组
-	 * 
-	 * @param user
-	 * @return
-	 */
-	private Object[] getInsertObjectParamArray(UserInfoEntity user) {
+	@Override
+	String generateDeleteByIdSql() {
+		return "DELETE FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` WHERE ID = ?";
+	}
+
+	@Override
+	Object[] getInsertObjectParamArray(UserInfoEntity user) {
 		Object[] params = { user.getID(), user.getUserName(), user.getCnName(), user.getPassword(), user.getSex(),
 				user.getMobile(), user.getMail(), user.getOrgOuCode(), user.getEncryptionType(), user.getPostionNo(),
 				user.getEntryTime(), user.getBirthday(), user.getExpireDate(), user.getSpare1(), user.getSpare2(),
@@ -152,13 +79,8 @@ public class UserInfoDao implements GenericDao<UserInfoEntity> {
 		return params;
 	}
 
-	/**
-	 * 批量化更新的参数数组
-	 * 
-	 * @param user
-	 * @return
-	 */
-	private Object[] getUpdateObjectParamArray(UserInfoEntity user) {
+	@Override
+	Object[] getUpdateObjectParamArray(UserInfoEntity user) {
 		Object[] params = { user.getUserName(), user.getCnName(), user.getPassword(), user.getSex(), user.getMobile(),
 				user.getMail(), user.getOrgOuCode(), user.getEncryptionType(), user.getPostionNo(), user.getEntryTime(),
 				user.getBirthday(), user.getExpireDate(), user.getSpare1(), user.getSpare2(), user.getSpare3(),

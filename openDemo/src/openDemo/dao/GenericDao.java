@@ -9,6 +9,8 @@ public interface GenericDao<T> {
 
 	List<T> getAll() throws SQLException;
 
+	int getAllCount() throws SQLException;;
+
 	void insert(T t) throws SQLException;
 
 	void update(T t) throws SQLException;
