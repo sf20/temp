@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -26,6 +27,8 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -80,6 +83,8 @@ public class OpSyncService {
 	private static String MAPKEY_USER_DISABLE = "userDisable";
 	// private static String MAPKEY_USER_DELETE = "userDelete";
 
+	private static String SYNC_CODE_SUCCESS = "0";
+
 	private static SimpleDateFormat javaDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private static SimpleDateFormat jsonDateFormat = new SimpleDateFormat("yyyyMMdd");
 
@@ -87,6 +92,8 @@ public class OpSyncService {
 	private UserService userService = new UserService();
 	private ObjectMapper mapper;
 	private UserInfoDao userInfoDao;
+
+	private static final Logger logger = LogManager.getLogger(OpSyncService.class);
 
 	public OpSyncService() {
 		// 创建用于json反序列化的对象
@@ -107,25 +114,22 @@ public class OpSyncService {
 	 * @throws SQLException
 	 */
 	public void sync() throws IOException, ReflectiveOperationException, SQLException {
-		int count = 0;
-		count = userInfoDao.getAllCount();
+		int count = userInfoDao.getAllCount();
 
+		// 已经同步过 进行增量同步
 		if (count > 0) {
-			// 已经同步过 进行增量同步
-			// 二次同步==>数据比较==>数据库数据更新
-
 			// 用户增量同步
+			System.out.println("用户增量同步");
 			opUserSync(SERVICEOPERATION_EMP, MODE_UPDATE);
-		} else {
-			// 组织初次同步<==数据库数据新增
-			// 用户初次同步<==数据库数据新增
-			// 初次同步 进行全量同步
-
-			// 组织全量
-			opOrgSync(SERVICEOPERATION_ORG, MODE_FULL);
-			// 用户全量
+		}
+		// 初次同步 进行全量同步
+		else {
+			// 组织全量同步
+			// opOrgSync(SERVICEOPERATION_ORG, MODE_FULL);
+			// 用户全量同步
+			System.out.println("用户全量同步");
 			opUserSync(SERVICEOPERATION_EMP, MODE_FULL);
-			// 岗位全量
+			// TODO 岗位全量同步
 
 		}
 
@@ -142,7 +146,7 @@ public class OpSyncService {
 	 *            可在1（全量）和2（增量）中二选一。EMP拥有1和2两种模式。Org只有1，全量模式。
 	 * @return 响应的json字符串
 	 */
-	private String getJsonPost(String serviceOperation, String mode) {
+	public String getJsonPost(String serviceOperation, String mode) {
 		HttpClient httpClient = HttpClientBuilder.create().build();
 
 		HttpPost httpPost = new HttpPost(REQUEST_URL);
@@ -262,7 +266,7 @@ public class OpSyncService {
 		// TODO to delete
 		printOrgInfo(list);
 		ResultEntity resultEntity = orgService.ous(false, list);
-		print("同步组织", resultEntity);
+		printLog("同步组织", resultEntity);
 	}
 
 	/**
@@ -313,6 +317,17 @@ public class OpSyncService {
 		List<UserInfoEntity> newList = null;
 		newList = copyCreateEntityList(modle.getEsbResData().get(EMP_RES_DATA_KEY), UserInfoEntity.class);
 
+		// TODO
+		tempFixProblem(newList);
+
+		syncMenthod(newList, mode);
+
+		// TODO to delete
+		printUserInfo(newList);
+
+	}
+
+	private void syncMenthod(List<UserInfoEntity> newList, String mode) throws SQLException {
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
 			if (newList.size() > 0) {
@@ -346,10 +361,13 @@ public class OpSyncService {
 				syncEnableOneByOne(usersToEnable);
 			}
 		}
+	}
 
-		// TODO to delete
-		// printUserInfo(list);
-
+	private void tempFixProblem(List<UserInfoEntity> newList) {
+		for (Iterator<UserInfoEntity> iterator = newList.iterator(); iterator.hasNext();) {
+			UserInfoEntity userInfoEntity = (UserInfoEntity) iterator.next();
+			userInfoEntity.setID(userInfoEntity.getUserName());
+		}
 	}
 
 	/**
@@ -364,12 +382,11 @@ public class OpSyncService {
 		for (UserInfoEntity user : usersToSyncAdd) {
 			tempList.add(user);
 
-			resultEntity = userService.userSync(true, tempList);
-			if ("0".equals(resultEntity.getCode())) {
+			resultEntity = userService.userSync(false, tempList);
+			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 				userInfoDao.insert(user);
 			} else {
-				// TODO log
-				print("用户同步新增", resultEntity);
+				printLog("用户同步新增", resultEntity);
 			}
 
 			tempList.clear();
@@ -389,12 +406,11 @@ public class OpSyncService {
 		for (UserInfoEntity user : usersToSyncUpdate) {
 			tempList.add(user);
 
-			resultEntity = userService.userSync(true, tempList);
-			if ("0".equals(resultEntity.getCode())) {
+			resultEntity = userService.userSync(false, tempList);
+			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 				userInfoDao.update(user);
 			} else {
-				// TODO log
-				print("用户同步更新", resultEntity);
+				printLog("用户同步更新", resultEntity);
 			}
 
 			tempList.clear();
@@ -416,11 +432,10 @@ public class OpSyncService {
 			tempList.add(user.getUserName());
 
 			resultEntity = userService.enabledusersSync(tempList);
-			if ("0".equals(resultEntity.getCode())) {
+			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 				userInfoDao.update(user);
 			} else {
-				// TODO log
-				print("用户同步启用", resultEntity);
+				printLog("用户同步启用", resultEntity);
 			}
 
 			tempList.clear();
@@ -440,11 +455,10 @@ public class OpSyncService {
 			tempList.add(user.getUserName());
 
 			resultEntity = userService.disabledusersSync(tempList);
-			if ("0".equals(resultEntity.getCode())) {
+			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 				userInfoDao.update(user);
 			} else {
-				// TODO log
-				print("用户同步禁用", resultEntity);
+				printLog("用户同步禁用", resultEntity);
 			}
 
 			tempList.clear();
@@ -542,7 +556,7 @@ public class OpSyncService {
 						list.subList(count * SIZE_PER_SYNC, (count + 1) * SIZE_PER_SYNC));
 			}
 
-			print("用户同步" + (count + 1), resultEntity);
+			printLog("用户同步" + (count + 1), resultEntity);
 		}
 
 		// =========
@@ -565,7 +579,7 @@ public class OpSyncService {
 				tempList.clear();
 				tempList.add(user);
 				resultEntity2 = userService.userSync(false, tempList);
-				print("用户同步" + (++count), resultEntity2);
+				printLog("用户同步" + (++count), resultEntity2);
 			}
 		} else {
 			System.out.println("出错了，未同步。。。");
@@ -603,6 +617,10 @@ public class OpSyncService {
 		}
 	}
 
+	private void printLog(String name, ResultEntity resultEntity) {
+		logger.error(name + ":" + resultEntity.getCode() + "=" + resultEntity.getMessage());
+	}
+
 	// TODO to delete====================测试用方法======================
 	private void printOrgInfo(List<OuInfoEntity> list) {
 		System.out.println("ID == OuName == ParentID == Description == Users == isSub");
@@ -614,26 +632,25 @@ public class OpSyncService {
 	}
 
 	private void printUserInfo(List<UserInfoEntity> list) {
-		System.out.println(
-				"ID == UserName == CnName == Password == Sex == Mobile == Mail == OrgOuCode == PostionNo == entryTime == Spare1");
-		for (UserInfoEntity user : list) {
-			Date entryTime = user.getEntryTime();
-			String entryTimeStr = null;
-			if (entryTime != null) {
-				entryTimeStr = javaDateFormat.format(entryTime);
-			}
-
-			System.out.println(user.getID() + " == " + user.getUserName() + " == " + user.getCnName() + " == "
-					+ user.getPassword() + " == " + user.getSex() + " == " + user.getMobile() + " == " + user.getMail()
-					+ " == " + user.getOrgOuCode() + " == " + user.getPostionNo() + " == " + entryTimeStr + " == "
-					+ user.getSpare1());
-		}
+		// System.out.println(
+		// "ID == UserName == CnName == Password == Sex == Mobile == Mail == OrgOuCode
+		// == PostionNo == entryTime == Spare1");
+		// for (UserInfoEntity user : list) {
+		// Date entryTime = user.getEntryTime();
+		// String entryTimeStr = null;
+		// if (entryTime != null) {
+		// entryTimeStr = javaDateFormat.format(entryTime);
+		// }
+		//
+		// System.out.println(user.getID() + " == " + user.getUserName() + " == " +
+		// user.getCnName() + " == "
+		// + user.getPassword() + " == " + user.getSex() + " == " + user.getMobile() + "
+		// == " + user.getMail()
+		// + " == " + user.getOrgOuCode() + " == " + user.getPostionNo() + " == " +
+		// entryTimeStr + " == "
+		// + user.getSpare1());
+		// }
 		System.out.println("total size: " + list.size());
-	}
-
-	private void print(String name, ResultEntity resultEntity) {
-		System.out.println(name + ":" + resultEntity.getCode() + "==" + resultEntity.getData() + "=="
-				+ resultEntity.getMessage() + "==" + resultEntity.getTotalCount());
 	}
 
 	private String getFileStr(String filePath) {
