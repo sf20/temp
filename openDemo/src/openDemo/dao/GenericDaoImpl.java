@@ -1,7 +1,6 @@
 package openDemo.dao;
 
 import java.lang.reflect.ParameterizedType;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -13,45 +12,44 @@ import org.apache.commons.dbutils.handlers.ScalarHandler;
 import openDemo.common.JdbcUtil;
 
 public abstract class GenericDaoImpl<T> implements GenericDao<T> {
-	private Connection conn;
 	private Class<T> entityClass;
 
 	@SuppressWarnings("unchecked")
 	public GenericDaoImpl() {
-		conn = JdbcUtil.getConnection();
-
 		// 得到T.class
 		entityClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 	}
 
 	@Override
 	public T getById(String id) throws SQLException {
-		return new QueryRunner().query(conn, generateGetByIdSql(), new BeanHandler<>(entityClass), id);
+		return new QueryRunner(JdbcUtil.getDataSource()).query(generateGetByIdSql(), new BeanHandler<>(entityClass),
+				id);
 	}
 
 	@Override
 	public List<T> getAll() throws SQLException {
-		return new QueryRunner().query(conn, generateGetAllSql(), new BeanListHandler<>(entityClass));
+		return new QueryRunner(JdbcUtil.getDataSource()).query(generateGetAllSql(), new BeanListHandler<>(entityClass));
 	}
 
 	@Override
 	public int getAllCount() throws SQLException {
-		return new QueryRunner().query(conn, generateGetAllCountSql(), new ScalarHandler<Long>()).intValue();
+		return new QueryRunner(JdbcUtil.getDataSource()).query(generateGetAllCountSql(), new ScalarHandler<Long>())
+				.intValue();
 	}
 
 	@Override
 	public void insert(T t) throws SQLException {
-		new QueryRunner().update(conn, generateInsertSql(), getInsertObjectParamArray(t));
+		new QueryRunner(JdbcUtil.getDataSource()).update(generateInsertSql(), getInsertObjectParamArray(t));
 	}
 
 	@Override
 	public void update(T t) throws SQLException {
-		new QueryRunner().update(conn, generateUpdateSql(), getUpdateObjectParamArray(t));
+		new QueryRunner(JdbcUtil.getDataSource()).update(generateUpdateSql(), getUpdateObjectParamArray(t));
 	}
 
 	@Override
 	public void deleteById(String id) throws SQLException {
-		new QueryRunner().update(conn, generateDeleteByIdSql(), id);
+		new QueryRunner(JdbcUtil.getDataSource()).update(generateDeleteByIdSql(), id);
 	}
 
 	@Override
@@ -62,7 +60,7 @@ public abstract class GenericDaoImpl<T> implements GenericDao<T> {
 			params[i] = getInsertObjectParamArray(list.get(i));
 		}
 
-		new QueryRunner().batch(conn, generateInsertSql(), params);
+		new QueryRunner(JdbcUtil.getDataSource()).batch(generateInsertSql(), params);
 	}
 
 	@Override
@@ -73,7 +71,7 @@ public abstract class GenericDaoImpl<T> implements GenericDao<T> {
 			params[i] = getUpdateObjectParamArray(list.get(i));
 		}
 
-		new QueryRunner().batch(conn, generateUpdateSql(), params);
+		new QueryRunner(JdbcUtil.getDataSource()).batch(generateUpdateSql(), params);
 	}
 
 	@Override
@@ -84,7 +82,7 @@ public abstract class GenericDaoImpl<T> implements GenericDao<T> {
 			params[i] = new Object[] { ids[i] };
 		}
 
-		new QueryRunner().batch(conn, generateDeleteByIdSql(), params);
+		new QueryRunner(JdbcUtil.getDataSource()).batch(generateDeleteByIdSql(), params);
 	}
 
 	abstract String generateGetByIdSql();
