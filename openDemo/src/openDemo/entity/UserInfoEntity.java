@@ -1,7 +1,5 @@
 package openDemo.entity;
 
-import java.util.Date;
-
 /**
  * 用户类对象
  * 
@@ -63,17 +61,17 @@ public class UserInfoEntity {
 	/**
 	 * 入职日期
 	 */
-	private Date entryTime;
+	private String entryTime;
 
 	/**
 	 * 出生日期
 	 */
-	private Date birthday;
+	private String birthday;
 
 	/**
 	 * 过期日期
 	 */
-	private Date expireDate;
+	private String expireDate;
 
 	/**
 	 * 扩展字段 1~10
@@ -178,27 +176,27 @@ public class UserInfoEntity {
 		this.postionNo = postionNo;
 	}
 
-	public Date getEntryTime() {
+	public String getEntryTime() {
 		return entryTime;
 	}
 
-	public void setEntryTime(Date entryTime) {
+	public void setEntryTime(String entryTime) {
 		this.entryTime = entryTime;
 	}
 
-	public Date getBirthday() {
+	public String getBirthday() {
 		return birthday;
 	}
 
-	public void setBirthday(Date birthday) {
+	public void setBirthday(String birthday) {
 		this.birthday = birthday;
 	}
 
-	public Date getExpireDate() {
+	public String getExpireDate() {
 		return expireDate;
 	}
 
-	public void setExpireDate(Date expireDate) {
+	public void setExpireDate(String expireDate) {
 		this.expireDate = expireDate;
 	}
 

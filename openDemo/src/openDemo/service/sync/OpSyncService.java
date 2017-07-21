@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -79,7 +80,8 @@ public class OpSyncService {
 
 	private static String SYNC_CODE_SUCCESS = "0";
 
-	private static SimpleDateFormat jsonDateFormat = new SimpleDateFormat("yyyyMMdd");
+	private static SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
+	private static SimpleDateFormat JAVA_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
 	private OrgService orgService = new OrgService();
 	private UserService userService = new UserService();
@@ -95,7 +97,7 @@ public class OpSyncService {
 		// 忽略json中多余的属性字段
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		// json字符串的日期格式
-		mapper.setDateFormat(jsonDateFormat);
+		mapper.setDateFormat(JSON_DATE_FORMAT);
 	}
 
 	/**
@@ -326,14 +328,47 @@ public class OpSyncService {
 		modle = mapper.readValue(jsonString, new TypeReference<OpReqJsonModle<OpUserInfoModel>>() {
 		});
 
-		List<UserInfoEntity> newList = null;
-		newList = copyCreateEntityList(modle.getEsbResData().get(EMP_RES_DATA_KEY), UserInfoEntity.class);
+		List<OpUserInfoModel> modeList = modle.getEsbResData().get(EMP_RES_DATA_KEY);
+		List<UserInfoEntity> newList = copyCreateEntityList(modeList, UserInfoEntity.class);
 
 		// TODO
 		tempFixProblem(newList);
+		changeDateFormatAndSex(modeList, newList);
 
 		syncMethod(newList, mode, islink);
 
+	}
+
+	/**
+	 * 将json模型对象的日期进行格式化(yyyy-MM-dd)后赋值给对应的java同步对象
+	 * 
+	 * @param fromList
+	 *            json模型对象集合
+	 * @param toList
+	 *            java同步对象集合
+	 */
+	private void changeDateFormatAndSex(List<OpUserInfoModel> fromList, List<UserInfoEntity> toList) {
+		int listSize = toList.size();
+
+		for (int i = 0; i < listSize; i++) {
+			Date entryTime = fromList.get(i).getEntryTime();
+			if (entryTime != null) {
+				toList.get(i).setEntryTime(JAVA_DATE_FORMAT.format(entryTime));
+			}
+
+			Date expireDate = fromList.get(i).getExpireDate();
+			if (expireDate != null) {
+				toList.get(i).setExpireDate(JAVA_DATE_FORMAT.format(expireDate));
+			}
+
+			// 性别字符串转换 1：男 2：女
+			String sex = fromList.get(i).getSex();
+			if ("1".equals(sex)) {
+				toList.get(i).setSex("男");
+			} else if ("2".equals(sex)) {
+				toList.get(i).setSex("女");
+			}
+		}
 	}
 
 	private void syncMethod(List<UserInfoEntity> newList, String mode, boolean islink) throws SQLException {
@@ -564,7 +599,8 @@ public class OpSyncService {
 	 * @param resultEntity
 	 */
 	private void printLog(String type, String id, ResultEntity resultEntity) {
-		logger.error(type + " ID:" + id + " ErrMsg:" + resultEntity.getCode() + " " + resultEntity.getMessage());
+		// TODO
+		logger.error(type + "ID:" + id + " ErrMsg:" + resultEntity.getCode() + "-" + resultEntity.getMessage());
 	}
 
 }

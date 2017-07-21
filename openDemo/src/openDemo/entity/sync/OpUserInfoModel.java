@@ -17,7 +17,7 @@ public class OpUserInfoModel {
 	 * 用户ID(同步必传)
 	 */
 	// TODO
-	@JsonProperty("UserId")
+	@JsonProperty("OpUserId")
 	private String ID;
 
 	/**
@@ -41,8 +41,7 @@ public class OpUserInfoModel {
 	/**
 	 * 性别
 	 */
-	// TODO @JsonProperty("Gender")
-	@JsonIgnore
+	@JsonProperty("Gender")
 	private String sex;
 
 	/**
@@ -79,8 +78,7 @@ public class OpUserInfoModel {
 	/**
 	 * 入职日期
 	 */
-	// TODO @JsonProperty("EnterDate")
-	@JsonIgnore
+	@JsonProperty("EnterDate")
 	private Date entryTime;
 
 	/**
@@ -92,7 +90,7 @@ public class OpUserInfoModel {
 	/**
 	 * 过期日期
 	 */
-	@JsonIgnore
+	@JsonProperty("LeaveDate")
 	private Date expireDate;
 
 	/**
