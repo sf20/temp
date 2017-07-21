@@ -1,5 +1,6 @@
 package openDemo.entity;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -44,6 +45,8 @@ public class OuInfoEntity {
 	 * 排序索引?
 	 */
 	private Integer orderIndex;
+
+	private Date endDate;
 
 	public String getID() {
 		return ID;
@@ -99,6 +102,14 @@ public class OuInfoEntity {
 
 	public void setOrderIndex(Integer orderIndex) {
 		this.orderIndex = orderIndex;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
 	}
 
 	@Override

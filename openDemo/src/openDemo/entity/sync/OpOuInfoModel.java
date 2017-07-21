@@ -1,5 +1,6 @@
 package openDemo.entity.sync;
 
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -56,6 +57,12 @@ public class OpOuInfoModel {
 	@JsonIgnore
 	private int orderIndex;
 
+	/*
+	 * 组织废止日期
+	 */
+	@JsonProperty("Endda")
+	private Date endDate;
+
 	public String getID() {
 		return ID;
 	}
@@ -110,6 +117,14 @@ public class OpOuInfoModel {
 
 	public void setOrderIndex(int orderIndex) {
 		this.orderIndex = orderIndex;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
 	}
 
 }

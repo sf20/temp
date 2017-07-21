@@ -76,6 +76,8 @@ public class OpSyncService {
 	private static String MAPKEY_USER_SYNC_UPDATE = "userSyncUpdate";
 	private static String MAPKEY_USER_ENABLE = "userEnable";
 	private static String MAPKEY_USER_DISABLE = "userDisable";
+	private static String MAPKEY_ORG_SYNC_ADD = "orgSyncAdd";
+	private static String MAPKEY_ORG_SYNC_UPDATE = "orgSyncUpdate";
 	// private static String MAPKEY_USER_DELETE = "userDelete";
 
 	private static String SYNC_CODE_SUCCESS = "0";
@@ -110,8 +112,10 @@ public class OpSyncService {
 	public void sync() throws IOException, ReflectiveOperationException, SQLException {
 		int orgCount = ouInfoDao.getAllCount();
 		if (orgCount > 0) {
-			// TODO 组织增量同步
-			logger.info("进入组织增量同步...");
+			// 组织增量同步
+			logger.info("组织增量同步开始...");
+			opOrgSync(SERVICEOPERATION_ORG, MODE_UPDATE, false);
+			logger.info("组织增量同步结束");
 		} else {
 			// 组织全量同步
 			logger.info("组织全量同步开始...");
@@ -256,19 +260,88 @@ public class OpSyncService {
 			throws IOException, ReflectiveOperationException, SQLException {
 		String jsonString = getJsonPost(serviceOperation, mode);
 
-		OpReqJsonModle<OpOuInfoModel> modle = new OpReqJsonModle<>();
-		modle = mapper.readValue(jsonString, new TypeReference<OpReqJsonModle<OpOuInfoModel>>() {
-		});
+		OpReqJsonModle<OpOuInfoModel> modle = mapper.readValue(jsonString,
+				new TypeReference<OpReqJsonModle<OpOuInfoModel>>() {
+				});
 
-		List<OuInfoEntity> list = copyCreateEntityList(modle.getEsbResData().get(ORG_RES_DATA_KEY), OuInfoEntity.class);
+		List<OuInfoEntity> newList = copyCreateEntityList(modle.getEsbResData().get(ORG_RES_DATA_KEY),
+				OuInfoEntity.class);
 
-		replaceIllegalChar(list);
+		replaceIllegalChar(newList);
 
-		logger.info("组织同步Total Size: " + list.size());
+		// 全量模式
+		if (MODE_FULL.equals(mode)) {
+			removeExpiredOrgs(newList);
+			syncAddOrgOneByOne(newList, isBaseInfo);
+		}
+		// 增量模式
+		else {
+			// 获取数据库全量list
+			List<OuInfoEntity> allList = ouInfoDao.getAll();
 
+			Map<String, List<OuInfoEntity>> map = compareOrgList(allList, newList);
+			List<OuInfoEntity> orgsToSyncAdd = map.get(MAPKEY_ORG_SYNC_ADD);
+			if (orgsToSyncAdd.size() > 0) {
+				syncAddOrgOneByOne(orgsToSyncAdd, isBaseInfo);
+			}
+
+			List<OuInfoEntity> orgsToSyncUpdate = map.get(MAPKEY_ORG_SYNC_UPDATE);
+			if (orgsToSyncUpdate.size() > 0) {
+				syncUpdateOrgOneByOne(orgsToSyncUpdate, isBaseInfo);
+			}
+		}
+	}
+
+	/**
+	 * 去除过期组织
+	 * 
+	 * @param list
+	 */
+	private void removeExpiredOrgs(List<OuInfoEntity> list) {
+		for (Iterator<OuInfoEntity> iterator = list.iterator(); iterator.hasNext();) {
+			Date endDate = iterator.next().getEndDate();
+			// endDate早于当天
+			if (endDate == null || endDate.compareTo(new Date()) < 0) {
+				iterator.remove();
+			}
+		}
+	}
+
+	/**
+	 * 逐个组织同步更新
+	 * 
+	 * @param orgsToSyncUpdate
+	 * @param isBaseInfo
+	 * @throws SQLException
+	 */
+	private void syncUpdateOrgOneByOne(List<OuInfoEntity> orgsToSyncUpdate, boolean isBaseInfo) throws SQLException {
 		List<OuInfoEntity> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
-		for (OuInfoEntity org : list) {
+		for (OuInfoEntity org : orgsToSyncUpdate) {
+			tempList.add(org);
+
+			resultEntity = orgService.ous(isBaseInfo, tempList);
+			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+				ouInfoDao.update(org);
+			} else {
+				printLog("组织同步更新失败", org.getID(), resultEntity);
+			}
+
+			tempList.clear();
+		}
+	}
+
+	/**
+	 * 逐个组织同步新增
+	 * 
+	 * @param orgsToSyncAdd
+	 * @param isBaseInfo
+	 * @throws SQLException
+	 */
+	private void syncAddOrgOneByOne(List<OuInfoEntity> orgsToSyncAdd, boolean isBaseInfo) throws SQLException {
+		List<OuInfoEntity> tempList = new ArrayList<>();
+		ResultEntity resultEntity = null;
+		for (OuInfoEntity org : orgsToSyncAdd) {
 			tempList.add(org);
 
 			resultEntity = orgService.ous(isBaseInfo, tempList);
@@ -324,9 +397,9 @@ public class OpSyncService {
 			throws IOException, ReflectiveOperationException, SQLException {
 		String jsonString = getJsonPost(serviceOperation, mode);
 
-		OpReqJsonModle<OpUserInfoModel> modle = new OpReqJsonModle<>();
-		modle = mapper.readValue(jsonString, new TypeReference<OpReqJsonModle<OpUserInfoModel>>() {
-		});
+		OpReqJsonModle<OpUserInfoModel> modle = mapper.readValue(jsonString,
+				new TypeReference<OpReqJsonModle<OpUserInfoModel>>() {
+				});
 
 		List<OpUserInfoModel> modeList = modle.getEsbResData().get(EMP_RES_DATA_KEY);
 		List<UserInfoEntity> newList = copyCreateEntityList(modeList, UserInfoEntity.class);
@@ -384,7 +457,7 @@ public class OpSyncService {
 			// 获取数据库全量list
 			List<UserInfoEntity> allList = userInfoDao.getAll();
 			// 与增量list进行比较
-			Map<String, List<UserInfoEntity>> map = compareList(allList, newList);
+			Map<String, List<UserInfoEntity>> map = compareUserList(allList, newList);
 
 			List<UserInfoEntity> usersToSyncAdd = map.get(MAPKEY_USER_SYNC_ADD);
 			if (usersToSyncAdd.size() > 0) {
@@ -408,9 +481,15 @@ public class OpSyncService {
 		}
 	}
 
+	/**
+	 * 用于解决返回json字符串中组织没有ID的问题
+	 * 
+	 * @param newList
+	 */
 	private void tempFixProblem(List<UserInfoEntity> newList) {
 		for (Iterator<UserInfoEntity> iterator = newList.iterator(); iterator.hasNext();) {
-			UserInfoEntity userInfoEntity = (UserInfoEntity) iterator.next();
+			UserInfoEntity userInfoEntity = iterator.next();
+			// ID = userName
 			userInfoEntity.setID(userInfoEntity.getUserName());
 		}
 	}
@@ -513,15 +592,79 @@ public class OpSyncService {
 	}
 
 	/**
-	 * 数据库表数据集合与最新获取数据集合进行比较
+	 * 数据库组织表数据集合与最新获取组织数据集合进行比较
 	 * 
 	 * @param fullList
-	 *            数据库表数据集合
+	 *            数据库组织表数据集合
 	 * @param newList
-	 *            最新获取数据集合
+	 *            最新获取组织数据集合
+	 * @return
+	 */
+	private Map<String, List<OuInfoEntity>> compareOrgList(List<OuInfoEntity> fullList, List<OuInfoEntity> newList) {
+		Map<String, List<OuInfoEntity>> map = new HashMap<>();
+
+		List<OuInfoEntity> orgsToSyncAdd = new ArrayList<>();
+		List<OuInfoEntity> orgsToSyncUpdate = new ArrayList<>();
+		// List<OuInfoEntity> orgsToSyncDelete = new ArrayList<>();
+		// org.getEndDate()比new Date()小
+
+		// 待更新组织
+		for (OuInfoEntity fullOrg : fullList) {
+			for (OuInfoEntity newOrg : newList) {
+				// 已经存在的组织比较
+				if (fullOrg.equals(newOrg)) {
+					String fullOrgName = fullOrg.getOuName();
+					String newOrgName = newOrg.getOuName();
+					// 组织名有变更
+					if (fullOrgName == null) {
+						if (newOrgName != null) {
+							orgsToSyncUpdate.add(newOrg);
+						}
+					} else {
+						if (newOrgName == null) {
+							orgsToSyncUpdate.add(newOrg);
+						} else {
+							if (!newOrgName.equals(fullOrgName)) {
+								orgsToSyncUpdate.add(newOrg);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// 待新增组织
+		for (OuInfoEntity org : newList) {
+			if (!fullList.contains(org)) {
+				Date endDate = org.getEndDate();
+				// 非过期组织
+				if (endDate != null && endDate.compareTo(new Date()) > 0) {
+					orgsToSyncAdd.add(org);
+				}
+			}
+		}
+
+		map.put(MAPKEY_ORG_SYNC_ADD, orgsToSyncAdd);
+		map.put(MAPKEY_ORG_SYNC_UPDATE, orgsToSyncUpdate);
+
+		logger.info("组织同步Total Size: " + newList.size());
+		logger.info("用户同步新增Size: " + orgsToSyncAdd.size());
+		logger.info("用户同步更新Size: " + orgsToSyncUpdate.size());
+
+		return map;
+	}
+
+	/**
+	 * 数据库用户表数据集合与最新获取用户数据集合进行比较
+	 * 
+	 * @param fullList
+	 *            数据库用户表数据集合
+	 * @param newList
+	 *            最新获取用户数据集合
 	 * @return 包含 同步新增、更新、启用、禁用等用户集合的Map对象
 	 */
-	private Map<String, List<UserInfoEntity>> compareList(List<UserInfoEntity> fullList, List<UserInfoEntity> newList) {
+	private Map<String, List<UserInfoEntity>> compareUserList(List<UserInfoEntity> fullList,
+			List<UserInfoEntity> newList) {
 		Map<String, List<UserInfoEntity>> map = new HashMap<>();
 
 		List<UserInfoEntity> usersToSyncAdd = new ArrayList<>();
@@ -584,7 +727,8 @@ public class OpSyncService {
 	 * @param list
 	 */
 	private void replaceIllegalChar(List<OuInfoEntity> list) {
-		for (OuInfoEntity entity : list) {
+		for (Iterator<OuInfoEntity> iterator = list.iterator(); iterator.hasNext();) {
+			OuInfoEntity entity = iterator.next();
 			String ouName = entity.getOuName();
 			if (ouName != null && ouName.contains(REPLACE_FROM)) {
 				entity.setOuName(ouName.replaceAll(REPLACE_FROM, REPLACE_TO));
