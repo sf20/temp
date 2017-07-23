@@ -261,6 +261,7 @@ public class OpSyncService {
 			throws IOException, ReflectiveOperationException, SQLException {
 		String jsonString = getJsonPost(serviceOperation, mode);
 
+		// 将json字符串转为组织单位json对象数据模型
 		OpReqJsonModle<OpOuInfoModel> modle = mapper.readValue(jsonString,
 				new TypeReference<OpReqJsonModle<OpOuInfoModel>>() {
 				});
@@ -273,6 +274,7 @@ public class OpSyncService {
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
 			removeExpiredOrgs(newList);
+			logger.info("组织同步Total Size: " + newList.size());
 			syncAddOrgOneByOne(newList, isBaseInfo);
 		}
 		// 增量模式
@@ -293,7 +295,7 @@ public class OpSyncService {
 
 			List<OuInfoEntity> orgsToSyncDelete = map.get(MAPKEY_ORG_SYNC_DELETE);
 			if (orgsToSyncDelete.size() > 0) {
-				syncDeleteOrgOneByOne(orgsToSyncDelete, isBaseInfo);
+				syncDeleteOrgOneByOne(orgsToSyncDelete);
 			}
 		}
 	}
@@ -315,10 +317,9 @@ public class OpSyncService {
 	 * 逐个组织同步删除
 	 * 
 	 * @param orgsToSyncDelete
-	 * @param isBaseInfo
 	 * @throws SQLException
 	 */
-	private void syncDeleteOrgOneByOne(List<OuInfoEntity> orgsToSyncDelete, boolean isBaseInfo) throws SQLException {
+	private void syncDeleteOrgOneByOne(List<OuInfoEntity> orgsToSyncDelete) throws SQLException {
 		List<String> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (OuInfoEntity org : orgsToSyncDelete) {
@@ -427,6 +428,7 @@ public class OpSyncService {
 			throws IOException, ReflectiveOperationException, SQLException {
 		String jsonString = getJsonPost(serviceOperation, mode);
 
+		// 将json字符串转为用户json对象数据模型
 		OpReqJsonModle<OpUserInfoModel> modle = mapper.readValue(jsonString,
 				new TypeReference<OpReqJsonModle<OpUserInfoModel>>() {
 				});
@@ -441,11 +443,9 @@ public class OpSyncService {
 		// syncMethod(newList, mode, islink);
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
+			removeExpiredUser(newList);
 			logger.info("用户同步Total Size: " + newList.size());
-			if (newList.size() > 0) {
-				removeExpiredUser(newList);
-				syncAddOneByOne(newList, islink);
-			}
+			syncAddUserOneByOne(newList, islink);
 		}
 		// 增量模式
 		else {
@@ -456,17 +456,17 @@ public class OpSyncService {
 
 			List<UserInfoEntity> usersToSyncAdd = map.get(MAPKEY_USER_SYNC_ADD);
 			if (usersToSyncAdd.size() > 0) {
-				syncAddOneByOne(usersToSyncAdd, islink);
+				syncAddUserOneByOne(usersToSyncAdd, islink);
 			}
 
 			List<UserInfoEntity> usersToSyncUpdate = map.get(MAPKEY_USER_SYNC_UPDATE);
 			if (usersToSyncUpdate.size() > 0) {
-				syncUpdateOneByOne(usersToSyncUpdate, islink);
+				syncUpdateUserOneByOne(usersToSyncUpdate, islink);
 			}
 
 			List<UserInfoEntity> usersToDelete = map.get(MAPKEY_USER_SYNC_DELETE);
 			if (usersToDelete.size() > 0) {
-				syncDeleteOneByOne(usersToDelete);
+				syncDeleteUserOneByOne(usersToDelete);
 			}
 		}
 
@@ -538,7 +538,7 @@ public class OpSyncService {
 	 * @param islink
 	 * @throws SQLException
 	 */
-	private void syncAddOneByOne(List<UserInfoEntity> usersToSyncAdd, boolean islink) throws SQLException {
+	private void syncAddUserOneByOne(List<UserInfoEntity> usersToSyncAdd, boolean islink) throws SQLException {
 		List<UserInfoEntity> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (UserInfoEntity user : usersToSyncAdd) {
@@ -562,7 +562,7 @@ public class OpSyncService {
 	 * @param islink
 	 * @throws SQLException
 	 */
-	private void syncUpdateOneByOne(List<UserInfoEntity> usersToSyncUpdate, boolean islink) throws SQLException {
+	private void syncUpdateUserOneByOne(List<UserInfoEntity> usersToSyncUpdate, boolean islink) throws SQLException {
 		List<UserInfoEntity> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 
@@ -587,7 +587,7 @@ public class OpSyncService {
 	 * @param usersToDelete
 	 * @throws SQLException
 	 */
-	private void syncDeleteOneByOne(List<UserInfoEntity> usersToDelete) throws SQLException {
+	private void syncDeleteUserOneByOne(List<UserInfoEntity> usersToDelete) throws SQLException {
 		List<String> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (UserInfoEntity user : usersToDelete) {
