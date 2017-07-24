@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import openDemo.dao.OuInfoDao;
+import openDemo.dao.PositionDao;
 import openDemo.dao.UserInfoDao;
 import openDemo.entity.OuInfoEntity;
 import openDemo.entity.ResultEntity;
@@ -40,6 +41,7 @@ import openDemo.entity.sync.OpOuInfoModel;
 import openDemo.entity.sync.OpReqJsonModle;
 import openDemo.entity.sync.OpUserInfoModel;
 import openDemo.service.OrgService;
+import openDemo.service.PositionService;
 import openDemo.service.UserService;
 
 public class OpSyncService {
@@ -85,10 +87,12 @@ public class OpSyncService {
 	private static SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 	private static SimpleDateFormat JAVA_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
+	private PositionService positionService = new PositionService();
 	private OrgService orgService = new OrgService();
 	private UserService userService = new UserService();
-	private UserInfoDao userInfoDao = new UserInfoDao();
+	private PositionDao positionDao = new PositionDao();
 	private OuInfoDao ouInfoDao = new OuInfoDao();
+	private UserInfoDao userInfoDao = new UserInfoDao();
 	private ObjectMapper mapper;
 
 	private static final Logger logger = LogManager.getLogger(OpSyncService.class);
@@ -110,6 +114,15 @@ public class OpSyncService {
 	 * @throws SQLException
 	 */
 	public void sync() throws IOException, ReflectiveOperationException, SQLException {
+		int posCount = positionDao.getAllCount();
+		if (posCount > 0) {
+			// 岗位增量同步
+			
+		} else {
+			// 岗位全量同步
+			// 获取岗位名集合=>增加pNo
+		}
+
 		int orgCount = ouInfoDao.getAllCount();
 		if (orgCount > 0) {
 			// 组织增量同步
@@ -135,9 +148,6 @@ public class OpSyncService {
 			opUserSync(SERVICEOPERATION_EMP, MODE_FULL, true);
 			logger.info("[用户全量]同步结束");
 		}
-
-		// TODO 岗位同步
-
 	}
 
 	/**
