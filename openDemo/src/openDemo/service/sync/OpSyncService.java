@@ -43,7 +43,7 @@ import openDemo.service.OrgService;
 import openDemo.service.UserService;
 
 public class OpSyncService {
-
+	// 用户接口请求参数名
 	private static final String REQUESTID = "RequestId";
 	private static final String SERVICENAME = "ServiceName";
 	private static final String SERVICEOPERATION = "ServiceOperation";
@@ -51,23 +51,22 @@ public class OpSyncService {
 	private static final String MODE = "Mode";
 	private static final String ESBREQHEAD = "EsbReqHead";
 	private static final String ESBREQDATA = "EsbReqData";
-
+	// 用户接口请求参数值
 	private static final String REQUEST_URL = "http://esbuat.opple.com:50831/esb_emp/json";
 	private static final String USERNAME = "yxtuser";
 	private static final String PASSWORD = "yxtpwd";
 	private static final String SERVICE_NAME = "YXT_ESB_EmpOrgQuery";
 	private static final String SERVICE_VERSION = "1.0";
-
+	private static final String SERVICEOPERATION_EMP = "QueryEmpInfo";
+	private static final String SERVICEOPERATION_ORG = "QueryOrgInfo";
+	private static final String MODE_FULL = "1";
+	private static final String MODE_UPDATE = "2";
+	// json请求及转换时字符集类型
 	private static final String CHARSET_UTF8 = "UTF-8";
 
 	// 客户提供接口返回的json数据中组织数据和员工数据的key
 	private static final String ORG_RES_DATA_KEY = "SapMiddleOrg";
 	private static final String EMP_RES_DATA_KEY = "SapMiddleEmp";
-
-	private static final String SERVICEOPERATION_EMP = "QueryEmpInfo";
-	private static final String SERVICEOPERATION_ORG = "QueryOrgInfo";
-	private static final String MODE_FULL = "1";
-	private static final String MODE_UPDATE = "2";
 
 	private static String REPLACE_FROM = "&";
 	private static String REPLACE_TO = " ";
