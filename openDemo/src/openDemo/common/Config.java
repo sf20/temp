@@ -1,9 +1,9 @@
 package openDemo.common;
 
 public interface Config {
-	String apikey = "xxxxxxxxxxxxxxxxxxxxxxxx";
+	String apikey = "57dac39f-aa0c-42dc-a64f-eae4618dd128";
 	
-	String secretkey  = "xxxxxxxxxxxxxxxxxxxxxxxxxxx";
+	String secretkey  = "d0781377-ab21-4d05-b6c2-034ffadda54d";
 	
-	String baseUrl = "http://api.yunxuetang.cn/";
+	String baseUrl = "http://api.qida.yunxuetang.com.cn/";
 }
