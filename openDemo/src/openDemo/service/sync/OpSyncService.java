@@ -114,27 +114,27 @@ public class OpSyncService {
 		int orgCount = ouInfoDao.getAllCount();
 		if (orgCount > 0) {
 			// 组织增量同步
-			logger.info("组织增量同步开始...");
+			logger.info("[组织增量]同步开始...");
 			opOrgSync(SERVICEOPERATION_ORG, MODE_UPDATE, false);
-			logger.info("组织增量同步结束");
+			logger.info("[组织增量]同步结束");
 		} else {
 			// 组织全量同步
-			logger.info("组织全量同步开始...");
+			logger.info("[组织全量]同步开始...");
 			opOrgSync(SERVICEOPERATION_ORG, MODE_FULL, false);
-			logger.info("组织全量同步结束");
+			logger.info("[组织全量]同步结束");
 		}
 
 		int userCount = userInfoDao.getAllCount();
 		if (userCount > 0) {
 			// 用户增量同步
-			logger.info("用户增量同步开始...");
+			logger.info("[用户增量]同步开始...");
 			opUserSync(SERVICEOPERATION_EMP, MODE_UPDATE, true);
-			logger.info("用户增量同步结束");
+			logger.info("[用户增量]同步结束");
 		} else {
 			// 用户全量同步
-			logger.info("用户全量同步开始...");
+			logger.info("[用户全量]同步开始...");
 			opUserSync(SERVICEOPERATION_EMP, MODE_FULL, true);
-			logger.info("用户全量同步结束");
+			logger.info("[用户全量]同步结束");
 		}
 
 		// TODO 岗位同步
@@ -271,11 +271,12 @@ public class OpSyncService {
 
 		replaceIllegalChar(newList);
 
+		logger.info("组织同步Total Size: " + newList.size());
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
 			removeExpiredOrgs(newList);
-			logger.info("组织同步Total Size: " + newList.size());
 			syncAddOrgOneByOne(newList, isBaseInfo);
+			logger.info("组织同步新增Size: " + newList.size());
 		}
 		// 增量模式
 		else {
@@ -307,8 +308,10 @@ public class OpSyncService {
 	 */
 	private void removeExpiredOrgs(List<OuInfoEntity> list) {
 		for (Iterator<OuInfoEntity> iterator = list.iterator(); iterator.hasNext();) {
-			if (isOrgExpired(iterator.next())) {
+			OuInfoEntity org = iterator.next();
+			if (isOrgExpired(org)) {
 				iterator.remove();
+				logger.warn("删除了过期组织：" + org.getOuName());
 			}
 		}
 	}
@@ -440,12 +443,12 @@ public class OpSyncService {
 		tempFixProblem(newList);
 		changeDateFormatAndSex(modeList, newList);
 
-		// syncMethod(newList, mode, islink);
+		logger.info("用户同步Total Size: " + newList.size());
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
 			removeExpiredUser(newList);
-			logger.info("用户同步Total Size: " + newList.size());
 			syncAddUserOneByOne(newList, islink);
+			logger.info("用户同步新增Size: " + newList.size());
 		}
 		// 增量模式
 		else {
@@ -480,8 +483,10 @@ public class OpSyncService {
 	private void removeExpiredUser(List<UserInfoEntity> newList) {
 		for (Iterator<UserInfoEntity> iterator = newList.iterator(); iterator.hasNext();) {
 			// 有leavedate离职日期的删除
-			if (iterator.next().getExpireDate() != null) {
+			UserInfoEntity user = iterator.next();
+			if (user.getExpireDate() != null) {
 				iterator.remove();
+				logger.warn("删除了过期员工：" + user.getID());
 			}
 		}
 	}
@@ -651,9 +656,13 @@ public class OpSyncService {
 
 		// 待新增组织
 		for (OuInfoEntity org : newList) {
-			// 非过期组织
-			if (!fullList.contains(org) && !isOrgExpired(org)) {
-				orgsToSyncAdd.add(org);
+			if (!fullList.contains(org)) {
+				// 非过期组织
+				if (!isOrgExpired(org)) {
+					orgsToSyncAdd.add(org);
+				} else {
+					logger.warn("包含过期组织：" + org.getOuName());
+				}
 			}
 		}
 
@@ -661,7 +670,6 @@ public class OpSyncService {
 		map.put(MAPKEY_ORG_SYNC_UPDATE, orgsToSyncUpdate);
 		map.put(MAPKEY_ORG_SYNC_DELETE, orgsToSyncDelete);
 
-		logger.info("组织同步Total Size: " + newList.size());
 		logger.info("组织同步新增Size: " + orgsToSyncAdd.size());
 		logger.info("组织同步更新Size: " + orgsToSyncUpdate.size());
 		logger.info("组织同步删除Size: " + orgsToSyncDelete.size());
@@ -718,8 +726,13 @@ public class OpSyncService {
 
 		// 待新增用户
 		for (UserInfoEntity user : newList) {
-			if (!fullList.contains(user) && user.getExpireDate() == null) {
-				usersToSyncAdd.add(user);
+			if (!fullList.contains(user)) {
+				// 非过期员工
+				if (user.getExpireDate() == null) {
+					usersToSyncAdd.add(user);
+				} else {
+					logger.warn("包含过期员工：" + user.getID());
+				}
 			}
 		}
 
@@ -727,7 +740,6 @@ public class OpSyncService {
 		map.put(MAPKEY_USER_SYNC_UPDATE, usersToSyncUpdate);
 		map.put(MAPKEY_USER_SYNC_DELETE, usersToDelete);
 
-		logger.info("用户同步Total Size: " + newList.size());
 		logger.info("用户同步新增Size: " + usersToSyncAdd.size());
 		logger.info("用户同步更新Size: " + usersToSyncUpdate.size());
 		logger.info("用户同步删除Size: " + usersToDelete.size());
