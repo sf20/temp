@@ -1,0 +1,74 @@
+package openDemo.service;
+
+import java.util.List;
+import java.util.Map;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JsonConfig;
+import openDemo.common.Config;
+import openDemo.common.HttpResultUtil;
+import openDemo.common.JsonUtil;
+import openDemo.entity.PositionEntity;
+import openDemo.entity.ResultEntity;
+
+/**
+ * 岗位同步
+ * 
+ * @author yanl
+ *
+ */
+public class PositionService {
+
+	/**
+	 * 同步岗位
+	 * 
+	 * @param positionInfos
+	 *            岗位列表
+	 * @return
+	 */
+	public ResultEntity syncPos(List<PositionEntity> positionInfos) {
+		JsonConfig jsonConfig = JsonUtil.jsonConfig(PositionEntity.class);
+		JSONArray array = JSONArray.fromObject(positionInfos, jsonConfig);
+		Map<String, Object> params = HttpResultUtil.getParamsMap();
+		params.put("positionInfo", array.toString());
+		String url = Config.baseUrl + "el/sync/position";
+		String result = HttpResultUtil.getResult(params, url);
+		return HttpResultUtil.getResult(result);
+	}
+
+	/**
+	 * 同步岗位（返回对应岗位编号）
+	 * 
+	 * @param positionInfos
+	 *            岗位列表
+	 * @return
+	 */
+	public ResultEntity syncPosGetPNo(List<PositionEntity> positionInfos) {
+		JsonConfig jsonConfig = JsonUtil.jsonConfig(PositionEntity.class);
+		JSONArray array = JSONArray.fromObject(positionInfos, jsonConfig);
+		Map<String, Object> params = HttpResultUtil.getParamsMap();
+		params.put("positionInfo", array.toString());
+		String url = Config.baseUrl + "el/sync/syncpositionfornopno";
+		String result = HttpResultUtil.getResult(params, url);
+		return HttpResultUtil.getResult(result);
+	}
+
+	/**
+	 * 同步更改岗位名称
+	 * 
+	 * @param positionNo
+	 *            岗位编号
+	 * @param positionName
+	 *            岗位名称(修改后)
+	 * @return
+	 */
+	public ResultEntity changePosName(String positionNo, String positionName) {
+		Map<String, Object> params = HttpResultUtil.getParamsMap();
+		params.put("positionNo", positionNo);
+		params.put("positionName", positionName);
+		String url = Config.baseUrl + "el/sync/updatepositioninfo";
+		String result = HttpResultUtil.getResult(params, url);
+		return HttpResultUtil.getResult(result);
+	}
+
+}
