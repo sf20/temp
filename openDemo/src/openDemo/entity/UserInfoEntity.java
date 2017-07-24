@@ -58,6 +58,11 @@ public class UserInfoEntity {
 	 */
 	private String postionNo;
 
+	/*
+	 * 岗位名
+	 */
+	private String postionName;
+
 	/**
 	 * 入职日期
 	 */
@@ -174,6 +179,14 @@ public class UserInfoEntity {
 
 	public void setPostionNo(String postionNo) {
 		this.postionNo = postionNo;
+	}
+
+	public String getPostionName() {
+		return postionName;
+	}
+
+	public void setPostionName(String postionName) {
+		this.postionName = postionName;
 	}
 
 	public String getEntryTime() {

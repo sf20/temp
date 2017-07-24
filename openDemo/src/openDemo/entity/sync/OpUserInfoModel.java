@@ -75,6 +75,12 @@ public class OpUserInfoModel {
 	@JsonIgnore
 	private String postionNo;
 
+	/*
+	 * 岗位名
+	 */
+	@JsonProperty("PositionName")
+	private String postionName;
+
 	/**
 	 * 入职日期
 	 */
@@ -195,6 +201,14 @@ public class OpUserInfoModel {
 
 	public void setPostionNo(String postionNo) {
 		this.postionNo = postionNo;
+	}
+
+	public String getPostionName() {
+		return postionName;
+	}
+
+	public void setPostionName(String postionName) {
+		this.postionName = postionName;
 	}
 
 	public Date getEntryTime() {

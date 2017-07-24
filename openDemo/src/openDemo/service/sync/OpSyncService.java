@@ -7,9 +7,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -35,6 +38,7 @@ import openDemo.dao.OuInfoDao;
 import openDemo.dao.PositionDao;
 import openDemo.dao.UserInfoDao;
 import openDemo.entity.OuInfoEntity;
+import openDemo.entity.PositionEntity;
 import openDemo.entity.ResultEntity;
 import openDemo.entity.UserInfoEntity;
 import openDemo.entity.sync.OpOuInfoModel;
@@ -81,8 +85,12 @@ public class OpSyncService {
 	private static String MAPKEY_ORG_SYNC_ADD = "orgSyncAdd";
 	private static String MAPKEY_ORG_SYNC_UPDATE = "orgSyncUpdate";
 	private static String MAPKEY_ORG_SYNC_DELETE = "orgSyncDelete";
+	private static String MAPKEY_POS_SYNC_ADD = "posSyncAdd";
+	private static String MAPKEY_POS_SYNC_UPDATE = "posSyncUpdate";
 
 	private static String SYNC_CODE_SUCCESS = "0";
+	// 岗位类别的默认值
+	private static String POSITION_CLASS_DEFAULT = "未分类";
 
 	private static SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 	private static SimpleDateFormat JAVA_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
@@ -117,10 +125,15 @@ public class OpSyncService {
 		int posCount = positionDao.getAllCount();
 		if (posCount > 0) {
 			// 岗位增量同步
-			
+			logger.info("[岗位增量]同步开始...");
+			opPosSync(SERVICEOPERATION_EMP, MODE_UPDATE);
+			logger.info("[岗位增量]同步结束");
 		} else {
 			// 岗位全量同步
-			// 获取岗位名集合=>增加pNo
+			logger.info("[岗位全量]同步开始...");
+			opPosSync(SERVICEOPERATION_EMP, MODE_FULL);
+			logger.info("[岗位全量]同步结束");
+
 		}
 
 		int orgCount = ouInfoDao.getAllCount();
@@ -147,6 +160,148 @@ public class OpSyncService {
 			logger.info("[用户全量]同步开始...");
 			opUserSync(SERVICEOPERATION_EMP, MODE_FULL, true);
 			logger.info("[用户全量]同步结束");
+		}
+	}
+
+	/**
+	 * 岗位同步
+	 * 
+	 * @param serviceoperationOrg
+	 * @param modeFull
+	 * @throws ReflectiveOperationException
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	public void opPosSync(String serviceOperation, String mode)
+			throws IOException, ReflectiveOperationException, SQLException {
+		List<OpUserInfoModel> userModelList = getUserModelList(serviceOperation, mode);
+		List<PositionEntity> newList = getPosListFromUsers(userModelList);
+
+		logger.info("岗位同步Total Size: " + newList.size());
+		// 全量模式
+		if (MODE_FULL.equals(mode)) {
+			syncUpdatePosOneByOne(newList, MAPKEY_POS_SYNC_ADD);
+			logger.info("岗位同步新增Size: " + newList.size());
+		}
+		// 增量模式
+		else {
+			// 获取数据库全量list
+			List<PositionEntity> allList = positionDao.getAll();
+
+			Map<String, List<PositionEntity>> map = comparePosList(allList, newList);
+			for (Entry<String, List<PositionEntity>> entry : map.entrySet()) {
+				syncUpdatePosOneByOne(entry.getValue(), entry.getKey());
+			}
+		}
+	}
+
+	/**
+	 * 根据用户集合生成岗位对象集合
+	 * 
+	 * @param userModelList
+	 * @return
+	 */
+	private List<PositionEntity> getPosListFromUsers(List<OpUserInfoModel> userModelList) {
+		// 保证无重复
+		Set<String> posNames = new HashSet<>();
+		for (OpUserInfoModel modle : userModelList) {
+			posNames.add(modle.getPostionName());
+		}
+
+		List<PositionEntity> list = new ArrayList<>(posNames.size());
+		PositionEntity temp = null;
+		for (String posName : posNames) {
+			temp = new PositionEntity();
+			temp.setpNo(UUID.randomUUID().toString());
+			temp.setpNames(POSITION_CLASS_DEFAULT + ";" + posName);
+		}
+
+		return list;
+	}
+
+	/**
+	 * 数据库岗位表数据集合与最新获取岗位数据集合进行比较
+	 * 
+	 * @param fullList
+	 *            数据库岗位表数据集合
+	 * @param newList
+	 *            最新获取岗位数据集合
+	 * @return
+	 */
+	private Map<String, List<PositionEntity>> comparePosList(List<PositionEntity> fullList,
+			List<PositionEntity> newList) {
+		Map<String, List<PositionEntity>> map = new HashMap<>();
+
+		List<PositionEntity> posToSyncAdd = new ArrayList<>();
+		List<PositionEntity> posToSyncUpdate = new ArrayList<>();
+
+		for (PositionEntity fullPos : fullList) {
+			for (PositionEntity newPos : newList) {
+				// 已经存在的岗位比较
+				if (fullPos.equals(newPos)) {
+					// 岗位名有变更
+					String fullPosName = fullPos.getpNames();
+					String newPosName = newPos.getpNames();
+					if (fullPosName == null) {
+						if (newPosName != null) {
+							posToSyncUpdate.add(newPos);
+						}
+					} else {
+						if (!fullPosName.equals(newPosName)) {
+							posToSyncUpdate.add(newPos);
+						}
+					}
+				}
+			}
+		}
+
+		// 待新增岗位
+		for (PositionEntity pos : newList) {
+			// TODO 岗位名不存在
+			if (!fullList.contains(pos)) {
+				posToSyncAdd.add(pos);
+			}
+		}
+
+		map.put(MAPKEY_POS_SYNC_ADD, posToSyncAdd);
+		map.put(MAPKEY_POS_SYNC_UPDATE, posToSyncUpdate);
+
+		logger.info("岗位同步新增Size: " + posToSyncAdd.size());
+		logger.info("岗位同步更新Size: " + posToSyncUpdate.size());
+
+		return map;
+	}
+
+	/**
+	 * 逐个岗位同步更新
+	 * 
+	 * @param posToSync
+	 * @param addOrUpdate
+	 * @throws SQLException
+	 */
+	private void syncUpdatePosOneByOne(List<PositionEntity> posToSync, String addOrUpdate) throws SQLException {
+		List<PositionEntity> tempList = new ArrayList<>();
+		ResultEntity resultEntity = null;
+		for (PositionEntity pos : posToSync) {
+			tempList.add(pos);
+
+			if (MAPKEY_POS_SYNC_ADD.equals(addOrUpdate)) {
+				resultEntity = positionService.syncPos(tempList);
+			} else {
+				resultEntity = positionService.changePosName(pos.getpNo(), pos.getpNames());
+			}
+
+			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+				if (MAPKEY_POS_SYNC_ADD.equals(addOrUpdate)) {
+					positionDao.insert(pos);
+				} else {
+					positionDao.update(pos);
+				}
+			} else {
+				printLog("岗位同步更新失败", pos.getpNames(), resultEntity);
+			}
+
+			tempList.clear();
 		}
 	}
 
@@ -438,19 +593,14 @@ public class OpSyncService {
 	 */
 	public void opUserSync(String serviceOperation, String mode, boolean islink)
 			throws IOException, ReflectiveOperationException, SQLException {
-		String jsonString = getJsonPost(serviceOperation, mode);
-
-		// 将json字符串转为用户json对象数据模型
-		OpReqJsonModle<OpUserInfoModel> modle = mapper.readValue(jsonString,
-				new TypeReference<OpReqJsonModle<OpUserInfoModel>>() {
-				});
-
-		List<OpUserInfoModel> modeList = modle.getEsbResData().get(EMP_RES_DATA_KEY);
-		List<UserInfoEntity> newList = copyCreateEntityList(modeList, UserInfoEntity.class);
+		List<OpUserInfoModel> modelList = getUserModelList(serviceOperation, mode);
+		List<UserInfoEntity> newList = copyCreateEntityList(modelList, UserInfoEntity.class);
 
 		// TODO
 		tempFixProblem(newList);
-		changeDateFormatAndSex(modeList, newList);
+		changeDateFormatAndSex(modelList, newList);
+
+		// TODO 关联岗位到用户 setPositionToUser
 
 		logger.info("用户同步Total Size: " + newList.size());
 		// 全量模式
@@ -482,6 +632,27 @@ public class OpSyncService {
 			}
 		}
 
+	}
+
+	/**
+	 * 向客户接口发送请求并返回员工json数据模型集合
+	 * 
+	 * @param serviceOperation
+	 * @param mode
+	 * @return
+	 * @throws IOException
+	 * @throws ReflectiveOperationException
+	 */
+	private List<OpUserInfoModel> getUserModelList(String serviceOperation, String mode)
+			throws IOException, ReflectiveOperationException {
+		String jsonString = getJsonPost(serviceOperation, mode);
+
+		// 将json字符串转为用户json对象数据模型
+		OpReqJsonModle<OpUserInfoModel> modle = mapper.readValue(jsonString,
+				new TypeReference<OpReqJsonModle<OpUserInfoModel>>() {
+				});
+
+		return modle.getEsbResData().get(EMP_RES_DATA_KEY);
 	}
 
 	/**
