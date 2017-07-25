@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
@@ -86,7 +85,7 @@ public class OpSyncService {
 	private static String MAPKEY_ORG_SYNC_UPDATE = "orgSyncUpdate";
 	private static String MAPKEY_ORG_SYNC_DELETE = "orgSyncDelete";
 	private static String MAPKEY_POS_SYNC_ADD = "posSyncAdd";
-	private static String MAPKEY_POS_SYNC_UPDATE = "posSyncUpdate";
+	// private static String MAPKEY_POS_SYNC_UPDATE = "posSyncUpdate";
 
 	private static String SYNC_CODE_SUCCESS = "0";
 	// 岗位类别的默认值
@@ -126,7 +125,7 @@ public class OpSyncService {
 		if (posCount > 0) {
 			// 岗位增量同步
 			logger.info("[岗位增量]同步开始...");
-			opPosSync(SERVICEOPERATION_EMP, MODE_UPDATE);
+			opPosSync(SERVICEOPERATION_EMP, MODE_UPDATE);// TODO type?
 			logger.info("[岗位增量]同步结束");
 		} else {
 			// 岗位全量同步
@@ -140,7 +139,7 @@ public class OpSyncService {
 		if (orgCount > 0) {
 			// 组织增量同步
 			logger.info("[组织增量]同步开始...");
-			opOrgSync(SERVICEOPERATION_ORG, MODE_UPDATE, false);
+			opOrgSync(SERVICEOPERATION_ORG, MODE_UPDATE, false);// TODO type?
 			logger.info("[组织增量]同步结束");
 		} else {
 			// 组织全量同步
@@ -166,8 +165,8 @@ public class OpSyncService {
 	/**
 	 * 岗位同步
 	 * 
-	 * @param serviceoperationOrg
-	 * @param modeFull
+	 * @param serviceOperation
+	 * @param mode
 	 * @throws ReflectiveOperationException
 	 * @throws IOException
 	 * @throws SQLException
@@ -180,18 +179,16 @@ public class OpSyncService {
 		logger.info("岗位同步Total Size: " + newList.size());
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
-			syncUpdatePosOneByOne(newList, MAPKEY_POS_SYNC_ADD);
+			syncAddPosOneByOne(newList);
 			logger.info("岗位同步新增Size: " + newList.size());
 		}
 		// 增量模式
 		else {
 			// 获取数据库全量list
 			List<PositionEntity> allList = positionDao.getAll();
-
 			Map<String, List<PositionEntity>> map = comparePosList(allList, newList);
-			for (Entry<String, List<PositionEntity>> entry : map.entrySet()) {
-				syncUpdatePosOneByOne(entry.getValue(), entry.getKey());
-			}
+
+			syncAddPosOneByOne(map.get(MAPKEY_POS_SYNC_ADD));
 		}
 	}
 
@@ -202,9 +199,10 @@ public class OpSyncService {
 	 * @return
 	 */
 	private List<PositionEntity> getPosListFromUsers(List<OpUserInfoModel> userModelList) {
-		// 保证无重复
+		// 使用Set保证无重复
 		Set<String> posNames = new HashSet<>();
 		for (OpUserInfoModel modle : userModelList) {
+			// TODO 岗位名非空判断？
 			posNames.add(modle.getPostionName());
 		}
 
@@ -214,6 +212,7 @@ public class OpSyncService {
 			temp = new PositionEntity();
 			temp.setpNo(UUID.randomUUID().toString());
 			temp.setpNames(POSITION_CLASS_DEFAULT + ";" + posName);
+			list.add(temp);
 		}
 
 		return list;
@@ -231,74 +230,54 @@ public class OpSyncService {
 	private Map<String, List<PositionEntity>> comparePosList(List<PositionEntity> fullList,
 			List<PositionEntity> newList) {
 		Map<String, List<PositionEntity>> map = new HashMap<>();
-
 		List<PositionEntity> posToSyncAdd = new ArrayList<>();
-		List<PositionEntity> posToSyncUpdate = new ArrayList<>();
 
-		for (PositionEntity fullPos : fullList) {
-			for (PositionEntity newPos : newList) {
-				// 已经存在的岗位比较
-				if (fullPos.equals(newPos)) {
-					// 岗位名有变更
+		// 待新增岗位
+		for (PositionEntity newPos : newList) {
+			String newPosName = newPos.getpNames();
+
+			if (newPosName != null) {
+				boolean isPosNameExist = false;
+
+				for (PositionEntity fullPos : fullList) {
 					String fullPosName = fullPos.getpNames();
-					String newPosName = newPos.getpNames();
-					if (fullPosName == null) {
-						if (newPosName != null) {
-							posToSyncUpdate.add(newPos);
-						}
-					} else {
-						if (!fullPosName.equals(newPosName)) {
-							posToSyncUpdate.add(newPos);
-						}
+					if (fullPosName != null && newPosName.equals(fullPosName)) {
+						isPosNameExist = true;
+						break;
 					}
+				}
+
+				// 岗位名不存在
+				if (!isPosNameExist) {
+					posToSyncAdd.add(newPos);
 				}
 			}
 		}
 
-		// 待新增岗位
-		for (PositionEntity pos : newList) {
-			// TODO 岗位名不存在
-			if (!fullList.contains(pos)) {
-				posToSyncAdd.add(pos);
-			}
-		}
-
 		map.put(MAPKEY_POS_SYNC_ADD, posToSyncAdd);
-		map.put(MAPKEY_POS_SYNC_UPDATE, posToSyncUpdate);
-
 		logger.info("岗位同步新增Size: " + posToSyncAdd.size());
-		logger.info("岗位同步更新Size: " + posToSyncUpdate.size());
 
 		return map;
 	}
 
 	/**
-	 * 逐个岗位同步更新
+	 * 逐个岗位同步新增
 	 * 
 	 * @param posToSync
-	 * @param addOrUpdate
 	 * @throws SQLException
 	 */
-	private void syncUpdatePosOneByOne(List<PositionEntity> posToSync, String addOrUpdate) throws SQLException {
+	private void syncAddPosOneByOne(List<PositionEntity> posToSync) throws SQLException {
 		List<PositionEntity> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (PositionEntity pos : posToSync) {
 			tempList.add(pos);
 
-			if (MAPKEY_POS_SYNC_ADD.equals(addOrUpdate)) {
-				resultEntity = positionService.syncPos(tempList);
-			} else {
-				resultEntity = positionService.changePosName(pos.getpNo(), pos.getpNames());
-			}
+			resultEntity = positionService.syncPos(tempList);
 
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				if (MAPKEY_POS_SYNC_ADD.equals(addOrUpdate)) {
-					positionDao.insert(pos);
-				} else {
-					positionDao.update(pos);
-				}
+				positionDao.insert(pos);
 			} else {
-				printLog("岗位同步更新失败", pos.getpNames(), resultEntity);
+				printLog("岗位同步新增失败", pos.getpNames(), resultEntity);
 			}
 
 			tempList.clear();
