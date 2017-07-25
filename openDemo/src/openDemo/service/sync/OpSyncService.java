@@ -126,7 +126,7 @@ public class OpSyncService {
 		if (posCount > 0) {
 			// 岗位增量同步
 			logger.info("[岗位增量]同步开始...");
-			opPosSync(SERVICEOPERATION_EMP, MODE_UPDATE);// TODO type?
+			opPosSync(SERVICEOPERATION_EMP, MODE_UPDATE);
 			logger.info("[岗位增量]同步结束");
 		} else {
 			// 岗位全量同步
@@ -139,7 +139,7 @@ public class OpSyncService {
 		if (orgCount > 0) {
 			// 组织增量同步
 			logger.info("[组织增量]同步开始...");
-			opOrgSync(SERVICEOPERATION_ORG, MODE_UPDATE, false);// TODO type?
+			opOrgSync(SERVICEOPERATION_ORG, MODE_UPDATE, false);
 			logger.info("[组织增量]同步结束");
 		} else {
 			// 组织全量同步
@@ -173,7 +173,7 @@ public class OpSyncService {
 	 */
 	public void opPosSync(String serviceOperation, String mode)
 			throws IOException, ReflectiveOperationException, SQLException {
-		List<OpUserInfoModel> userModelList = getUserModelList(serviceOperation, mode);
+		List<OpUserInfoModel> userModelList = getUserModelList(serviceOperation, mode);// TODO mode=1
 		List<PositionEntity> newList = getPosListFromUsers(userModelList);
 
 		logger.info("岗位同步Total Size: " + newList.size());
@@ -401,7 +401,7 @@ public class OpSyncService {
 	 */
 	public void opOrgSync(String serviceOperation, String mode, boolean isBaseInfo)
 			throws IOException, ReflectiveOperationException, SQLException {
-		String jsonString = getJsonPost(serviceOperation, mode);
+		String jsonString = getJsonPost(serviceOperation, MODE_FULL);// Org只有全量模式
 
 		// 将json字符串转为组织单位json对象数据模型
 		OpReqJsonModle<OpOuInfoModel> modle = mapper.readValue(jsonString,
