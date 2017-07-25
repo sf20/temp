@@ -90,6 +90,7 @@ public class OpSyncService {
 	private static String SYNC_CODE_SUCCESS = "0";
 	// 岗位类别的默认值
 	private static String POSITION_CLASS_DEFAULT = "未分类";
+	private static String POSITION_CLASS_SEPARATOR = ";";
 
 	private static SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 	private static SimpleDateFormat JAVA_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
@@ -132,7 +133,6 @@ public class OpSyncService {
 			logger.info("[岗位全量]同步开始...");
 			opPosSync(SERVICEOPERATION_EMP, MODE_FULL);
 			logger.info("[岗位全量]同步结束");
-
 		}
 
 		int orgCount = ouInfoDao.getAllCount();
@@ -202,7 +202,6 @@ public class OpSyncService {
 		// 使用Set保证无重复
 		Set<String> posNames = new HashSet<>();
 		for (OpUserInfoModel modle : userModelList) {
-			// TODO 岗位名非空判断？
 			posNames.add(modle.getPostionName());
 		}
 
@@ -211,7 +210,7 @@ public class OpSyncService {
 		for (String posName : posNames) {
 			temp = new PositionEntity();
 			temp.setpNo(UUID.randomUUID().toString());
-			temp.setpNames(POSITION_CLASS_DEFAULT + ";" + posName);
+			temp.setpNames(POSITION_CLASS_DEFAULT + POSITION_CLASS_SEPARATOR + posName);
 			list.add(temp);
 		}
 
@@ -575,11 +574,11 @@ public class OpSyncService {
 		List<OpUserInfoModel> modelList = getUserModelList(serviceOperation, mode);
 		List<UserInfoEntity> newList = copyCreateEntityList(modelList, UserInfoEntity.class);
 
-		// TODO
-		tempFixProblem(newList);
+		copySetUserId(newList);
 		changeDateFormatAndSex(modelList, newList);
 
-		// TODO 关联岗位到用户 setPositionToUser
+		// 关联岗位到用户
+		setPositionNoToUser(newList);
 
 		logger.info("用户同步Total Size: " + newList.size());
 		// 全量模式
@@ -624,6 +623,51 @@ public class OpSyncService {
 	}
 
 	/**
+	 * 关联岗位到用户
+	 * 
+	 * @param newList
+	 * @throws SQLException
+	 */
+	private void setPositionNoToUser(List<UserInfoEntity> newList) throws SQLException {
+		List<PositionEntity> posList = positionDao.getAll();
+
+		for (UserInfoEntity user : newList) {
+			String pNameInUser = user.getPostionName();
+
+			if (pNameInUser != null) {
+				for (PositionEntity pos : posList) {
+					// 根据岗位名进行查找
+					if (pNameInUser.equals(getPositionName(pos.getpNames()))) {
+						user.setPostionNo(pos.getpNo());
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * 从pNames中得到岗位名(pNames格式: 一级类别;二级类别;岗位名)
+	 * 
+	 * @param getpNames
+	 * @return
+	 */
+	private String getPositionName(String pNames) {
+		if (pNames == null) {
+			return null;
+		}
+
+		String[] arr = pNames.split(POSITION_CLASS_SEPARATOR);
+		int len = arr.length;
+		if (len == 0) {
+			return null;
+		}
+
+		// 最后是岗位名
+		return arr[len - 1];
+	}
+
+	/**
 	 * 向客户接口发送请求并返回员工json数据模型集合
 	 * 
 	 * @param serviceOperation
@@ -661,7 +705,7 @@ public class OpSyncService {
 	}
 
 	/**
-	 * 将json模型对象的日期进行格式化(yyyy-MM-dd)后赋值给对应的java同步对象
+	 * 将json模型对象的日期进行格式化(yyyy-MM-dd)后赋值给对应的java同步对象 + 性别值转换
 	 * 
 	 * @param fromList
 	 *            json模型对象集合
@@ -693,14 +737,14 @@ public class OpSyncService {
 	}
 
 	/**
-	 * 用于解决返回json字符串中组织没有ID的问题
+	 * 将userName字段值赋值给ID字段 用于解决返回json字符串中组织没有ID的问题
 	 * 
 	 * @param newList
 	 */
-	private void tempFixProblem(List<UserInfoEntity> newList) {
+	private void copySetUserId(List<UserInfoEntity> newList) {
 		for (Iterator<UserInfoEntity> iterator = newList.iterator(); iterator.hasNext();) {
 			UserInfoEntity userInfoEntity = iterator.next();
-			// ID = userName
+			// ID <= userName
 			userInfoEntity.setID(userInfoEntity.getUserName());
 		}
 	}
