@@ -80,4 +80,18 @@ public class OrgService {
 		return HttpResultUtil.getResult(result);
 	}
 
+	/**
+	 * 根据部门名称查询部门编号
+	 * 
+	 * @param ouname
+	 *            第三方ID或部门编号
+	 * @return
+	 */
+	public ResultEntity getOucodeByName(String ouname) {
+		Map<String, Object> params = HttpResultUtil.getParamsMap();
+		params.put("ouname", ouname);
+		String url = Config.baseUrl + "el/sync/getoucodebyouname";
+		String result = HttpResultUtil.getResult(params, url);
+		return HttpResultUtil.getResult(result);
+	}
 }
