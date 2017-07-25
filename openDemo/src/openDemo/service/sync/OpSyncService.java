@@ -417,12 +417,9 @@ public class OpSyncService {
 		logger.info("组织同步Total Size: " + newList.size());
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
+			removeExpiredOrgs(newList);
 			syncAddOrgOneByOne(newList, isBaseInfo);
 			logger.info("组织同步新增Size: " + newList.size());
-
-			List<OuInfoEntity> expiredOrgs = getExpiredOrgs(newList);
-			syncDeleteOrgOneByOne(expiredOrgs);
-			logger.info("组织同步删除Size: " + expiredOrgs.size());
 		}
 		// 增量模式
 		else {
@@ -448,19 +445,18 @@ public class OpSyncService {
 	}
 
 	/**
-	 * 返回组织集合中的过期组织
+	 * 去除过期组织
 	 * 
 	 * @param list
-	 * @return
 	 */
-	private List<OuInfoEntity> getExpiredOrgs(List<OuInfoEntity> list) {
-		List<OuInfoEntity> expiredOrgs = new ArrayList<>();
-		for (OuInfoEntity org : list) {
+	private void removeExpiredOrgs(List<OuInfoEntity> list) {
+		for (Iterator<OuInfoEntity> iterator = list.iterator(); iterator.hasNext();) {
+			OuInfoEntity org = iterator.next();
 			if (isOrgExpired(org)) {
-				expiredOrgs.add(org);
+				iterator.remove();
+				logger.warn("删除了过期组织：" + org.getOuName());
 			}
 		}
-		return expiredOrgs;
 	}
 
 	/**
