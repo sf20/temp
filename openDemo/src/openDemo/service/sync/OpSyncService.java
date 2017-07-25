@@ -78,9 +78,9 @@ public class OpSyncService {
 
 	private static String MAPKEY_USER_SYNC_ADD = "userSyncAdd";
 	private static String MAPKEY_USER_SYNC_UPDATE = "userSyncUpdate";
-	private static String MAPKEY_USER_SYNC_DELETE = "userSyncDelete";
-	// private static String MAPKEY_USER_SYNC_ENABLE = "userSyncEnable";
-	// private static String MAPKEY_USER_SYNC_DISABLE = "userSyncDisable";
+	// private static String MAPKEY_USER_SYNC_DELETE = "userSyncDelete";
+	private static String MAPKEY_USER_SYNC_ENABLE = "userSyncEnable";
+	private static String MAPKEY_USER_SYNC_DISABLE = "userSyncDisable";
 	private static String MAPKEY_ORG_SYNC_ADD = "orgSyncAdd";
 	private static String MAPKEY_ORG_SYNC_UPDATE = "orgSyncUpdate";
 	private static String MAPKEY_ORG_SYNC_DELETE = "orgSyncDelete";
@@ -584,9 +584,14 @@ public class OpSyncService {
 		logger.info("用户同步Total Size: " + newList.size());
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
-			removeExpiredUser(newList);
 			syncAddUserOneByOne(newList, islink);
 			logger.info("用户同步新增Size: " + newList.size());
+
+			List<UserInfoEntity> expiredUsers = getExpiredUsers(newList);
+			if (expiredUsers.size() > 0) {
+				syncDisableOneByOne(expiredUsers);
+				logger.info("用户同步禁用Size: " + expiredUsers.size());
+			}
 		}
 		// 增量模式
 		else {
@@ -605,9 +610,14 @@ public class OpSyncService {
 				syncUpdateUserOneByOne(usersToSyncUpdate, islink);
 			}
 
-			List<UserInfoEntity> usersToDelete = map.get(MAPKEY_USER_SYNC_DELETE);
-			if (usersToDelete.size() > 0) {
-				syncDeleteUserOneByOne(usersToDelete);
+			List<UserInfoEntity> usersToDisable = map.get(MAPKEY_USER_SYNC_DISABLE);
+			if (usersToDisable.size() > 0) {
+				syncDisableOneByOne(usersToDisable);
+			}
+
+			List<UserInfoEntity> usersToEnable = map.get(MAPKEY_USER_SYNC_ENABLE);
+			if (usersToEnable.size() > 0) {
+				syncEnableOneByOne(usersToEnable);
 			}
 		}
 
@@ -635,19 +645,19 @@ public class OpSyncService {
 	}
 
 	/**
-	 * 去除过期员工
+	 * 返回过期员工
 	 * 
-	 * @param newList
+	 * @param list
+	 * @return
 	 */
-	private void removeExpiredUser(List<UserInfoEntity> newList) {
-		for (Iterator<UserInfoEntity> iterator = newList.iterator(); iterator.hasNext();) {
-			// 有leavedate离职日期的删除
-			UserInfoEntity user = iterator.next();
+	private List<UserInfoEntity> getExpiredUsers(List<UserInfoEntity> list) {
+		List<UserInfoEntity> expiredUsers = new ArrayList<>();
+		for (UserInfoEntity user : list) {
 			if (user.getExpireDate() != null) {
-				iterator.remove();
-				logger.warn("删除了过期员工：" + user.getID());
+				expiredUsers.add(user);
 			}
 		}
+		return expiredUsers;
 	}
 
 	/**
@@ -746,22 +756,46 @@ public class OpSyncService {
 	}
 
 	/**
-	 * 逐个用户同步删除
+	 * 逐个用户同步启用
 	 * 
-	 * @param usersToDelete
+	 * @param usersToEnable
 	 * @throws SQLException
 	 */
-	private void syncDeleteUserOneByOne(List<UserInfoEntity> usersToDelete) throws SQLException {
+	private void syncEnableOneByOne(List<UserInfoEntity> usersToEnable) throws SQLException {
 		List<String> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
-		for (UserInfoEntity user : usersToDelete) {
+
+		for (UserInfoEntity user : usersToEnable) {
 			tempList.add(user.getUserName());
 
-			resultEntity = userService.deletedusersSync(tempList);
+			resultEntity = userService.enabledusersSync(tempList);
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				userInfoDao.deleteById(user.getID());
+				userInfoDao.update(user);
 			} else {
-				printLog("用户同步删除失败", user.getID(), resultEntity);
+				printLog("用户同步启用失败", user.getID(), resultEntity);
+			}
+
+			tempList.clear();
+		}
+	}
+
+	/**
+	 * 逐个用户同步禁用
+	 * 
+	 * @param usersToDisable
+	 * @throws SQLException
+	 */
+	private void syncDisableOneByOne(List<UserInfoEntity> usersToDisable) throws SQLException {
+		List<String> tempList = new ArrayList<>();
+		ResultEntity resultEntity = null;
+		for (UserInfoEntity user : usersToDisable) {
+			tempList.add(user.getUserName());
+
+			resultEntity = userService.disabledusersSync(tempList);
+			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+				userInfoDao.update(user);
+			} else {
+				printLog("用户同步禁用失败", user.getID(), resultEntity);
 			}
 
 			tempList.clear();
@@ -859,7 +893,7 @@ public class OpSyncService {
 	 *            数据库用户表数据集合
 	 * @param newList
 	 *            最新获取用户数据集合
-	 * @return 包含 同步新增、更新、删除等用户集合的Map对象
+	 * @return 包含 同步新增、更新、启用、禁用等用户集合的Map对象
 	 */
 	private Map<String, List<UserInfoEntity>> compareUserList(List<UserInfoEntity> fullList,
 			List<UserInfoEntity> newList) {
@@ -867,18 +901,30 @@ public class OpSyncService {
 
 		List<UserInfoEntity> usersToSyncAdd = new ArrayList<>();
 		List<UserInfoEntity> usersToSyncUpdate = new ArrayList<>();
-		List<UserInfoEntity> usersToDelete = new ArrayList<>();
+		List<UserInfoEntity> usersToEnable = new ArrayList<>();
+		List<UserInfoEntity> usersToDisable = new ArrayList<>();
 
+		// 待更新用户
 		for (UserInfoEntity fullUser : fullList) {
 			for (UserInfoEntity newUser : newList) {
 				// 已经存在的用户比较
 				if (fullUser.equals(newUser)) {
-					// 用户离职待删除
-					if (newUser.getExpireDate() != null) {
-						usersToDelete.add(newUser);
+					if (fullUser.getExpireDate() == null) {
+						if (newUser.getExpireDate() != null) {
+							// 用户过期禁用
+							usersToDisable.add(newUser);
+						} else {
+							// 存在用户更新
+							usersToSyncUpdate.add(newUser);
+						}
 					} else {
-						// 存在用户更新
-						usersToSyncUpdate.add(newUser);
+						if (newUser.getExpireDate() == null) {
+							// 用户重新启用
+							usersToEnable.add(newUser);
+						} else {
+							// 存在用户更新
+							usersToSyncUpdate.add(newUser);
+						}
 					}
 				}
 			}
@@ -887,22 +933,19 @@ public class OpSyncService {
 		// 待新增用户
 		for (UserInfoEntity user : newList) {
 			if (!fullList.contains(user)) {
-				// 非过期员工
-				if (user.getExpireDate() == null) {
-					usersToSyncAdd.add(user);
-				} else {
-					logger.warn("包含过期员工：" + user.getID());
-				}
+				usersToSyncAdd.add(user);
 			}
 		}
 
 		map.put(MAPKEY_USER_SYNC_ADD, usersToSyncAdd);
 		map.put(MAPKEY_USER_SYNC_UPDATE, usersToSyncUpdate);
-		map.put(MAPKEY_USER_SYNC_DELETE, usersToDelete);
+		map.put(MAPKEY_USER_SYNC_ENABLE, usersToEnable);
+		map.put(MAPKEY_USER_SYNC_DISABLE, usersToDisable);
 
 		logger.info("用户同步新增Size: " + usersToSyncAdd.size());
 		logger.info("用户同步更新Size: " + usersToSyncUpdate.size());
-		logger.info("用户同步删除Size: " + usersToDelete.size());
+		logger.info("用户同步启用Size: " + usersToEnable.size());
+		logger.info("用户同步禁用Size: " + usersToDisable.size());
 
 		return map;
 	}
