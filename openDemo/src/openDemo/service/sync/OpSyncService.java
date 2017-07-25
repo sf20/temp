@@ -73,9 +73,6 @@ public class OpSyncService {
 	private static final String ORG_RES_DATA_KEY = "SapMiddleOrg";
 	private static final String EMP_RES_DATA_KEY = "SapMiddleEmp";
 
-	private static String REPLACE_FROM = "&";
-	private static String REPLACE_TO = " ";
-
 	private static String MAPKEY_USER_SYNC_ADD = "userSyncAdd";
 	private static String MAPKEY_USER_SYNC_UPDATE = "userSyncUpdate";
 	// private static String MAPKEY_USER_SYNC_DELETE = "userSyncDelete";
@@ -411,7 +408,7 @@ public class OpSyncService {
 		List<OuInfoEntity> newList = copyCreateEntityList(modle.getEsbResData().get(ORG_RES_DATA_KEY),
 				OuInfoEntity.class);
 
-		replaceIllegalChar(newList);
+		// replaceIllegalChar(newList);
 
 		logger.info("组织同步Total Size: " + newList.size());
 		// 全量模式
@@ -475,7 +472,7 @@ public class OpSyncService {
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 				ouInfoDao.deleteById(orgId);
 			} else {
-				printLog("组织同步删除失败", org.getID(), resultEntity);
+				printLog("组织同步删除失败", org.getOuName(), resultEntity);
 			}
 
 			tempList.clear();
@@ -500,7 +497,7 @@ public class OpSyncService {
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 				ouInfoDao.update(org);
 			} else {
-				printLog("组织同步更新失败", org.getID(), resultEntity);
+				printLog("组织同步更新失败", org.getOuName(), resultEntity);
 			}
 
 			tempList.clear();
@@ -524,7 +521,7 @@ public class OpSyncService {
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 				ouInfoDao.insert(org);
 			} else {
-				printLog("组织同步新增失败", org.getID(), resultEntity);
+				printLog("组织同步新增失败", org.getOuName(), resultEntity);
 			}
 
 			tempList.clear();
@@ -992,21 +989,6 @@ public class OpSyncService {
 		logger.info("用户同步禁用Size: " + usersToDisable.size());
 
 		return map;
-	}
-
-	/**
-	 * 将组织名中的"&"替换为" "
-	 * 
-	 * @param list
-	 */
-	private void replaceIllegalChar(List<OuInfoEntity> list) {
-		for (Iterator<OuInfoEntity> iterator = list.iterator(); iterator.hasNext();) {
-			OuInfoEntity entity = iterator.next();
-			String ouName = entity.getOuName();
-			if (ouName != null && ouName.contains(REPLACE_FROM)) {
-				entity.setOuName(ouName.replaceAll(REPLACE_FROM, REPLACE_TO));
-			}
-		}
 	}
 
 	/**
