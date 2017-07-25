@@ -1,9 +1,9 @@
 ﻿package openDemo.test;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import openDemo.entity.GroupInfoEntity;
 import openDemo.entity.OuInfoEntity;
@@ -24,7 +24,7 @@ public class OpenDemoTest {
 
 	public OpenDemoTest() {
 		// 岗位同步
-		posTest();
+		// posTest();
 
 		// //1.单点登录:el/sso
 		// ssoTest();
@@ -42,8 +42,8 @@ public class OpenDemoTest {
 		// deletedusersTest();
 		//
 		// 6.同步组织单位: el/sync/ous
-		// ousTest();
-		//
+		ousTest();
+
 		// //7.同步删除组织单位: el/sync/deleteous 返回信息msg在data中
 		// deleteousTest();
 		//
@@ -77,7 +77,7 @@ public class OpenDemoTest {
 	// 单点登录:el/sso
 	private void ssoTest() {
 		SsoService ssoService = new SsoService();
-		ResultEntity resultEntity = ssoService.sso("OP024827");
+		ResultEntity resultEntity = ssoService.sso("testId");
 		print("单点登录", resultEntity);
 	}
 
@@ -87,10 +87,10 @@ public class OpenDemoTest {
 		List<UserInfoEntity> users = new ArrayList<UserInfoEntity>();
 		UserInfoEntity userEntity = new UserInfoEntity();
 		// userEntity.setOrgOuCode("506799895");
-		userEntity.setID("OP024827");
-		userEntity.setUserName("OP024827");
-		userEntity.setCnName("喻彦");
-		userEntity.setSex("男");
+		userEntity.setID("testId");
+		userEntity.setUserName("testId");
+		userEntity.setCnName("testId");
+		userEntity.setOrgOuCode("10086");
 		users.add(userEntity);
 		ResultEntity resultEntity = userService.userSync(true, users);
 		print("同步用户", resultEntity);
@@ -130,11 +130,17 @@ public class OpenDemoTest {
 		List<OuInfoEntity> ouInfos = new ArrayList<OuInfoEntity>();
 		OuInfoEntity ouInfoEntity = new OuInfoEntity();
 		ouInfoEntity.setID("10086");
-		ouInfoEntity.setOuName(null);
+		ouInfoEntity.setOuName("a&b");
 		// ouInfoEntity.setParentID("1");
 		ouInfoEntity.setIsSub("false");
 		ouInfos.add(ouInfoEntity);
-		ResultEntity resultEntity = orgService.ous(false, ouInfos);
+		ResultEntity resultEntity = null;
+		try {
+			resultEntity = orgService.getOucodeByName(URLEncoder.encode("a&b","utf-8"));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}//ous(false, ouInfos);// 
 		print("同步组织单位", resultEntity);
 	}
 

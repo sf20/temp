@@ -19,28 +19,19 @@ import openDemo.service.sync.OpSyncService;
 public class OpSyncServiceTest {
 	private static final Logger logger = LogManager.getLogger(OpSyncServiceTest.class);
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, ReflectiveOperationException, SQLException {
 		Date startDate = new Date();
 		System.out.println("同步中......");
 
 		OpSyncService opSyncService = new OpSyncService();
 		try {
 			opSyncService.sync();
-		} catch (IOException e) {
-			logger.error("同步出现异常...");
-			logger.error(e.getMessage());
-		} catch (ReflectiveOperationException e) {
-			logger.error("同步出现异常...");
-			logger.error(e.getMessage());
-		} catch (SQLException e) {
-			logger.error("同步出现异常...");
-			logger.error(e.getMessage());
 		} catch (Exception e) {
-			logger.error("同步出现异常...");
-			logger.error(e.getMessage());
+			e.printStackTrace();
 		}
-		// String query = "QueryOrgInfo";// QueryEmpInfo
-		// String mode = "1";
+		// String query = "QueryEmpInfo";// QueryOrgInfo
+		// String mode = "3";
+		// System.out.println(opSyncService.getJsonPost(query, mode));
 		// printOpOuInfoModel(opSyncService.getJsonPost(query, mode));
 		// opSyncService.opOrgSync(query, mode, false);
 
