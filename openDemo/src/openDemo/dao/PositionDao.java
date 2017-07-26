@@ -6,23 +6,27 @@ public class PositionDao extends GenericDaoImpl<PositionEntity> {
 
 	@Override
 	String generateGetByIdSql() {
-		return "SELECT t.* FROM `position_57dac39f-aa0c-42dc-a64f-eae4618dd128` t where t.pNo = ?";
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT * FROM ").append(generateTableName()).append(" WHERE pNo = ?");
+		return sql.toString();
 	}
 
 	@Override
-	String generateGetAllSql() {
-		return "SELECT t.* FROM `position_57dac39f-aa0c-42dc-a64f-eae4618dd128` t";
+	String generateDeleteByIdSql() {
+		StringBuffer sql = new StringBuffer();
+		sql.append("DELETE FROM ").append(generateTableName()).append(" WHERE pNo = ?");
+		return sql.toString();
 	}
 
 	@Override
-	String generateGetAllCountSql() {
-		return "SELECT count(*) FROM `position_57dac39f-aa0c-42dc-a64f-eae4618dd128`";
+	String getTableNamePrefix() {
+		return TABLENAME_PREFIX_POSITION;
 	}
 
 	@Override
 	String generateInsertSql() {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append("INSERT INTO `position_57dac39f-aa0c-42dc-a64f-eae4618dd128` ");
+		buffer.append("INSERT INTO ").append(generateTableName());
 		buffer.append("(pNo, pNames) VALUES(?, ?)");
 
 		return buffer.toString();
@@ -31,16 +35,11 @@ public class PositionDao extends GenericDaoImpl<PositionEntity> {
 	@Override
 	String generateUpdateSql() {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append("UPDATE `position_57dac39f-aa0c-42dc-a64f-eae4618dd128` SET ");
+		buffer.append("UPDATE ").append(generateTableName()).append(" SET ");
 		buffer.append("pNames = ?");
 		buffer.append(" WHERE pNo = ?");
 
 		return buffer.toString();
-	}
-
-	@Override
-	String generateDeleteByIdSql() {
-		return "DELETE FROM `position_57dac39f-aa0c-42dc-a64f-eae4618dd128` WHERE pNo = ?";
 	}
 
 	@Override

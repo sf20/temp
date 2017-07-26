@@ -9,9 +9,16 @@ import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
+import openDemo.common.Config;
 import openDemo.common.JdbcUtil;
 
 public abstract class GenericDaoImpl<T> implements GenericDao<T> {
+	public static final String TABLENAME_PREFIX_OUINFO = "ouinfo";
+	public static final String TABLENAME_PREFIX_POSITION = "position";
+	public static final String TABLENAME_PREFIX_USERINFO = "userinfo";
+	public static final String TABLENAME_SEPARATOR = "_";
+	public static final String TABLENAME_SUFFIX = Config.apikey;
+
 	private Class<T> entityClass;
 
 	@SuppressWarnings("unchecked")
@@ -85,17 +92,44 @@ public abstract class GenericDaoImpl<T> implements GenericDao<T> {
 		new QueryRunner(JdbcUtil.getDataSource()).batch(generateDeleteByIdSql(), params);
 	}
 
-	abstract String generateGetByIdSql();
+	String generateGetByIdSql() {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT * FROM ").append(generateTableName()).append(" WHERE ID = ?");
+		return sql.toString();
+	};
 
-	abstract String generateGetAllSql();
+	String generateGetAllSql() {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT * FROM ").append(generateTableName());
+		return sql.toString();
+	};
 
-	abstract String generateGetAllCountSql();
+	String generateGetAllCountSql() {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT count(*) FROM ").append(generateTableName());
+		return sql.toString();
+	};
+
+	String generateDeleteByIdSql() {
+		StringBuffer sql = new StringBuffer();
+		sql.append("DELETE FROM ").append(generateTableName()).append(" WHERE ID = ?");
+		return sql.toString();
+	};
+
+	String generateTableName() {
+		StringBuffer tableName = new StringBuffer();
+		// 表名前后加"`"
+		tableName.append("`").append(getTableNamePrefix()).append(TABLENAME_SEPARATOR).append(TABLENAME_SUFFIX)
+				.append("`");
+
+		return tableName.toString();
+	}
+
+	abstract String getTableNamePrefix();
 
 	abstract String generateInsertSql();
 
 	abstract String generateUpdateSql();
-
-	abstract String generateDeleteByIdSql();
 
 	/**
 	 * 批量化新增的参数数组

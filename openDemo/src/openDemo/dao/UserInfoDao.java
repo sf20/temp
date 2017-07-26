@@ -5,24 +5,14 @@ import openDemo.entity.UserInfoEntity;
 public class UserInfoDao extends GenericDaoImpl<UserInfoEntity> {
 
 	@Override
-	String generateGetByIdSql() {
-		return "SELECT t.* FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` t where t.ID = ?";
-	}
-
-	@Override
-	String generateGetAllSql() {
-		return "SELECT t.* FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` t";
-	}
-
-	@Override
-	String generateGetAllCountSql() {
-		return "SELECT count(*) FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128`";
+	String getTableNamePrefix() {
+		return TABLENAME_PREFIX_USERINFO;
 	}
 
 	@Override
 	String generateInsertSql() {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append("INSERT INTO `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` ");
+		buffer.append("INSERT INTO ").append(generateTableName());
 		buffer.append(
 				"(ID, UserName, CnName, Password, Sex, Mobile, Mail, OrgOuCode, EncryptionType, PostionNo, Entrytime,");
 		buffer.append(
@@ -36,7 +26,7 @@ public class UserInfoDao extends GenericDaoImpl<UserInfoEntity> {
 	@Override
 	String generateUpdateSql() {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append("UPDATE `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` SET ");
+		buffer.append("UPDATE ").append(generateTableName()).append(" SET ");
 		buffer.append("UserName = ?,");
 		buffer.append("CnName = ?,");
 		buffer.append("Password = ?,");
@@ -65,11 +55,6 @@ public class UserInfoDao extends GenericDaoImpl<UserInfoEntity> {
 	}
 
 	@Override
-	String generateDeleteByIdSql() {
-		return "DELETE FROM `userinfo_57dac39f-aa0c-42dc-a64f-eae4618dd128` WHERE ID = ?";
-	}
-
-	@Override
 	Object[] getInsertObjectParamArray(UserInfoEntity user) {
 		Object[] params = { user.getID(), user.getUserName(), user.getCnName(), user.getPassword(), user.getSex(),
 				user.getMobile(), user.getMail(), user.getOrgOuCode(), user.getEncryptionType(), user.getPostionNo(),
@@ -88,4 +73,5 @@ public class UserInfoDao extends GenericDaoImpl<UserInfoEntity> {
 				user.getSpare9(), user.getSpare10(), user.getID() };
 		return params;
 	}
+
 }
