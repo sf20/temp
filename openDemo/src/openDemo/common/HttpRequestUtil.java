@@ -6,11 +6,15 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class HttpRequestUtil {
-	
+	private static final Logger logger = LogManager.getLogger(HttpRequestUtil.class);
 	/**
      * 向指定URL发送GET方法的请求
      * 
@@ -95,7 +99,7 @@ public class HttpRequestUtil {
                 result += line;
             }
         } catch (Exception e) {
-//        	logger.debug("发送 POST 请求出现异常！"+e);
+        	logger.error("发送 POST 请求出现异常！" + e);
         	throw new Exception("发送 POST 请求连接出现异常！");
         } finally{
             try{
@@ -115,7 +119,7 @@ public class HttpRequestUtil {
     public static String sendPost(String url,Map<String, Object> params) throws Exception{
 		StringBuffer buffer = new StringBuffer(128);
 		for (Entry<String, Object> entry : params.entrySet()) {
-			buffer.append("&"+entry.getKey()+"="+entry.getValue());
+			buffer.append("&"+entry.getKey()+"="+URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8"));
 		}
 		return sendPost(url, buffer.toString());
 	}
