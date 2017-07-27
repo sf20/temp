@@ -13,7 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ThreadPoolTest {
-	private static final long PERIOD = 10 * 60 * 1000;// 定时器间隔执行时间 单位毫秒
+	private static final long PERIOD = 60 * 60 * 1000;// 定时器间隔执行时间 单位毫秒
 
 	// 每次定时器执行时间参数
 	private static final int TIMER_EXEC_TIME_HOUR = 11;
@@ -23,7 +23,7 @@ public class ThreadPoolTest {
 	private static final int CORE_POOL_SIZE = 1;// 线程池数量
 
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LogManager.getLogger(ThreadPoolTest.class);
 
 	private Calendar calendar;
 	private Date initDate;// 定时器首次执行时间
@@ -49,6 +49,9 @@ public class ThreadPoolTest {
 		// for (int i = 0; i < 10; i++) {
 		// System.out.println(randomTime());
 		// }
+
+		// System.out.println(timeMillsToHMS(2 * 60 * 60 * 1000 - 51 * 60 * 1000 +
+		// 10000));
 	}
 
 	public void multiSyncTask() {
@@ -79,8 +82,7 @@ public class ThreadPoolTest {
 
 					threadPool.schedule(this, delay, TimeUnit.MILLISECONDS);
 				} catch (Exception e) {
-					e.printStackTrace();
-					threadPool.shutdown();
+					shutdowmAndPrintLog(threadPool, e);
 				}
 			}
 		};
@@ -114,7 +116,7 @@ public class ThreadPoolTest {
 		}
 
 		logger.info("预定下次执行时间: " + dateFormat.format(addTime(nowTime, delay)));
-		logger.info("距离下次执行还有: " + delay / (1000 * 60) + "分" + (delay % (1000 * 60)) / 1000 + "秒");
+		logger.info("距离下次执行还有: " + timeMillsToHMS(delay));
 
 		return delay;
 	}
@@ -149,7 +151,44 @@ public class ThreadPoolTest {
 	}
 
 	public static long randomTime() {
-		return (new Random().nextInt(1200) + 240) * 1000;
+		int randomSecond = new Random().nextInt(60) + 20;
+		// if (randomSecond > 60) {
+		// throw new RuntimeException();
+		// }
+		return randomSecond * 1000;
 	}
 
+	/**
+	 * 将毫秒数转化为相应的时分秒格式：hh小时mm分钟ss秒
+	 * 
+	 * @param delay
+	 * @return
+	 */
+	public static String timeMillsToHMS(long delay) {
+		long oneSecondMills = 1000;
+		long oneMinuteMills = 60 * oneSecondMills;
+		long oneHourMills = 60 * oneMinuteMills;
+
+		long hour = delay / oneHourMills;
+		long minute = (delay - hour * oneHourMills) / oneMinuteMills;
+		long second = (delay - hour * oneHourMills - minute * oneMinuteMills) / oneSecondMills;
+
+		StringBuffer hmsStr = new StringBuffer();
+		if (hour > 0) {
+			hmsStr.append(hour).append("小时");
+		}
+		if (minute > 0) {
+			hmsStr.append(minute).append("分钟");
+		}
+		if (second > 0) {
+			hmsStr.append(second).append("秒");
+		}
+
+		return hmsStr.toString();
+	}
+
+	private void shutdowmAndPrintLog(ScheduledExecutorService threadPool, Exception e) {
+		threadPool.shutdown();
+		e.printStackTrace();
+	}
 }
