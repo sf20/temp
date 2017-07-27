@@ -51,12 +51,16 @@ public class SyncTimer {
 	}
 
 	public static void main(String[] args) {
-		logger.info("定时器已启动...");
+		System.out.println("程序初始化中请稍候...");
 		new SyncTimer().multiSyncTask();
 	}
 
 	private void multiSyncTask() {
 		final ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+		final OpSyncService opSyncService = new OpSyncService();
+
+		System.out.println("初始化完成::定时器已启动");
+		logger.info("定时器已启动...");
 
 		TimerTask task1 = new TimerTask() {
 			@Override
@@ -66,7 +70,7 @@ public class SyncTimer {
 					Date nextTime = getNextTime();
 
 					logger.info("定时同步[OpSyncService]开始...");
-					new OpSyncService().sync();
+					opSyncService.sync();
 					logger.info("定时同步[OpSyncService]结束");
 
 					// 实际任务结束时间

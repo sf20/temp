@@ -15,7 +15,7 @@ public class JdbcUtil {
 	static {
 		try {
 			Properties prop = new Properties();
-			InputStream in = JdbcUtil.class.getClassLoader().getResourceAsStream("dbcpConfig.properties");
+			InputStream in = JdbcUtil.class.getClassLoader().getResourceAsStream("jdbc.properties");
 			prop.load(in);
 			ds = BasicDataSourceFactory.createDataSource(prop);
 		} catch (Exception e) {
