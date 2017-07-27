@@ -1,5 +1,6 @@
 package openDemo.common;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -14,14 +15,10 @@ public class HttpResultUtil {
 	 * @param params
 	 * @param url
 	 * @return
+	 * @throws IOException 
 	 */
-	public static String getResult(Map<String, Object> params, String url){
-		String result = null;
-		try {
-			result = HttpRequestUtil.sendPost(url, params);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public static String getResult(Map<String, Object> params, String url) throws IOException{
+		String result = HttpRequestUtil.sendPost(url, params);
 		return result;
 	}
 	

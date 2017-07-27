@@ -1,5 +1,6 @@
 package openDemo.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -23,8 +24,9 @@ public class RoleService {
 	 * @param isBaseInfo 只同步组基本信息
 	 * @param groupInfos 组列表
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity roles(boolean isBaseInfo,List<GroupInfoEntity> groupInfos){
+	public ResultEntity roles(boolean isBaseInfo,List<GroupInfoEntity> groupInfos) throws IOException{
 		JsonConfig jsonConfig = JsonUtil.jsonConfig(GroupInfoEntity.class);
 		JSONArray array = JSONArray.fromObject(groupInfos, jsonConfig);
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
@@ -39,8 +41,9 @@ public class RoleService {
 	 * 同步删除组
 	 * @param roleThirdSystemIDs 组编号列表JSON格式例如：["role_kaifa",  "role_ceshi"];
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity deletedroles(List<String> roleThirdSystemIDs){
+	public ResultEntity deletedroles(List<String> roleThirdSystemIDs) throws IOException{
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
 		JSONArray roleThirdSystemIDArray = JSONArray.fromObject(roleThirdSystemIDs);
 		params.put("roleThirdSystemID", roleThirdSystemIDArray.toString());
@@ -53,8 +56,9 @@ public class RoleService {
 	 * 同步用户移除组
 	 * @param userNames 用户名列表JSON格式，例如：["sum11", "sum10"];
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity removeusersfromrole(List<String> userNames){
+	public ResultEntity removeusersfromrole(List<String> userNames) throws IOException{
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
 		JSONArray userNamesArray = JSONArray.fromObject(userNames);
 		params.put("userNames", userNamesArray.toString());

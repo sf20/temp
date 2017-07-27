@@ -1,5 +1,6 @@
 package openDemo.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -25,8 +26,9 @@ public class PositionService {
 	 * @param positionInfos
 	 *            岗位列表
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity syncPos(List<PositionEntity> positionInfos) {
+	public ResultEntity syncPos(List<PositionEntity> positionInfos) throws IOException {
 		JsonConfig jsonConfig = JsonUtil.jsonConfig(PositionEntity.class);
 		JSONArray array = JSONArray.fromObject(positionInfos, jsonConfig);
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
@@ -42,8 +44,9 @@ public class PositionService {
 	 * @param positionInfos
 	 *            岗位列表
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity syncPosGetPNo(List<PositionEntity> positionInfos) {
+	public ResultEntity syncPosGetPNo(List<PositionEntity> positionInfos) throws IOException {
 		JsonConfig jsonConfig = JsonUtil.jsonConfig(PositionEntity.class);
 		JSONArray array = JSONArray.fromObject(positionInfos, jsonConfig);
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
@@ -61,8 +64,9 @@ public class PositionService {
 	 * @param positionName
 	 *            岗位名称(修改后)
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity changePosName(String positionNo, String positionName) {
+	public ResultEntity changePosName(String positionNo, String positionName) throws IOException {
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
 		params.put("positionNo", positionNo);
 		params.put("positionName", positionName);

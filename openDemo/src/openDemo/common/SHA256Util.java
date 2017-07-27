@@ -10,6 +10,7 @@ public class SHA256Util {
         try { 
             md = MessageDigest.getInstance(ALGORITHM); 
         } catch (NoSuchAlgorithmException e) { 
+        	// TODO
             e.printStackTrace(); 
         } 
         if (null != md) { 

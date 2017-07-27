@@ -1,5 +1,6 @@
 package openDemo.service;
 
+import java.io.IOException;
 import java.util.Map;
 
 import openDemo.common.Config;
@@ -17,8 +18,9 @@ public class SsoService {
 	 * 单点登录
 	 * @param uname 登录企业大学时输入的用户名
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity sso(String uname){
+	public ResultEntity sso(String uname) throws IOException{
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
 		params.put("uname", uname);
 		String url = Config.baseUrl + "el/sso";

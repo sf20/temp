@@ -1,5 +1,6 @@
 package openDemo.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -24,8 +25,9 @@ public class UserService {
 	 * @param islink 是否同步用户基本信息
 	 * @param users 用户信息以JSON格式
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity userSync(boolean islink, List<UserInfoEntity> users){
+	public ResultEntity userSync(boolean islink, List<UserInfoEntity> users) throws IOException{
 		JsonConfig jsonConfig = JsonUtil.jsonConfig(UserInfoEntity.class);
 		JSONArray array = JSONArray.fromObject(users, jsonConfig);
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
@@ -40,8 +42,9 @@ public class UserService {
 	 * 同步禁用用户
 	 * @param userNames 用户名列表JSON格式，例如：["sum11", "sum10"];
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity disabledusersSync(List<String> userNames){
+	public ResultEntity disabledusersSync(List<String> userNames) throws IOException{
 		String url = Config.baseUrl + "el/sync/disabledusers";
 		ResultEntity result = userOp(userNames, url);
 		return result;
@@ -51,8 +54,9 @@ public class UserService {
 	 * 同步启用用户
 	 * @param userNames 用户名列表JSON格式，例如：["sum11", "sum10"];
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity enabledusersSync(List<String> userNames){
+	public ResultEntity enabledusersSync(List<String> userNames) throws IOException{
 		String url = Config.baseUrl + "el/sync/enabledusers";
 		ResultEntity result = userOp(userNames, url);
 		return result;
@@ -62,8 +66,9 @@ public class UserService {
 	 * 同步删除用户
 	 * @param userNames 用户名列表JSON格式，例如：["sum11", "sum10"];
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity deletedusersSync(List<String> userNames){
+	public ResultEntity deletedusersSync(List<String> userNames) throws IOException{
 		String url = Config.baseUrl + "el/sync/deletedusers";
 		ResultEntity result = userOp(userNames, url);
 		return result;
@@ -74,8 +79,9 @@ public class UserService {
 	 * @param userNames 用户名列表JSON格式，例如：["sum11", "sum10"];
 	 * @param url
 	 * @return
+	 * @throws IOException 
 	 */
-	private ResultEntity userOp(List<String> userNames, String url){
+	private ResultEntity userOp(List<String> userNames, String url) throws IOException{
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
 		JSONArray userNameArray = JSONArray.fromObject(userNames);
 		params.put("userNames", userNameArray.toString());

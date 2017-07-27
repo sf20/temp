@@ -1,5 +1,6 @@
 package openDemo.service;
 
+import java.io.IOException;
 import java.util.Map;
 
 import openDemo.common.Config;
@@ -19,8 +20,9 @@ public class RegisterService {
 	 * @param domainName 机构域名 (ex:coke,不需要.com等)
 	 * @param mobile 手机号码
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity syncregisterenterprise(String orgName, String domainName, String mobile){
+	public ResultEntity syncregisterenterprise(String orgName, String domainName, String mobile) throws IOException{
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
 		params.put("orgName", orgName);
 		params.put("domainName", domainName);

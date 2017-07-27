@@ -260,8 +260,9 @@ public class OpSyncService {
 	 * 
 	 * @param posToSync
 	 * @throws SQLException
+	 * @throws IOException 
 	 */
-	private void syncAddPosOneByOne(List<PositionEntity> posToSync) throws SQLException {
+	private void syncAddPosOneByOne(List<PositionEntity> posToSync) throws SQLException, IOException {
 		List<PositionEntity> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (PositionEntity pos : posToSync) {
@@ -445,8 +446,9 @@ public class OpSyncService {
 	 * 
 	 * @param orgsToSyncDelete
 	 * @throws SQLException
+	 * @throws IOException 
 	 */
-	private void syncDeleteOrgOneByOne(List<OuInfoEntity> orgsToSyncDelete) throws SQLException {
+	private void syncDeleteOrgOneByOne(List<OuInfoEntity> orgsToSyncDelete) throws SQLException, IOException {
 		List<String> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (OuInfoEntity org : orgsToSyncDelete) {
@@ -471,8 +473,9 @@ public class OpSyncService {
 	 * @param orgsToSyncUpdate
 	 * @param isBaseInfo
 	 * @throws SQLException
+	 * @throws IOException 
 	 */
-	private void syncUpdateOrgOneByOne(List<OuInfoEntity> orgsToSyncUpdate, boolean isBaseInfo) throws SQLException {
+	private void syncUpdateOrgOneByOne(List<OuInfoEntity> orgsToSyncUpdate, boolean isBaseInfo) throws SQLException, IOException {
 		List<OuInfoEntity> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (OuInfoEntity org : orgsToSyncUpdate) {
@@ -495,8 +498,9 @@ public class OpSyncService {
 	 * @param orgsToSyncAdd
 	 * @param isBaseInfo
 	 * @throws SQLException
+	 * @throws IOException 
 	 */
-	private void syncAddOrgOneByOne(List<OuInfoEntity> orgsToSyncAdd, boolean isBaseInfo) throws SQLException {
+	private void syncAddOrgOneByOne(List<OuInfoEntity> orgsToSyncAdd, boolean isBaseInfo) throws SQLException, IOException {
 		List<OuInfoEntity> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (OuInfoEntity org : orgsToSyncAdd) {
@@ -737,8 +741,9 @@ public class OpSyncService {
 	 * @param usersToSyncAdd
 	 * @param islink
 	 * @throws SQLException
+	 * @throws IOException 
 	 */
-	private void syncAddUserOneByOne(List<UserInfoEntity> usersToSyncAdd, boolean islink) throws SQLException {
+	private void syncAddUserOneByOne(List<UserInfoEntity> usersToSyncAdd, boolean islink) throws SQLException, IOException {
 		List<UserInfoEntity> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (UserInfoEntity user : usersToSyncAdd) {
@@ -761,8 +766,9 @@ public class OpSyncService {
 	 * @param usersToSyncUpdate
 	 * @param islink
 	 * @throws SQLException
+	 * @throws IOException 
 	 */
-	private void syncUpdateUserOneByOne(List<UserInfoEntity> usersToSyncUpdate, boolean islink) throws SQLException {
+	private void syncUpdateUserOneByOne(List<UserInfoEntity> usersToSyncUpdate, boolean islink) throws SQLException, IOException {
 		List<UserInfoEntity> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 
@@ -786,8 +792,9 @@ public class OpSyncService {
 	 * 
 	 * @param usersToEnable
 	 * @throws SQLException
+	 * @throws IOException 
 	 */
-	private void syncEnableOneByOne(List<UserInfoEntity> usersToEnable) throws SQLException {
+	private void syncEnableOneByOne(List<UserInfoEntity> usersToEnable) throws SQLException, IOException {
 		List<String> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 
@@ -810,8 +817,9 @@ public class OpSyncService {
 	 * 
 	 * @param usersToDisable
 	 * @throws SQLException
+	 * @throws IOException 
 	 */
-	private void syncDisableOneByOne(List<UserInfoEntity> usersToDisable) throws SQLException {
+	private void syncDisableOneByOne(List<UserInfoEntity> usersToDisable) throws SQLException, IOException {
 		List<String> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (UserInfoEntity user : usersToDisable) {

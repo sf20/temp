@@ -7,14 +7,13 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 public class HttpRequestUtil {
-	private static final Logger logger = LogManager.getLogger(HttpRequestUtil.class);
+	public static final String CHARSET_UTF8 = "UTF-8";
+	
 	/**
      * 向指定URL发送GET方法的请求
      * 
@@ -23,10 +22,9 @@ public class HttpRequestUtil {
      * @param param
      *            请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
      * @return URL 所代表远程资源的响应结果
-	 * @throws Exception 
-	 * @throws XueWenServiceException 
+	 * @throws IOException 
      */
-    public static String sendGet(String url, String param) throws Exception {
+    public static String sendGet(String url, String param) throws IOException{
         String result = "";
         BufferedReader in = null;
         try {
@@ -42,20 +40,14 @@ public class HttpRequestUtil {
             connection.connect();
             // 定义 BufferedReader输入流来读取URL的响应
             in = new BufferedReader(new InputStreamReader(
-                    connection.getInputStream()));
+                    connection.getInputStream(), Charset.forName(CHARSET_UTF8)));
             String line;
             while ((line = in.readLine()) != null) {
                 result += line;
             }
-        } catch (Exception e) {
-        	throw new Exception("发送 GET 请求连接出现异常！");
         } finally {
-            try {
-            	if (in != null) {
-                    in.close();
-                }
-            } catch (Exception e2) {
-            	throw new Exception("get方法:关闭连接异常");
+        	if (in != null) {
+                in.close();
             }
         }
         return result;
@@ -69,9 +61,9 @@ public class HttpRequestUtil {
      * @param param
      *            请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
      * @return 所代表远程资源的响应结果
-	 * @throws XueWenServiceException 
+	 * @throws IOException 
      */
-    public static String sendPost(String url, String param) throws Exception {
+    public static String sendPost(String url, String param) throws IOException {
         PrintWriter out = null;
         BufferedReader in = null;
         String result = "";
@@ -93,33 +85,26 @@ public class HttpRequestUtil {
             // flush输出流的缓冲
             out.flush();
             // 定义BufferedReader输入流来读取URL的响应
-            in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            in = new BufferedReader(new InputStreamReader(conn.getInputStream(), Charset.forName(CHARSET_UTF8)));
             String line;
             while ((line = in.readLine()) != null) {
                 result += line;
             }
-        } catch (Exception e) {
-        	logger.error("发送 POST 请求出现异常！" + e);
-        	throw new Exception("发送 POST 请求连接出现异常！");
-        } finally{
-            try{
-                if(out!=null){
-                    out.close();
-                }
-                if(in!=null){
-                    in.close();
-                }
-            } catch(IOException ex){
-            	throw new Exception("post方法:关闭连接异常");
+        }finally{
+            if(out!=null){
+                out.close();
+            }
+            if(in!=null){
+                in.close();
             }
         }
         return result;
     }    
     
-    public static String sendPost(String url,Map<String, Object> params) throws Exception{
+    public static String sendPost(String url,Map<String, Object> params) throws IOException{
 		StringBuffer buffer = new StringBuffer(128);
 		for (Entry<String, Object> entry : params.entrySet()) {
-			buffer.append("&"+entry.getKey()+"="+URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8"));
+			buffer.append("&"+entry.getKey()+"="+URLEncoder.encode(String.valueOf(entry.getValue()), CHARSET_UTF8));
 		}
 		return sendPost(url, buffer.toString());
 	}

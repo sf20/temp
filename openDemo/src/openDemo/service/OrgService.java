@@ -1,5 +1,6 @@
 package openDemo.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -23,8 +24,9 @@ public class OrgService {
 	 * @param isBaseInfo 只同步组织单位基本信息。
 	 * @param ouInfos 组织单位列表
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity ous(boolean isBaseInfo,List<OuInfoEntity> ouInfos){
+	public ResultEntity ous(boolean isBaseInfo,List<OuInfoEntity> ouInfos) throws IOException{
 		JsonConfig jsonConfig = JsonUtil.jsonConfig(OuInfoEntity.class);
 		JSONArray array = JSONArray.fromObject(ouInfos, jsonConfig);
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
@@ -40,8 +42,9 @@ public class OrgService {
 	 * @param isBaseInfo
 	 * @param ouInfos
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity deleteous(List<String> ouCodeOrThirdSystemIDs){
+	public ResultEntity deleteous(List<String> ouCodeOrThirdSystemIDs) throws IOException{
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
 		JSONArray ouCodeOrThirdSystemIDArray = JSONArray.fromObject(ouCodeOrThirdSystemIDs);
 		params.put("OuCodeOrThirdSystemID", ouCodeOrThirdSystemIDArray.toString());
@@ -54,8 +57,9 @@ public class OrgService {
 	 * 同步用户移除组织单位
 	 * @param userNames 用户名列表JSON格式例如：["sum11", "sum10"];
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity removeusersfromou(List<String> userNames){
+	public ResultEntity removeusersfromou(List<String> userNames) throws IOException{
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
 		JSONArray userNamesArray = JSONArray.fromObject(userNames);
 		params.put("userNames", userNamesArray.toString());
@@ -69,8 +73,9 @@ public class OrgService {
 	 * @param userNames 用户名列表JSON格式例如：["sum11", "sum10"];
 	 * @param newOuID 第三方ID或部门编号
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity batchchangeorgou(List<String> userNames, String newOuID){
+	public ResultEntity batchchangeorgou(List<String> userNames, String newOuID) throws IOException{
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
 		JSONArray userNamesArray = JSONArray.fromObject(userNames);
 		params.put("userNames", userNamesArray.toString());
@@ -86,8 +91,9 @@ public class OrgService {
 	 * @param ouname
 	 *            第三方ID或部门编号
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity getOucodeByName(String ouname) {
+	public ResultEntity getOucodeByName(String ouname) throws IOException {
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
 		params.put("ouname", ouname);
 		String url = Config.baseUrl + "el/sync/getoucodebyouname";
