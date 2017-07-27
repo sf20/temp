@@ -17,7 +17,6 @@ import java.util.UUID;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.HttpClientUtils;
@@ -288,35 +287,30 @@ public class OpSyncService {
 	 * @param mode
 	 *            可在1（全量）和2（增量）中二选一。EMP拥有1和2两种模式。Org只有1，全量模式。
 	 * @return 响应的json字符串
+	 * @throws IOException
 	 */
-	public String getJsonPost(String serviceOperation, String mode) {
+	public String getJsonPost(String serviceOperation, String mode) throws IOException {
 		HttpClient httpClient = HttpClientBuilder.create().build();
 
 		HttpPost httpPost = new HttpPost(REQUEST_URL);
-
-		// 请求header中增加Auth部分
-		httpPost.addHeader("Authorization", getBasicAuthHeader(USERNAME, PASSWORD));
-
-		// 构建消息实体 发送Json格式的数据
-		StringEntity entity = new StringEntity(buildReqJson(serviceOperation, mode), ContentType.APPLICATION_JSON);
-		entity.setContentEncoding(CHARSET_UTF8);
-		httpPost.setEntity(entity);
-
 		HttpResponse httpResponse = null;
 		String responseStr = null;
 		try {
+			// 请求header中增加Auth部分
+			httpPost.addHeader("Authorization", getBasicAuthHeader(USERNAME, PASSWORD));
+
+			// 构建消息实体 发送Json格式的数据
+			StringEntity entity = new StringEntity(buildReqJson(serviceOperation, mode), ContentType.APPLICATION_JSON);
+			entity.setContentEncoding(CHARSET_UTF8);
+			httpPost.setEntity(entity);
+
 			// 发送post请求
-			httpResponse = httpClient.execute(httpPost);
+			httpResponse = httpClient.execute(httpPost);// TODO ClientProtocolException
 
 			if (httpResponse.getStatusLine().getStatusCode() == 200) {
 				responseStr = EntityUtils.toString(httpResponse.getEntity(), CHARSET_UTF8);
 			}
 
-		} catch (ClientProtocolException e) {
-			// TODO
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		} finally {
 			if (httpClient != null) {
 				HttpClientUtils.closeQuietly(httpClient);
@@ -326,7 +320,8 @@ public class OpSyncService {
 				HttpClientUtils.closeQuietly(httpResponse);
 			}
 		}
-
+		// TODO to delete
+		logger.info("=====" + responseStr);
 		return responseStr;
 	}
 
@@ -336,17 +331,12 @@ public class OpSyncService {
 	 * @param username
 	 * @param password
 	 * @return Auth请求头内容
+	 * @throws UnsupportedEncodingException
 	 */
-	private String getBasicAuthHeader(String username, String password) {
+	private String getBasicAuthHeader(String username, String password) throws UnsupportedEncodingException {
 		String auth = username + ":" + password;
-		byte[] encodedAuth = null;
-		String authHeader = null;
-		try {
-			encodedAuth = Base64.encodeBase64(auth.getBytes(CHARSET_UTF8));
-			authHeader = "Basic " + new String(encodedAuth, CHARSET_UTF8);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+		byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(CHARSET_UTF8));
+		String authHeader = "Basic " + new String(encodedAuth, CHARSET_UTF8);
 
 		return authHeader;
 	}
@@ -359,8 +349,9 @@ public class OpSyncService {
 	 * @param mode
 	 *            可在1（全量）和2（增量）中二选一。EMP拥有1和2两种模式。Org只有1，全量模式。
 	 * @return
+	 * @throws JsonProcessingException
 	 */
-	private String buildReqJson(String serviceOperation, String mode) {
+	private String buildReqJson(String serviceOperation, String mode) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> map = new HashMap<>();
 
@@ -375,13 +366,7 @@ public class OpSyncService {
 		reqDataMap.put(MODE, mode);
 		map.put(ESBREQDATA, reqDataMap);
 
-		String str = "";
-		try {
-			str = mapper.writeValueAsString(map);
-		} catch (JsonProcessingException e) {
-			// TODO
-			e.printStackTrace();
-		}
+		String str = mapper.writeValueAsString(map);
 
 		return str;
 	}
@@ -999,7 +984,7 @@ public class OpSyncService {
 	 */
 	private void printLog(String type, String id, ResultEntity resultEntity) {
 		// TODO
-		logger.error(type + "ID:" + id + " ErrMsg:" + resultEntity.getCode() + "-" + resultEntity.getMessage());
+		logger.warn(type + "ID:" + id + " ErrMsg:" + resultEntity.getCode() + "-" + resultEntity.getMessage());
 	}
 
 }
