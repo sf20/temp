@@ -5,9 +5,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,7 +14,6 @@ import openDemo.entity.sync.OpReqJsonModle;
 import openDemo.service.sync.OpSyncService;
 
 public class OpSyncServiceTest {
-	private static final Logger logger = LogManager.getLogger(OpSyncServiceTest.class);
 
 	public static void main(String[] args) throws IOException, ReflectiveOperationException, SQLException {
 		Date startDate = new Date();

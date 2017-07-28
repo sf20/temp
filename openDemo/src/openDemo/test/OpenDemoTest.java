@@ -31,7 +31,7 @@ public class OpenDemoTest {
 		// ssoTest();
 
 		// 2.同步用户: el/sync/users
-		// userSyncTest();
+		userSyncTest();
 
 		// //3.同步禁用用户: el/sync/disabledusers
 		// disabledusersTest();
@@ -43,7 +43,7 @@ public class OpenDemoTest {
 		// deletedusersTest();
 		//
 		// 6.同步组织单位: el/sync/ous
-		ousTest();
+		// ousTest();
 
 		// //7.同步删除组织单位: el/sync/deleteous 返回信息msg在data中
 		// deleteousTest();
@@ -64,7 +64,7 @@ public class OpenDemoTest {
 		// removeusersfromroleTest();
 	}
 
-	private void posTest() throws IOException {
+	void posTest() throws IOException {
 		PositionService posService = new PositionService();
 		List<PositionEntity> positionInfos = new ArrayList<>();
 		PositionEntity p = new PositionEntity();
@@ -76,14 +76,14 @@ public class OpenDemoTest {
 	}
 
 	// 单点登录:el/sso
-	private void ssoTest() throws IOException {
+	void ssoTest() throws IOException {
 		SsoService ssoService = new SsoService();
 		ResultEntity resultEntity = ssoService.sso("testId");
 		print("单点登录", resultEntity);
 	}
 
 	// 同步用户: el/sync/users
-	private void userSyncTest() throws IOException {
+	void userSyncTest() throws IOException {
 		UserService userService = new UserService();
 		List<UserInfoEntity> users = new ArrayList<UserInfoEntity>();
 		UserInfoEntity userEntity = new UserInfoEntity();
@@ -98,7 +98,7 @@ public class OpenDemoTest {
 	}
 
 	// 同步禁用用户: el/sync/disabledusers
-	private void disabledusersTest() throws IOException {
+	void disabledusersTest() throws IOException {
 		UserService userService = new UserService();
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("lily11");
@@ -107,7 +107,7 @@ public class OpenDemoTest {
 	}
 
 	// 同步启用用户: el/sync/enabledusers
-	private void enabledusersTest() throws IOException {
+	void enabledusersTest() throws IOException {
 		UserService userService = new UserService();
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("lily11");
@@ -116,7 +116,7 @@ public class OpenDemoTest {
 	}
 
 	// 同步删除用户: el/sync/deletedusers
-	private void deletedusersTest() throws IOException {
+	void deletedusersTest() throws IOException {
 		UserService userService = new UserService();
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("lily11");
@@ -125,7 +125,7 @@ public class OpenDemoTest {
 	}
 
 	// 同步组织单位: el/sync/ous
-	private void ousTest() throws IOException {
+	void ousTest() throws IOException {
 		OrgService orgService = new OrgService();
 
 		List<OuInfoEntity> ouInfos = new ArrayList<OuInfoEntity>();
@@ -137,16 +137,16 @@ public class OpenDemoTest {
 		ouInfos.add(ouInfoEntity);
 		ResultEntity resultEntity = null;
 		try {
-			resultEntity = orgService.getOucodeByName(URLEncoder.encode("a&b","utf-8"));
+			resultEntity = orgService.getOucodeByName(URLEncoder.encode("a&b", "utf-8"));
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}//ous(false, ouInfos);// 
+		} // ous(false, ouInfos);//
 		print("同步组织单位", resultEntity);
 	}
 
 	// 同步删除组织单位: el/sync/deleteous
-	private void deleteousTest() throws IOException {
+	void deleteousTest() throws IOException {
 		OrgService orgService = new OrgService();
 		List<String> ouCodeOrThirdSystemIDs = new ArrayList<String>();
 		ouCodeOrThirdSystemIDs.add("java01");
@@ -155,7 +155,7 @@ public class OpenDemoTest {
 	}
 
 	// 同步用户移除组织单位: el/sync/removeusersfromou
-	private void removeusersfromouTest() throws IOException {
+	void removeusersfromouTest() throws IOException {
 		OrgService orgService = new OrgService();
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("lily12");
@@ -164,7 +164,7 @@ public class OpenDemoTest {
 	}
 
 	// 同步用户更改组织单位: el/sync/batchchangeorgou
-	private void batchchangeorgouTest() throws IOException {
+	void batchchangeorgouTest() throws IOException {
 		OrgService orgService = new OrgService();
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("lily12");
@@ -174,7 +174,7 @@ public class OpenDemoTest {
 	}
 
 	// 同步(角色)组: el/sync/roles
-	private void rolesTest() throws IOException {
+	void rolesTest() throws IOException {
 		RoleService roleService = new RoleService();
 		List<GroupInfoEntity> groupInfos = new ArrayList<GroupInfoEntity>();
 		GroupInfoEntity groupInfoEntity = new GroupInfoEntity();
@@ -191,7 +191,7 @@ public class OpenDemoTest {
 	}
 
 	// 同步删除(角色)组: el/sync/deletedroles
-	private void deletedrolesTest() throws IOException {
+	void deletedrolesTest() throws IOException {
 		RoleService roleService = new RoleService();
 		List<String> roleThirdSystemIDs = new ArrayList<String>();
 		roleThirdSystemIDs.add("1234");
@@ -201,7 +201,7 @@ public class OpenDemoTest {
 	}
 
 	// 同步用户移除(角色)组: el/sync/removeusersfromrole
-	private void removeusersfromroleTest() throws IOException {
+	void removeusersfromroleTest() throws IOException {
 		RoleService roleService = new RoleService();
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("yaoj");
@@ -210,7 +210,7 @@ public class OpenDemoTest {
 		print("同步用户移除(角色)组", resultEntity);
 	}
 
-	private void print(String name, ResultEntity resultEntity) {
+	void print(String name, ResultEntity resultEntity) {
 		System.out.println(name + ":" + resultEntity.getCode() + "==" + resultEntity.getData() + "=="
 				+ resultEntity.getMessage() + "==" + resultEntity.getTotalCount());
 	}
