@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,9 +33,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import openDemo.dao.OuInfoDao;
-import openDemo.dao.PositionDao;
-import openDemo.dao.UserInfoDao;
 import openDemo.entity.OuInfoEntity;
 import openDemo.entity.PositionEntity;
 import openDemo.entity.ResultEntity;
@@ -94,9 +92,10 @@ public class OpSyncService {
 	private PositionService positionService = new PositionService();
 	private OrgService orgService = new OrgService();
 	private UserService userService = new UserService();
-	private PositionDao positionDao = new PositionDao();
-	private OuInfoDao ouInfoDao = new OuInfoDao();
-	private UserInfoDao userInfoDao = new UserInfoDao();
+	// 用于存放请求获取到的数据的集合
+	private List<PositionEntity> positionList = new LinkedList<>();
+	private List<OuInfoEntity> ouInfoList = new LinkedList<>();
+	private List<UserInfoEntity> userInfoList = new LinkedList<>();
 	private ObjectMapper mapper;
 
 	private static final Logger logger = LogManager.getLogger(OpSyncService.class);
@@ -108,6 +107,35 @@ public class OpSyncService {
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		// json字符串的日期格式
 		mapper.setDateFormat(JSON_DATE_FORMAT);
+
+		initSync();
+	}
+
+	/**
+	 * 初始化同步
+	 */
+	private void initSync() {
+		try {
+			// 岗位全量同步
+			logger.info("[岗位全量]同步开始...");
+			opPosSync(SERVICEOPERATION_EMP, MODE_FULL);
+			logger.info("[岗位全量]同步结束");
+			// 组织全量同步
+			logger.info("[组织全量]同步开始...");
+			opOrgSync(SERVICEOPERATION_ORG, MODE_FULL, false);
+			logger.info("[组织全量]同步结束");
+			// 用户全量同步
+			logger.info("[用户全量]同步开始...");
+			opUserSync(SERVICEOPERATION_EMP, MODE_FULL, true);
+			logger.info("[用户全量]同步结束");
+		} catch (IOException e) {
+			logger.error("初始化同步出现异常", e);
+		} catch (ReflectiveOperationException e) {
+			logger.error("初始化同步出现异常", e);
+		} catch (SQLException e) {
+			logger.error("初始化同步出现异常", e);
+		}
+
 	}
 
 	/**
@@ -118,7 +146,7 @@ public class OpSyncService {
 	 * @throws SQLException
 	 */
 	public void sync() throws IOException, ReflectiveOperationException, SQLException {
-		int posCount = positionDao.getAllCount();
+		int posCount = positionList.size();
 		if (posCount > 0) {
 			// 岗位增量同步
 			logger.info("[岗位增量]同步开始...");
@@ -131,7 +159,7 @@ public class OpSyncService {
 			logger.info("[岗位全量]同步结束");
 		}
 
-		int orgCount = ouInfoDao.getAllCount();
+		int orgCount = ouInfoList.size();
 		if (orgCount > 0) {
 			// 组织增量同步
 			logger.info("[组织增量]同步开始...");
@@ -144,7 +172,7 @@ public class OpSyncService {
 			logger.info("[组织全量]同步结束");
 		}
 
-		int userCount = userInfoDao.getAllCount();
+		int userCount = userInfoList.size();
 		if (userCount > 0) {
 			// 用户增量同步
 			logger.info("[用户增量]同步开始...");
@@ -180,9 +208,7 @@ public class OpSyncService {
 		}
 		// 增量模式
 		else {
-			// 获取数据库全量list
-			List<PositionEntity> allList = positionDao.getAll();
-			Map<String, List<PositionEntity>> map = comparePosList(allList, newList);
+			Map<String, List<PositionEntity>> map = comparePosList(positionList, newList);
 
 			syncAddPosOneByOne(map.get(MAPKEY_POS_SYNC_ADD));
 		}
@@ -281,7 +307,7 @@ public class OpSyncService {
 			resultEntity = positionService.syncPos(tempList);
 
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				positionDao.insert(pos);
+				positionList.add(pos);
 			} else {
 				printLog("岗位同步新增失败", pos.getpNames(), resultEntity);
 			}
@@ -415,10 +441,7 @@ public class OpSyncService {
 		}
 		// 增量模式
 		else {
-			// 获取数据库全量list
-			List<OuInfoEntity> allList = ouInfoDao.getAll();
-
-			Map<String, List<OuInfoEntity>> map = compareOrgList(allList, newList);
+			Map<String, List<OuInfoEntity>> map = compareOrgList(ouInfoList, newList);
 			List<OuInfoEntity> orgsToSyncAdd = map.get(MAPKEY_ORG_SYNC_ADD);
 			if (orgsToSyncAdd.size() > 0) {
 				syncAddOrgOneByOne(orgsToSyncAdd, isBaseInfo);
@@ -462,12 +485,10 @@ public class OpSyncService {
 		List<String> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (OuInfoEntity org : orgsToSyncDelete) {
-			String orgId = org.getID();
-			tempList.add(orgId);
-
 			resultEntity = orgService.deleteous(tempList);
+
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				ouInfoDao.deleteById(orgId);
+				ouInfoList.remove(org);
 			} else {
 				printLog("组织同步删除失败", org.getOuName(), resultEntity);
 			}
@@ -494,7 +515,8 @@ public class OpSyncService {
 
 			resultEntity = orgService.ous(isBaseInfo, tempList);
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				ouInfoDao.update(org);
+				ouInfoList.remove(org);
+				ouInfoList.add(org);
 			} else {
 				printLog("组织同步更新失败", org.getOuName(), resultEntity);
 			}
@@ -520,7 +542,7 @@ public class OpSyncService {
 
 			resultEntity = orgService.ous(isBaseInfo, tempList);
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				ouInfoDao.insert(org);
+				ouInfoList.add(org);
 			} else {
 				printLog("组织同步新增失败", org.getOuName(), resultEntity);
 			}
@@ -592,10 +614,8 @@ public class OpSyncService {
 		}
 		// 增量模式
 		else {
-			// 获取数据库全量list
-			List<UserInfoEntity> allList = userInfoDao.getAll();
 			// 与增量list进行比较
-			Map<String, List<UserInfoEntity>> map = compareUserList(allList, newList);
+			Map<String, List<UserInfoEntity>> map = compareUserList(userInfoList, newList);
 
 			List<UserInfoEntity> usersToSyncAdd = map.get(MAPKEY_USER_SYNC_ADD);
 			if (usersToSyncAdd.size() > 0) {
@@ -627,13 +647,12 @@ public class OpSyncService {
 	 * @throws SQLException
 	 */
 	private void setPositionNoToUser(List<UserInfoEntity> newList) throws SQLException {
-		List<PositionEntity> posList = positionDao.getAll();
 
 		for (UserInfoEntity user : newList) {
 			String pNameInUser = user.getPostionName();
 
 			if (pNameInUser != null) {
-				for (PositionEntity pos : posList) {
+				for (PositionEntity pos : positionList) {
 					// 根据岗位名进行查找
 					if (pNameInUser.equals(getPositionName(pos.getpNames()))) {
 						user.setPostionNo(pos.getpNo());
@@ -764,7 +783,7 @@ public class OpSyncService {
 
 			resultEntity = userService.userSync(islink, tempList);
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				userInfoDao.insert(user);
+				userInfoList.add(user);
 			} else {
 				printLog("用户同步新增失败", user.getID(), resultEntity);
 			}
@@ -791,7 +810,8 @@ public class OpSyncService {
 
 			resultEntity = userService.userSync(islink, tempList);
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				userInfoDao.update(user);
+				userInfoList.remove(user);
+				userInfoList.add(user);
 			} else {
 				printLog("用户同步更新失败", user.getID(), resultEntity);
 			}
@@ -817,7 +837,8 @@ public class OpSyncService {
 
 			resultEntity = userService.enabledusersSync(tempList);
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				userInfoDao.update(user);
+				userInfoList.remove(user);
+				userInfoList.add(user);
 			} else {
 				printLog("用户同步启用失败", user.getID(), resultEntity);
 			}
@@ -841,7 +862,8 @@ public class OpSyncService {
 
 			resultEntity = userService.disabledusersSync(tempList);
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				userInfoDao.update(user);
+				userInfoList.remove(user);
+				userInfoList.add(user);
 			} else {
 				printLog("用户同步禁用失败", user.getID(), resultEntity);
 			}
