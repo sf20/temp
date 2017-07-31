@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import openDemo.service.sync.OpSyncService;
+import openDemo.service.sync.OppleSyncService;
 
 /**
  * 同步定时器
@@ -57,7 +57,7 @@ public class SyncTimerService {
 
 	private void multiSyncTask() {
 		final ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
-		final OpSyncService opSyncService = new OpSyncService();
+		final OppleSyncService opSyncService = new OppleSyncService();
 
 		logger.info("初始化完成::定时器已启动");
 

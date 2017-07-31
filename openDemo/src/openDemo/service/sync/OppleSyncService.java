@@ -45,7 +45,7 @@ import openDemo.service.SyncOrgService;
 import openDemo.service.SyncPositionService;
 import openDemo.service.SyncUserService;
 
-public class OpSyncService implements OppleConfig {
+public class OppleSyncService implements OppleConfig {
 	// 用户接口请求参数名
 	private static final String REQUESTID = "RequestId";
 	private static final String SERVICENAME = "ServiceName";
@@ -99,9 +99,9 @@ public class OpSyncService implements OppleConfig {
 	private List<UserInfoModel> userInfoList = new LinkedList<>();
 	private ObjectMapper mapper;
 
-	private static final Logger logger = LogManager.getLogger(OpSyncService.class);
+	private static final Logger logger = LogManager.getLogger(OppleSyncService.class);
 
-	public OpSyncService() {
+	public OppleSyncService() {
 		// 创建用于json反序列化的对象
 		mapper = new ObjectMapper();
 		// 忽略json中多余的属性字段

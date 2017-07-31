@@ -11,15 +11,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import openDemo.entity.sync.OpOuInfoModel;
 import openDemo.entity.sync.OpReqJsonModle;
-import openDemo.service.sync.OpSyncService;
+import openDemo.service.sync.OppleSyncService;
 
-public class OpSyncServiceTest {
+public class OppleSyncServiceTest {
 
 	public static void main(String[] args) throws IOException, ReflectiveOperationException, SQLException {
 		Date startDate = new Date();
 		System.out.println("同步中......");
 
-		OpSyncService opSyncService = new OpSyncService();
+		OppleSyncService opSyncService = new OppleSyncService();
 		try {
 			opSyncService.sync();
 		} catch (Exception e) {
