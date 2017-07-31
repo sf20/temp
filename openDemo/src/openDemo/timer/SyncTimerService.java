@@ -21,7 +21,7 @@ import openDemo.service.sync.OpSyncService;
  * @author yanl
  *
  */
-public class SyncTimer {
+public class SyncTimerService {
 	// 定时器间隔执行时间 单位毫秒
 	private static final long PERIOD = 60 * 60 * 1000;
 	// 每次定时器执行时间参数
@@ -32,13 +32,13 @@ public class SyncTimer {
 	private static final int CORE_POOL_SIZE = 1;
 
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	private static final Logger logger = LogManager.getLogger(SyncTimer.class);
+	private static final Logger logger = LogManager.getLogger(SyncTimerService.class);
 
 	private Calendar calendar;
 	private Date initDate;// 定时器首次执行时间
 	private Date baseDate;// 定时器间隔执行计算基准日
 
-	public SyncTimer() {
+	public SyncTimerService() {
 		calendar = Calendar.getInstance();
 		// 设置定时器首次执行时间
 		calendar.set(Calendar.HOUR_OF_DAY, TIMER_EXEC_TIME_HOUR);
@@ -52,7 +52,7 @@ public class SyncTimer {
 
 	public static void main(String[] args) {
 		logger.info("程序初始化::首次同步中请稍候...");
-		new SyncTimer().multiSyncTask();
+		new SyncTimerService().multiSyncTask();
 	}
 
 	private void multiSyncTask() {
