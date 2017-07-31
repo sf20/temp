@@ -203,8 +203,8 @@ public class OpSyncService {
 		logger.info("岗位同步Total Size: " + newList.size());
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
-			syncAddPosOneByOne(newList);
 			logger.info("岗位同步新增Size: " + newList.size());
+			syncAddPosOneByOne(newList);
 		}
 		// 增量模式
 		else {
@@ -436,8 +436,8 @@ public class OpSyncService {
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
 			removeExpiredOrgs(newList);
-			syncAddOrgOneByOne(newList, isBaseInfo);
 			logger.info("组织同步新增Size: " + newList.size());
+			syncAddOrgOneByOne(newList, isBaseInfo);
 		}
 		// 增量模式
 		else {
@@ -603,13 +603,13 @@ public class OpSyncService {
 		logger.info("用户同步Total Size: " + newList.size());
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
-			syncAddUserOneByOne(newList, islink);
 			logger.info("用户同步新增Size: " + newList.size());
+			syncAddUserOneByOne(newList, islink);
 
 			List<UserInfoEntity> expiredUsers = getExpiredUsers(newList);
 			if (expiredUsers.size() > 0) {
-				syncDisableOneByOne(expiredUsers);
 				logger.info("用户同步禁用Size: " + expiredUsers.size());
+				syncDisableOneByOne(expiredUsers);
 			}
 		}
 		// 增量模式

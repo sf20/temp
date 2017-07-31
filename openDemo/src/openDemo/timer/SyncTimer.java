@@ -25,8 +25,8 @@ public class SyncTimer {
 	// 定时器间隔执行时间 单位毫秒
 	private static final long PERIOD = 60 * 60 * 1000;
 	// 每次定时器执行时间参数
-	private static final int TIMER_EXEC_TIME_HOUR = 11;
-	private static final int TIMER_EXEC_TIME_MINUTE = 20;
+	private static final int TIMER_EXEC_TIME_HOUR = 9;
+	private static final int TIMER_EXEC_TIME_MINUTE = 10;
 	private static final int TIMER_EXEC_TIME_SECOND = 00;
 	// 线程池数量
 	private static final int CORE_POOL_SIZE = 1;
@@ -51,7 +51,7 @@ public class SyncTimer {
 	}
 
 	public static void main(String[] args) {
-		System.out.println("程序初始化中请稍候...");
+		logger.info("程序初始化::首次同步中请稍候...");
 		new SyncTimer().multiSyncTask();
 	}
 
@@ -59,8 +59,7 @@ public class SyncTimer {
 		final ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 		final OpSyncService opSyncService = new OpSyncService();
 
-		System.out.println("初始化完成::定时器已启动");
-		logger.info("定时器已启动...");
+		logger.info("初始化完成::定时器已启动");
 
 		TimerTask task1 = new TimerTask() {
 			@Override
