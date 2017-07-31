@@ -40,9 +40,9 @@ import openDemo.entity.UserInfoModel;
 import openDemo.entity.sync.OpOuInfoModel;
 import openDemo.entity.sync.OpReqJsonModle;
 import openDemo.entity.sync.OpUserInfoModel;
-import openDemo.service.OrgService;
-import openDemo.service.PositionService;
-import openDemo.service.UserService;
+import openDemo.service.OrgSyncService;
+import openDemo.service.PositionSyncService;
+import openDemo.service.UserSyncService;
 
 public class OpSyncService {
 	// 用户接口请求参数名
@@ -89,9 +89,9 @@ public class OpSyncService {
 	private static SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 	private static SimpleDateFormat JAVA_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
-	private PositionService positionService = new PositionService();
-	private OrgService orgService = new OrgService();
-	private UserService userService = new UserService();
+	private PositionSyncService positionService = new PositionSyncService();
+	private OrgSyncService orgService = new OrgSyncService();
+	private UserSyncService userService = new UserSyncService();
 	// 用于存放请求获取到的数据的集合
 	private List<PositionModel> positionList = new LinkedList<>();
 	private List<OuInfoModel> ouInfoList = new LinkedList<>();

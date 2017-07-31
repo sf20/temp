@@ -18,7 +18,7 @@ import openDemo.entity.UserInfoModel;
  * @author yaoj
  *
  */
-public class UserService {
+public class UserSyncService {
 	
 	/**
 	 * 

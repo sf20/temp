@@ -18,7 +18,7 @@ import openDemo.entity.ResultEntity;
  * @author yanl
  *
  */
-public class PositionService {
+public class PositionSyncService {
 
 	/**
 	 * 同步岗位
