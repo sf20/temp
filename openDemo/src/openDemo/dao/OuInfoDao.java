@@ -1,8 +1,8 @@
 package openDemo.dao;
 
-import openDemo.entity.OpOuInfoEntity;
+import openDemo.entity.OuInfoModel;
 
-public class OuInfoDao extends GenericDaoImpl<OpOuInfoEntity> {
+public class OuInfoDao extends GenericDaoImpl<OuInfoModel> {
 
 	@Override
 	String getTableNamePrefix() {
@@ -35,14 +35,14 @@ public class OuInfoDao extends GenericDaoImpl<OpOuInfoEntity> {
 	}
 
 	@Override
-	Object[] getInsertObjectParamArray(OpOuInfoEntity org) {
+	Object[] getInsertObjectParamArray(OuInfoModel org) {
 		Object[] params = { org.getID(), org.getOuName(), org.getParentID(), org.getDescription(), org.getUsers(),
 				org.getIsSub(), org.getOrderIndex() };
 		return params;
 	}
 
 	@Override
-	Object[] getUpdateObjectParamArray(OpOuInfoEntity org) {
+	Object[] getUpdateObjectParamArray(OuInfoModel org) {
 		Object[] params = { org.getOuName(), org.getParentID(), org.getDescription(), org.getUsers(), org.getIsSub(),
 				org.getOrderIndex(), org.getID() };
 		return params;

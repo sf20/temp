@@ -9,7 +9,7 @@ import net.sf.json.JsonConfig;
 import openDemo.common.Config;
 import openDemo.common.HttpResultUtil;
 import openDemo.common.JsonUtil;
-import openDemo.entity.OpOuInfoEntity;
+import openDemo.entity.OuInfoModel;
 import openDemo.entity.ResultEntity;
 
 /**
@@ -26,8 +26,8 @@ public class OrgService {
 	 * @return
 	 * @throws IOException 
 	 */
-	public ResultEntity ous(boolean isBaseInfo,List<OpOuInfoEntity> ouInfos) throws IOException{
-		JsonConfig jsonConfig = JsonUtil.jsonConfig(OpOuInfoEntity.class);
+	public ResultEntity ous(boolean isBaseInfo,List<OuInfoModel> ouInfos) throws IOException{
+		JsonConfig jsonConfig = JsonUtil.jsonConfig(OuInfoModel.class);
 		JSONArray array = JSONArray.fromObject(ouInfos, jsonConfig);
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
 		params.put("isBaseInfo", isBaseInfo);

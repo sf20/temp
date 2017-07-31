@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import openDemo.entity.GroupInfoEntity;
-import openDemo.entity.OpOuInfoEntity;
-import openDemo.entity.OpPositionEntity;
+import openDemo.entity.OuInfoModel;
+import openDemo.entity.PositionModel;
 import openDemo.entity.ResultEntity;
-import openDemo.entity.OpUserInfoEntity;
+import openDemo.entity.UserInfoModel;
 import openDemo.service.OrgService;
 import openDemo.service.PositionService;
 import openDemo.service.RoleService;
@@ -66,8 +66,8 @@ public class OpenDemoTest {
 
 	void posTest() throws IOException {
 		PositionService posService = new PositionService();
-		List<OpPositionEntity> positionInfos = new ArrayList<>();
-		OpPositionEntity p = new OpPositionEntity();
+		List<PositionModel> positionInfos = new ArrayList<>();
+		PositionModel p = new PositionModel();
 		p.setpNames("未分类;岗位修改");
 		p.setpNo("201707241745489031");
 		positionInfos.add(p);
@@ -85,8 +85,8 @@ public class OpenDemoTest {
 	// 同步用户: el/sync/users
 	void userSyncTest() throws IOException {
 		UserService userService = new UserService();
-		List<OpUserInfoEntity> users = new ArrayList<OpUserInfoEntity>();
-		OpUserInfoEntity userEntity = new OpUserInfoEntity();
+		List<UserInfoModel> users = new ArrayList<UserInfoModel>();
+		UserInfoModel userEntity = new UserInfoModel();
 		// userEntity.setOrgOuCode("506799895");
 		userEntity.setID("testId");
 		userEntity.setUserName("testId");
@@ -128,8 +128,8 @@ public class OpenDemoTest {
 	void ousTest() throws IOException {
 		OrgService orgService = new OrgService();
 
-		List<OpOuInfoEntity> ouInfos = new ArrayList<OpOuInfoEntity>();
-		OpOuInfoEntity ouInfoEntity = new OpOuInfoEntity();
+		List<OuInfoModel> ouInfos = new ArrayList<OuInfoModel>();
+		OuInfoModel ouInfoEntity = new OuInfoModel();
 		ouInfoEntity.setID("10086");
 		ouInfoEntity.setOuName("a&b");
 		// ouInfoEntity.setParentID("1");

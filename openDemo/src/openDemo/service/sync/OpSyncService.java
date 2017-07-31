@@ -33,10 +33,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import openDemo.entity.OpOuInfoEntity;
-import openDemo.entity.OpPositionEntity;
+import openDemo.entity.OuInfoModel;
+import openDemo.entity.PositionModel;
 import openDemo.entity.ResultEntity;
-import openDemo.entity.OpUserInfoEntity;
+import openDemo.entity.UserInfoModel;
 import openDemo.entity.sync.OpOuInfoModel;
 import openDemo.entity.sync.OpReqJsonModle;
 import openDemo.entity.sync.OpUserInfoModel;
@@ -93,9 +93,9 @@ public class OpSyncService {
 	private OrgService orgService = new OrgService();
 	private UserService userService = new UserService();
 	// 用于存放请求获取到的数据的集合
-	private List<OpPositionEntity> positionList = new LinkedList<>();
-	private List<OpOuInfoEntity> ouInfoList = new LinkedList<>();
-	private List<OpUserInfoEntity> userInfoList = new LinkedList<>();
+	private List<PositionModel> positionList = new LinkedList<>();
+	private List<OuInfoModel> ouInfoList = new LinkedList<>();
+	private List<UserInfoModel> userInfoList = new LinkedList<>();
 	private ObjectMapper mapper;
 
 	private static final Logger logger = LogManager.getLogger(OpSyncService.class);
@@ -198,7 +198,7 @@ public class OpSyncService {
 	public void opPosSync(String serviceOperation, String mode)
 			throws IOException, ReflectiveOperationException, SQLException {
 		List<OpUserInfoModel> userModelList = getUserModelList(serviceOperation, mode);
-		List<OpPositionEntity> newList = getPosListFromUsers(userModelList);
+		List<PositionModel> newList = getPosListFromUsers(userModelList);
 
 		logger.info("岗位同步Total Size: " + newList.size());
 		// 全量模式
@@ -208,7 +208,7 @@ public class OpSyncService {
 		}
 		// 增量模式
 		else {
-			Map<String, List<OpPositionEntity>> map = comparePosList(positionList, newList);
+			Map<String, List<PositionModel>> map = comparePosList(positionList, newList);
 
 			syncAddPosOneByOne(map.get(MAPKEY_POS_SYNC_ADD));
 		}
@@ -220,17 +220,17 @@ public class OpSyncService {
 	 * @param userModelList
 	 * @return
 	 */
-	private List<OpPositionEntity> getPosListFromUsers(List<OpUserInfoModel> userModelList) {
+	private List<PositionModel> getPosListFromUsers(List<OpUserInfoModel> userModelList) {
 		// 使用Set保证无重复
 		Set<String> posNames = new HashSet<>();
 		for (OpUserInfoModel modle : userModelList) {
 			posNames.add(modle.getPostionName());
 		}
 
-		List<OpPositionEntity> list = new ArrayList<>(posNames.size());
-		OpPositionEntity temp = null;
+		List<PositionModel> list = new ArrayList<>(posNames.size());
+		PositionModel temp = null;
 		for (String posName : posNames) {
-			temp = new OpPositionEntity();
+			temp = new PositionModel();
 			temp.setpNo(UUID.randomUUID().toString());
 			temp.setpNames(getFullPosNames(posName));
 			list.add(temp);
@@ -258,19 +258,19 @@ public class OpSyncService {
 	 *            最新获取岗位数据集合
 	 * @return
 	 */
-	private Map<String, List<OpPositionEntity>> comparePosList(List<OpPositionEntity> fullList,
-			List<OpPositionEntity> newList) {
-		Map<String, List<OpPositionEntity>> map = new HashMap<>();
-		List<OpPositionEntity> posToSyncAdd = new ArrayList<>();
+	private Map<String, List<PositionModel>> comparePosList(List<PositionModel> fullList,
+			List<PositionModel> newList) {
+		Map<String, List<PositionModel>> map = new HashMap<>();
+		List<PositionModel> posToSyncAdd = new ArrayList<>();
 
 		// 待新增岗位
-		for (OpPositionEntity newPos : newList) {
+		for (PositionModel newPos : newList) {
 			String newPosName = newPos.getpNames();
 
 			if (newPosName != null) {
 				boolean isPosNameExist = false;
 
-				for (OpPositionEntity fullPos : fullList) {
+				for (PositionModel fullPos : fullList) {
 					String fullPosName = fullPos.getpNames();
 					if (fullPosName != null && newPosName.equals(fullPosName)) {
 						isPosNameExist = true;
@@ -298,10 +298,10 @@ public class OpSyncService {
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private void syncAddPosOneByOne(List<OpPositionEntity> posToSync) throws SQLException, IOException {
-		List<OpPositionEntity> tempList = new ArrayList<>();
+	private void syncAddPosOneByOne(List<PositionModel> posToSync) throws SQLException, IOException {
+		List<PositionModel> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
-		for (OpPositionEntity pos : posToSync) {
+		for (PositionModel pos : posToSync) {
 			tempList.add(pos);
 
 			resultEntity = positionService.syncPos(tempList);
@@ -427,8 +427,8 @@ public class OpSyncService {
 				new TypeReference<OpReqJsonModle<OpOuInfoModel>>() {
 				});
 
-		List<OpOuInfoEntity> newList = copyCreateEntityList(modle.getEsbResData().get(ORG_RES_DATA_KEY),
-				OpOuInfoEntity.class);
+		List<OuInfoModel> newList = copyCreateEntityList(modle.getEsbResData().get(ORG_RES_DATA_KEY),
+				OuInfoModel.class);
 
 		// replaceIllegalChar(newList);
 
@@ -441,18 +441,18 @@ public class OpSyncService {
 		}
 		// 增量模式
 		else {
-			Map<String, List<OpOuInfoEntity>> map = compareOrgList(ouInfoList, newList);
-			List<OpOuInfoEntity> orgsToSyncAdd = map.get(MAPKEY_ORG_SYNC_ADD);
+			Map<String, List<OuInfoModel>> map = compareOrgList(ouInfoList, newList);
+			List<OuInfoModel> orgsToSyncAdd = map.get(MAPKEY_ORG_SYNC_ADD);
 			if (orgsToSyncAdd.size() > 0) {
 				syncAddOrgOneByOne(orgsToSyncAdd, isBaseInfo);
 			}
 
-			List<OpOuInfoEntity> orgsToSyncUpdate = map.get(MAPKEY_ORG_SYNC_UPDATE);
+			List<OuInfoModel> orgsToSyncUpdate = map.get(MAPKEY_ORG_SYNC_UPDATE);
 			if (orgsToSyncUpdate.size() > 0) {
 				syncUpdateOrgOneByOne(orgsToSyncUpdate, isBaseInfo);
 			}
 
-			List<OpOuInfoEntity> orgsToSyncDelete = map.get(MAPKEY_ORG_SYNC_DELETE);
+			List<OuInfoModel> orgsToSyncDelete = map.get(MAPKEY_ORG_SYNC_DELETE);
 			if (orgsToSyncDelete.size() > 0) {
 				syncDeleteOrgOneByOne(orgsToSyncDelete);
 			}
@@ -464,9 +464,9 @@ public class OpSyncService {
 	 * 
 	 * @param list
 	 */
-	private void removeExpiredOrgs(List<OpOuInfoEntity> list) {
-		for (Iterator<OpOuInfoEntity> iterator = list.iterator(); iterator.hasNext();) {
-			OpOuInfoEntity org = iterator.next();
+	private void removeExpiredOrgs(List<OuInfoModel> list) {
+		for (Iterator<OuInfoModel> iterator = list.iterator(); iterator.hasNext();) {
+			OuInfoModel org = iterator.next();
 			if (isOrgExpired(org)) {
 				iterator.remove();
 				logger.warn("删除了过期组织：" + org.getOuName());
@@ -481,10 +481,10 @@ public class OpSyncService {
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private void syncDeleteOrgOneByOne(List<OpOuInfoEntity> orgsToSyncDelete) throws SQLException, IOException {
+	private void syncDeleteOrgOneByOne(List<OuInfoModel> orgsToSyncDelete) throws SQLException, IOException {
 		List<String> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
-		for (OpOuInfoEntity org : orgsToSyncDelete) {
+		for (OuInfoModel org : orgsToSyncDelete) {
 			resultEntity = orgService.deleteous(tempList);
 
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
@@ -506,11 +506,11 @@ public class OpSyncService {
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private void syncUpdateOrgOneByOne(List<OpOuInfoEntity> orgsToSyncUpdate, boolean isBaseInfo)
+	private void syncUpdateOrgOneByOne(List<OuInfoModel> orgsToSyncUpdate, boolean isBaseInfo)
 			throws SQLException, IOException {
-		List<OpOuInfoEntity> tempList = new ArrayList<>();
+		List<OuInfoModel> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
-		for (OpOuInfoEntity org : orgsToSyncUpdate) {
+		for (OuInfoModel org : orgsToSyncUpdate) {
 			tempList.add(org);
 
 			resultEntity = orgService.ous(isBaseInfo, tempList);
@@ -533,11 +533,11 @@ public class OpSyncService {
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private void syncAddOrgOneByOne(List<OpOuInfoEntity> orgsToSyncAdd, boolean isBaseInfo)
+	private void syncAddOrgOneByOne(List<OuInfoModel> orgsToSyncAdd, boolean isBaseInfo)
 			throws SQLException, IOException {
-		List<OpOuInfoEntity> tempList = new ArrayList<>();
+		List<OuInfoModel> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
-		for (OpOuInfoEntity org : orgsToSyncAdd) {
+		for (OuInfoModel org : orgsToSyncAdd) {
 			tempList.add(org);
 
 			resultEntity = orgService.ous(isBaseInfo, tempList);
@@ -592,7 +592,7 @@ public class OpSyncService {
 	public void opUserSync(String serviceOperation, String mode, boolean islink)
 			throws IOException, ReflectiveOperationException, SQLException {
 		List<OpUserInfoModel> modelList = getUserModelList(serviceOperation, mode);
-		List<OpUserInfoEntity> newList = copyCreateEntityList(modelList, OpUserInfoEntity.class);
+		List<UserInfoModel> newList = copyCreateEntityList(modelList, UserInfoModel.class);
 
 		copySetUserId(newList);
 		changeDateFormatAndSex(modelList, newList);
@@ -606,7 +606,7 @@ public class OpSyncService {
 			logger.info("用户同步新增Size: " + newList.size());
 			syncAddUserOneByOne(newList, islink);
 
-			List<OpUserInfoEntity> expiredUsers = getExpiredUsers(newList);
+			List<UserInfoModel> expiredUsers = getExpiredUsers(newList);
 			if (expiredUsers.size() > 0) {
 				logger.info("用户同步禁用Size: " + expiredUsers.size());
 				syncDisableOneByOne(expiredUsers);
@@ -615,24 +615,24 @@ public class OpSyncService {
 		// 增量模式
 		else {
 			// 与增量list进行比较
-			Map<String, List<OpUserInfoEntity>> map = compareUserList(userInfoList, newList);
+			Map<String, List<UserInfoModel>> map = compareUserList(userInfoList, newList);
 
-			List<OpUserInfoEntity> usersToSyncAdd = map.get(MAPKEY_USER_SYNC_ADD);
+			List<UserInfoModel> usersToSyncAdd = map.get(MAPKEY_USER_SYNC_ADD);
 			if (usersToSyncAdd.size() > 0) {
 				syncAddUserOneByOne(usersToSyncAdd, islink);
 			}
 
-			List<OpUserInfoEntity> usersToSyncUpdate = map.get(MAPKEY_USER_SYNC_UPDATE);
+			List<UserInfoModel> usersToSyncUpdate = map.get(MAPKEY_USER_SYNC_UPDATE);
 			if (usersToSyncUpdate.size() > 0) {
 				syncUpdateUserOneByOne(usersToSyncUpdate, islink);
 			}
 
-			List<OpUserInfoEntity> usersToDisable = map.get(MAPKEY_USER_SYNC_DISABLE);
+			List<UserInfoModel> usersToDisable = map.get(MAPKEY_USER_SYNC_DISABLE);
 			if (usersToDisable.size() > 0) {
 				syncDisableOneByOne(usersToDisable);
 			}
 
-			List<OpUserInfoEntity> usersToEnable = map.get(MAPKEY_USER_SYNC_ENABLE);
+			List<UserInfoModel> usersToEnable = map.get(MAPKEY_USER_SYNC_ENABLE);
 			if (usersToEnable.size() > 0) {
 				syncEnableOneByOne(usersToEnable);
 			}
@@ -646,13 +646,13 @@ public class OpSyncService {
 	 * @param newList
 	 * @throws SQLException
 	 */
-	private void setPositionNoToUser(List<OpUserInfoEntity> newList) throws SQLException {
+	private void setPositionNoToUser(List<UserInfoModel> newList) throws SQLException {
 
-		for (OpUserInfoEntity user : newList) {
+		for (UserInfoModel user : newList) {
 			String pNameInUser = user.getPostionName();
 
 			if (pNameInUser != null) {
-				for (OpPositionEntity pos : positionList) {
+				for (PositionModel pos : positionList) {
 					// 根据岗位名进行查找
 					if (pNameInUser.equals(getPositionName(pos.getpNames()))) {
 						user.setPostionNo(pos.getpNo());
@@ -711,9 +711,9 @@ public class OpSyncService {
 	 * @param list
 	 * @return
 	 */
-	private List<OpUserInfoEntity> getExpiredUsers(List<OpUserInfoEntity> list) {
-		List<OpUserInfoEntity> expiredUsers = new ArrayList<>();
-		for (OpUserInfoEntity user : list) {
+	private List<UserInfoModel> getExpiredUsers(List<UserInfoModel> list) {
+		List<UserInfoModel> expiredUsers = new ArrayList<>();
+		for (UserInfoModel user : list) {
 			if (user.getExpireDate() != null) {
 				expiredUsers.add(user);
 			}
@@ -729,7 +729,7 @@ public class OpSyncService {
 	 * @param toList
 	 *            java同步对象集合
 	 */
-	private void changeDateFormatAndSex(List<OpUserInfoModel> fromList, List<OpUserInfoEntity> toList) {
+	private void changeDateFormatAndSex(List<OpUserInfoModel> fromList, List<UserInfoModel> toList) {
 		int listSize = toList.size();
 
 		for (int i = 0; i < listSize; i++) {
@@ -758,9 +758,9 @@ public class OpSyncService {
 	 * 
 	 * @param newList
 	 */
-	private void copySetUserId(List<OpUserInfoEntity> newList) {
-		for (Iterator<OpUserInfoEntity> iterator = newList.iterator(); iterator.hasNext();) {
-			OpUserInfoEntity userInfoEntity = iterator.next();
+	private void copySetUserId(List<UserInfoModel> newList) {
+		for (Iterator<UserInfoModel> iterator = newList.iterator(); iterator.hasNext();) {
+			UserInfoModel userInfoEntity = iterator.next();
 			// ID <= userName
 			userInfoEntity.setID(userInfoEntity.getUserName());
 		}
@@ -774,11 +774,11 @@ public class OpSyncService {
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private void syncAddUserOneByOne(List<OpUserInfoEntity> usersToSyncAdd, boolean islink)
+	private void syncAddUserOneByOne(List<UserInfoModel> usersToSyncAdd, boolean islink)
 			throws SQLException, IOException {
-		List<OpUserInfoEntity> tempList = new ArrayList<>();
+		List<UserInfoModel> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
-		for (OpUserInfoEntity user : usersToSyncAdd) {
+		for (UserInfoModel user : usersToSyncAdd) {
 			tempList.add(user);
 
 			resultEntity = userService.userSync(islink, tempList);
@@ -800,12 +800,12 @@ public class OpSyncService {
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private void syncUpdateUserOneByOne(List<OpUserInfoEntity> usersToSyncUpdate, boolean islink)
+	private void syncUpdateUserOneByOne(List<UserInfoModel> usersToSyncUpdate, boolean islink)
 			throws SQLException, IOException {
-		List<OpUserInfoEntity> tempList = new ArrayList<>();
+		List<UserInfoModel> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 
-		for (OpUserInfoEntity user : usersToSyncUpdate) {
+		for (UserInfoModel user : usersToSyncUpdate) {
 			tempList.add(user);
 
 			resultEntity = userService.userSync(islink, tempList);
@@ -828,11 +828,11 @@ public class OpSyncService {
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private void syncEnableOneByOne(List<OpUserInfoEntity> usersToEnable) throws SQLException, IOException {
+	private void syncEnableOneByOne(List<UserInfoModel> usersToEnable) throws SQLException, IOException {
 		List<String> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 
-		for (OpUserInfoEntity user : usersToEnable) {
+		for (UserInfoModel user : usersToEnable) {
 			tempList.add(user.getUserName());
 
 			resultEntity = userService.enabledusersSync(tempList);
@@ -854,10 +854,10 @@ public class OpSyncService {
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	private void syncDisableOneByOne(List<OpUserInfoEntity> usersToDisable) throws SQLException, IOException {
+	private void syncDisableOneByOne(List<UserInfoModel> usersToDisable) throws SQLException, IOException {
 		List<String> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
-		for (OpUserInfoEntity user : usersToDisable) {
+		for (UserInfoModel user : usersToDisable) {
 			tempList.add(user.getUserName());
 
 			resultEntity = userService.disabledusersSync(tempList);
@@ -881,15 +881,15 @@ public class OpSyncService {
 	 *            最新获取组织数据集合
 	 * @return 包含 同步新增、更新、 删除等组织集合的Map对象
 	 */
-	private Map<String, List<OpOuInfoEntity>> compareOrgList(List<OpOuInfoEntity> fullList, List<OpOuInfoEntity> newList) {
-		Map<String, List<OpOuInfoEntity>> map = new HashMap<>();
+	private Map<String, List<OuInfoModel>> compareOrgList(List<OuInfoModel> fullList, List<OuInfoModel> newList) {
+		Map<String, List<OuInfoModel>> map = new HashMap<>();
 
-		List<OpOuInfoEntity> orgsToSyncAdd = new ArrayList<>();
-		List<OpOuInfoEntity> orgsToSyncUpdate = new ArrayList<>();
-		List<OpOuInfoEntity> orgsToSyncDelete = new ArrayList<>();
+		List<OuInfoModel> orgsToSyncAdd = new ArrayList<>();
+		List<OuInfoModel> orgsToSyncUpdate = new ArrayList<>();
+		List<OuInfoModel> orgsToSyncDelete = new ArrayList<>();
 
-		for (OpOuInfoEntity fullOrg : fullList) {
-			for (OpOuInfoEntity newOrg : newList) {
+		for (OuInfoModel fullOrg : fullList) {
+			for (OuInfoModel newOrg : newList) {
 				// 已经存在的组织比较
 				if (fullOrg.equals(newOrg)) {
 					// 组织过期待删除
@@ -919,7 +919,7 @@ public class OpSyncService {
 		}
 
 		// 待新增组织
-		for (OpOuInfoEntity org : newList) {
+		for (OuInfoModel org : newList) {
 			if (!fullList.contains(org)) {
 				// 非过期组织
 				if (!isOrgExpired(org)) {
@@ -947,7 +947,7 @@ public class OpSyncService {
 	 * @param org
 	 * @return
 	 */
-	private boolean isOrgExpired(OpOuInfoEntity org) {
+	private boolean isOrgExpired(OuInfoModel org) {
 		Date endDate = org.getEndDate();
 		if (endDate == null) {
 			return true;
@@ -965,18 +965,18 @@ public class OpSyncService {
 	 *            最新获取用户数据集合
 	 * @return 包含 同步新增、更新、启用、禁用等用户集合的Map对象
 	 */
-	private Map<String, List<OpUserInfoEntity>> compareUserList(List<OpUserInfoEntity> fullList,
-			List<OpUserInfoEntity> newList) {
-		Map<String, List<OpUserInfoEntity>> map = new HashMap<>();
+	private Map<String, List<UserInfoModel>> compareUserList(List<UserInfoModel> fullList,
+			List<UserInfoModel> newList) {
+		Map<String, List<UserInfoModel>> map = new HashMap<>();
 
-		List<OpUserInfoEntity> usersToSyncAdd = new ArrayList<>();
-		List<OpUserInfoEntity> usersToSyncUpdate = new ArrayList<>();
-		List<OpUserInfoEntity> usersToEnable = new ArrayList<>();
-		List<OpUserInfoEntity> usersToDisable = new ArrayList<>();
+		List<UserInfoModel> usersToSyncAdd = new ArrayList<>();
+		List<UserInfoModel> usersToSyncUpdate = new ArrayList<>();
+		List<UserInfoModel> usersToEnable = new ArrayList<>();
+		List<UserInfoModel> usersToDisable = new ArrayList<>();
 
 		// 待更新用户
-		for (OpUserInfoEntity fullUser : fullList) {
-			for (OpUserInfoEntity newUser : newList) {
+		for (UserInfoModel fullUser : fullList) {
+			for (UserInfoModel newUser : newList) {
 				// 已经存在的用户比较
 				if (fullUser.equals(newUser)) {
 					if (fullUser.getExpireDate() == null) {
@@ -1001,7 +1001,7 @@ public class OpSyncService {
 		}
 
 		// 待新增用户
-		for (OpUserInfoEntity user : newList) {
+		for (UserInfoModel user : newList) {
 			if (!fullList.contains(user)) {
 				usersToSyncAdd.add(user);
 			}

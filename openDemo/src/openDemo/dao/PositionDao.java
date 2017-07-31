@@ -1,8 +1,8 @@
 package openDemo.dao;
 
-import openDemo.entity.OpPositionEntity;
+import openDemo.entity.PositionModel;
 
-public class PositionDao extends GenericDaoImpl<OpPositionEntity> {
+public class PositionDao extends GenericDaoImpl<PositionModel> {
 
 	@Override
 	String generateGetByIdSql() {
@@ -43,13 +43,13 @@ public class PositionDao extends GenericDaoImpl<OpPositionEntity> {
 	}
 
 	@Override
-	Object[] getInsertObjectParamArray(OpPositionEntity position) {
+	Object[] getInsertObjectParamArray(PositionModel position) {
 		Object[] params = { position.getpNo(), position.getpNames() };
 		return params;
 	}
 
 	@Override
-	Object[] getUpdateObjectParamArray(OpPositionEntity position) {
+	Object[] getUpdateObjectParamArray(PositionModel position) {
 		Object[] params = { position.getpNames(), position.getpNo() };
 		return params;
 	}

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import openDemo.dao.OuInfoDao;
-import openDemo.entity.OpOuInfoEntity;
+import openDemo.entity.OuInfoModel;
 
 public class OuInfoDaoTest {
 	OuInfoDao dao = new OuInfoDao();
@@ -31,7 +31,7 @@ public class OuInfoDaoTest {
 	}
 
 	public void insertTest() throws SQLException {
-		OpOuInfoEntity org = new OpOuInfoEntity();
+		OuInfoModel org = new OuInfoModel();
 		org.setID("org1");
 		org.setOuName("orgName");
 		org.setParentID("org0");
@@ -41,9 +41,9 @@ public class OuInfoDaoTest {
 	}
 
 	public void insertListTest() throws SQLException {
-		List<OpOuInfoEntity> list = new ArrayList<>();
+		List<OuInfoModel> list = new ArrayList<>();
 		for (int i = 1; i < 5; i++) {
-			OpOuInfoEntity org = new OpOuInfoEntity();
+			OuInfoModel org = new OuInfoModel();
 			org.setID("org" + i);
 			org.setOuName("orgName" + i);
 			org.setParentID("org0");
@@ -55,7 +55,7 @@ public class OuInfoDaoTest {
 	}
 
 	public void updateTest() throws SQLException {
-		OpOuInfoEntity org = dao.getById("org0");
+		OuInfoModel org = dao.getById("org0");
 		if (org != null) {
 			org.setOuName("testName");
 			dao.update(org);
@@ -66,9 +66,9 @@ public class OuInfoDaoTest {
 	}
 
 	public void updateListTest() throws SQLException {
-		List<OpOuInfoEntity> list = dao.getAll();
+		List<OuInfoModel> list = dao.getAll();
 
-		for (OpOuInfoEntity org : list) {
+		for (OuInfoModel org : list) {
 			org.setDescription("test");
 		}
 
@@ -84,7 +84,7 @@ public class OuInfoDaoTest {
 	}
 
 	public void getByIdTest() throws SQLException {
-		OpOuInfoEntity org = dao.getById("org1");
+		OuInfoModel org = dao.getById("org1");
 		System.out
 				.println(org.getID() + "==" + org.getOuName() + "==" + org.getParentID() + "==" + org.getDescription());
 	}
@@ -94,8 +94,8 @@ public class OuInfoDaoTest {
 	}
 
 	public void getAllTest() throws SQLException {
-		List<OpOuInfoEntity> list = dao.getAll();
-		for (OpOuInfoEntity org : list) {
+		List<OuInfoModel> list = dao.getAll();
+		for (OuInfoModel org : list) {
 			System.out.println(
 					org.getID() + "==" + org.getOuName() + "==" + org.getParentID() + "==" + org.getDescription());
 		}
