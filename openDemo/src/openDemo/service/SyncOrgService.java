@@ -17,7 +17,7 @@ import openDemo.entity.ResultEntity;
  * @author yaoj
  *
  */
-public class OrgSyncService {
+public class SyncOrgService {
 	
 	/**
 	 * 同步组织单位

@@ -11,11 +11,11 @@ import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
 import openDemo.entity.ResultEntity;
 import openDemo.entity.UserInfoModel;
-import openDemo.service.OrgSyncService;
-import openDemo.service.PositionSyncService;
+import openDemo.service.SyncOrgService;
+import openDemo.service.SyncPositionService;
 import openDemo.service.RoleService;
 import openDemo.service.SsoService;
-import openDemo.service.UserSyncService;
+import openDemo.service.SyncUserService;
 
 public class OpenDemoTest {
 
@@ -65,7 +65,7 @@ public class OpenDemoTest {
 	}
 
 	void posTest() throws IOException {
-		PositionSyncService posService = new PositionSyncService();
+		SyncPositionService posService = new SyncPositionService();
 		List<PositionModel> positionInfos = new ArrayList<>();
 		PositionModel p = new PositionModel();
 		p.setpNames("未分类;岗位修改");
@@ -84,7 +84,7 @@ public class OpenDemoTest {
 
 	// 同步用户: el/sync/users
 	void userSyncTest() throws IOException {
-		UserSyncService userService = new UserSyncService();
+		SyncUserService userService = new SyncUserService();
 		List<UserInfoModel> users = new ArrayList<UserInfoModel>();
 		UserInfoModel userEntity = new UserInfoModel();
 		// userEntity.setOrgOuCode("506799895");
@@ -99,7 +99,7 @@ public class OpenDemoTest {
 
 	// 同步禁用用户: el/sync/disabledusers
 	void disabledusersTest() throws IOException {
-		UserSyncService userService = new UserSyncService();
+		SyncUserService userService = new SyncUserService();
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("lily11");
 		ResultEntity resultEntity = userService.disabledusersSync(userNames);
@@ -108,7 +108,7 @@ public class OpenDemoTest {
 
 	// 同步启用用户: el/sync/enabledusers
 	void enabledusersTest() throws IOException {
-		UserSyncService userService = new UserSyncService();
+		SyncUserService userService = new SyncUserService();
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("lily11");
 		ResultEntity resultEntity = userService.enabledusersSync(userNames);
@@ -117,7 +117,7 @@ public class OpenDemoTest {
 
 	// 同步删除用户: el/sync/deletedusers
 	void deletedusersTest() throws IOException {
-		UserSyncService userService = new UserSyncService();
+		SyncUserService userService = new SyncUserService();
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("lily11");
 		ResultEntity resultEntity = userService.deletedusersSync(userNames);
@@ -126,7 +126,7 @@ public class OpenDemoTest {
 
 	// 同步组织单位: el/sync/ous
 	void ousTest() throws IOException {
-		OrgSyncService orgService = new OrgSyncService();
+		SyncOrgService orgService = new SyncOrgService();
 
 		List<OuInfoModel> ouInfos = new ArrayList<OuInfoModel>();
 		OuInfoModel ouInfoEntity = new OuInfoModel();
@@ -147,7 +147,7 @@ public class OpenDemoTest {
 
 	// 同步删除组织单位: el/sync/deleteous
 	void deleteousTest() throws IOException {
-		OrgSyncService orgService = new OrgSyncService();
+		SyncOrgService orgService = new SyncOrgService();
 		List<String> ouCodeOrThirdSystemIDs = new ArrayList<String>();
 		ouCodeOrThirdSystemIDs.add("java01");
 		ResultEntity resultEntity = orgService.deleteous(ouCodeOrThirdSystemIDs);
@@ -156,7 +156,7 @@ public class OpenDemoTest {
 
 	// 同步用户移除组织单位: el/sync/removeusersfromou
 	void removeusersfromouTest() throws IOException {
-		OrgSyncService orgService = new OrgSyncService();
+		SyncOrgService orgService = new SyncOrgService();
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("lily12");
 		ResultEntity resultEntity = orgService.removeusersfromou(userNames);
@@ -165,7 +165,7 @@ public class OpenDemoTest {
 
 	// 同步用户更改组织单位: el/sync/batchchangeorgou
 	void batchchangeorgouTest() throws IOException {
-		OrgSyncService orgService = new OrgSyncService();
+		SyncOrgService orgService = new SyncOrgService();
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("lily12");
 		String newOuID = "506799895";
