@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import openDemo.dao.UserInfoDao;
-import openDemo.entity.UserInfoEntity;
+import openDemo.entity.OpUserInfoEntity;
 
 public class UserInfoDaoTest {
 	UserInfoDao dao = new UserInfoDao();
@@ -31,7 +31,7 @@ public class UserInfoDaoTest {
 	}
 
 	public void insertTest() throws SQLException {
-		UserInfoEntity user = new UserInfoEntity();
+		OpUserInfoEntity user = new OpUserInfoEntity();
 		user.setID("ID0");
 		user.setUserName("userName");
 		user.setCnName("cnName");
@@ -60,10 +60,10 @@ public class UserInfoDaoTest {
 	}
 
 	public void insertListTest() throws SQLException {
-		List<UserInfoEntity> list = new ArrayList<>();
+		List<OpUserInfoEntity> list = new ArrayList<>();
 		for (int i = 1; i < 10; i++) {
-			UserInfoEntity user = new UserInfoEntity();
-			user = new UserInfoEntity();
+			OpUserInfoEntity user = new OpUserInfoEntity();
+			user = new OpUserInfoEntity();
 			user.setID("ID" + i);
 			user.setUserName("userName" + i);
 			user.setCnName("cnName" + i);
@@ -95,7 +95,7 @@ public class UserInfoDaoTest {
 	}
 
 	public void updateTest() throws SQLException {
-		UserInfoEntity user = dao.getById("ID0");
+		OpUserInfoEntity user = dao.getById("ID0");
 		if (user != null) {
 			user.setCnName("testName");
 			dao.update(user);
@@ -106,9 +106,9 @@ public class UserInfoDaoTest {
 	}
 
 	public void updateListTest() throws SQLException {
-		List<UserInfoEntity> list = dao.getAll();
+		List<OpUserInfoEntity> list = dao.getAll();
 
-		for (UserInfoEntity user : list) {
+		for (OpUserInfoEntity user : list) {
 			user.setSpare2("");
 			user.setSpare4("");
 			user.setSpare6("");
@@ -128,7 +128,7 @@ public class UserInfoDaoTest {
 	}
 
 	public void getByIdTest() throws SQLException {
-		UserInfoEntity user = dao.getById("ID0");
+		OpUserInfoEntity user = dao.getById("ID0");
 		System.out.println(user.getID() + "==" + user.getUserName() + "==" + user.getCnName() + "=="
 				+ user.getPassword() + "==" + user.getSex() + "==" + user.getMobile() + "==" + user.getMail() + "=="
 				+ user.getOrgOuCode() + "==" + user.getEncryptionType() + "==" + user.getPostionNo() + "=="
@@ -143,8 +143,8 @@ public class UserInfoDaoTest {
 	}
 
 	public void getAllTest() throws SQLException {
-		List<UserInfoEntity> list = dao.getAll();
-		for (UserInfoEntity user : list) {
+		List<OpUserInfoEntity> list = dao.getAll();
+		for (OpUserInfoEntity user : list) {
 			if (user.getEntryTime() != null) {
 				System.out.println(user.getID() + "==" + user.getUserName() + "==" + user.getCnName() + "=="
 						+ user.getPassword() + "==" + user.getSex() + "==" + user.getMobile() + "==" + user.getMail()

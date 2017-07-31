@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import openDemo.dao.PositionDao;
-import openDemo.entity.PositionEntity;
+import openDemo.entity.OpPositionEntity;
 
 public class PositionDaoTest {
 	PositionDao dao = new PositionDao();
@@ -31,7 +31,7 @@ public class PositionDaoTest {
 	}
 
 	public void insertTest() throws SQLException {
-		PositionEntity position = new PositionEntity();
+		OpPositionEntity position = new OpPositionEntity();
 		position.setpNo("pNo0");
 		position.setpNames("pNames0");
 
@@ -39,10 +39,10 @@ public class PositionDaoTest {
 	}
 
 	public void insertListTest() throws SQLException {
-		List<PositionEntity> list = new ArrayList<>();
+		List<OpPositionEntity> list = new ArrayList<>();
 
 		for (int i = 1; i < 5; i++) {
-			PositionEntity position = new PositionEntity();
+			OpPositionEntity position = new OpPositionEntity();
 			position.setpNo("pNo" + i);
 			position.setpNames("pNames" + i);
 			list.add(position);
@@ -52,7 +52,7 @@ public class PositionDaoTest {
 	}
 
 	public void updateTest() throws SQLException {
-		PositionEntity position = dao.getById("pNo0");
+		OpPositionEntity position = dao.getById("pNo0");
 		if (position != null) {
 			position.setpNames("testName");
 			dao.update(position);
@@ -63,9 +63,9 @@ public class PositionDaoTest {
 	}
 
 	public void updateListTest() throws SQLException {
-		List<PositionEntity> list = dao.getAll();
+		List<OpPositionEntity> list = dao.getAll();
 
-		for (PositionEntity position : list) {
+		for (OpPositionEntity position : list) {
 			position.setpNames("xxx");
 		}
 
@@ -81,7 +81,7 @@ public class PositionDaoTest {
 	}
 
 	public void getByIdTest() throws SQLException {
-		PositionEntity position = dao.getById("pNo4");
+		OpPositionEntity position = dao.getById("pNo4");
 		if (position != null) {
 			System.out.println(position.getpNo() + "==" + position.getpNames());
 		} else {
@@ -94,8 +94,8 @@ public class PositionDaoTest {
 	}
 
 	public void getAllTest() throws SQLException {
-		List<PositionEntity> list = dao.getAll();
-		for (PositionEntity position : list) {
+		List<OpPositionEntity> list = dao.getAll();
+		for (OpPositionEntity position : list) {
 			System.out.println(position.getpNo() + "==" + position.getpNames());
 		}
 	}

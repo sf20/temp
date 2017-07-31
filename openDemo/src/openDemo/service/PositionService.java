@@ -9,7 +9,7 @@ import net.sf.json.JsonConfig;
 import openDemo.common.Config;
 import openDemo.common.HttpResultUtil;
 import openDemo.common.JsonUtil;
-import openDemo.entity.PositionEntity;
+import openDemo.entity.OpPositionEntity;
 import openDemo.entity.ResultEntity;
 
 /**
@@ -28,8 +28,8 @@ public class PositionService {
 	 * @return
 	 * @throws IOException 
 	 */
-	public ResultEntity syncPos(List<PositionEntity> positionInfos) throws IOException {
-		JsonConfig jsonConfig = JsonUtil.jsonConfig(PositionEntity.class);
+	public ResultEntity syncPos(List<OpPositionEntity> positionInfos) throws IOException {
+		JsonConfig jsonConfig = JsonUtil.jsonConfig(OpPositionEntity.class);
 		JSONArray array = JSONArray.fromObject(positionInfos, jsonConfig);
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
 		params.put("positionInfo", array.toString());
@@ -46,8 +46,8 @@ public class PositionService {
 	 * @return
 	 * @throws IOException 
 	 */
-	public ResultEntity syncPosGetPNo(List<PositionEntity> positionInfos) throws IOException {
-		JsonConfig jsonConfig = JsonUtil.jsonConfig(PositionEntity.class);
+	public ResultEntity syncPosGetPNo(List<OpPositionEntity> positionInfos) throws IOException {
+		JsonConfig jsonConfig = JsonUtil.jsonConfig(OpPositionEntity.class);
 		JSONArray array = JSONArray.fromObject(positionInfos, jsonConfig);
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
 		params.put("positionInfo", array.toString());

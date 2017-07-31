@@ -10,7 +10,7 @@ import openDemo.common.Config;
 import openDemo.common.HttpResultUtil;
 import openDemo.common.JsonUtil;
 import openDemo.entity.ResultEntity;
-import openDemo.entity.UserInfoEntity;
+import openDemo.entity.OpUserInfoEntity;
 
 
 /**
@@ -27,8 +27,8 @@ public class UserService {
 	 * @return
 	 * @throws IOException 
 	 */
-	public ResultEntity userSync(boolean islink, List<UserInfoEntity> users) throws IOException{
-		JsonConfig jsonConfig = JsonUtil.jsonConfig(UserInfoEntity.class);
+	public ResultEntity userSync(boolean islink, List<OpUserInfoEntity> users) throws IOException{
+		JsonConfig jsonConfig = JsonUtil.jsonConfig(OpUserInfoEntity.class);
 		JSONArray array = JSONArray.fromObject(users, jsonConfig);
 		Map<String, Object> params = HttpResultUtil.getParamsMap();
 		params.put("islink", islink);

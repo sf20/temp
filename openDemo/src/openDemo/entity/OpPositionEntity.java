@@ -6,7 +6,7 @@ package openDemo.entity;
  * @author yanl
  *
  */
-public class PositionEntity {
+public class OpPositionEntity {
 	/**
 	 * 岗位编号
 	 */
@@ -49,7 +49,7 @@ public class PositionEntity {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		PositionEntity other = (PositionEntity) obj;
+		OpPositionEntity other = (OpPositionEntity) obj;
 		if (pNo == null) {
 			if (other.pNo != null)
 				return false;

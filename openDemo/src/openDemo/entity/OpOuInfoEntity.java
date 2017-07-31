@@ -9,7 +9,7 @@ import java.util.List;
  * @author yaoj
  *
  */
-public class OuInfoEntity {
+public class OpOuInfoEntity {
 
 	/**
 	 * 组织单位ID
@@ -128,7 +128,7 @@ public class OuInfoEntity {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		OuInfoEntity other = (OuInfoEntity) obj;
+		OpOuInfoEntity other = (OpOuInfoEntity) obj;
 		if (ID == null) {
 			if (other.ID != null)
 				return false;

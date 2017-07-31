@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import openDemo.dao.OuInfoDao;
-import openDemo.entity.OuInfoEntity;
+import openDemo.entity.OpOuInfoEntity;
 
 public class OuInfoDaoTest {
 	OuInfoDao dao = new OuInfoDao();
@@ -31,7 +31,7 @@ public class OuInfoDaoTest {
 	}
 
 	public void insertTest() throws SQLException {
-		OuInfoEntity org = new OuInfoEntity();
+		OpOuInfoEntity org = new OpOuInfoEntity();
 		org.setID("org1");
 		org.setOuName("orgName");
 		org.setParentID("org0");
@@ -41,9 +41,9 @@ public class OuInfoDaoTest {
 	}
 
 	public void insertListTest() throws SQLException {
-		List<OuInfoEntity> list = new ArrayList<>();
+		List<OpOuInfoEntity> list = new ArrayList<>();
 		for (int i = 1; i < 5; i++) {
-			OuInfoEntity org = new OuInfoEntity();
+			OpOuInfoEntity org = new OpOuInfoEntity();
 			org.setID("org" + i);
 			org.setOuName("orgName" + i);
 			org.setParentID("org0");
@@ -55,7 +55,7 @@ public class OuInfoDaoTest {
 	}
 
 	public void updateTest() throws SQLException {
-		OuInfoEntity org = dao.getById("org0");
+		OpOuInfoEntity org = dao.getById("org0");
 		if (org != null) {
 			org.setOuName("testName");
 			dao.update(org);
@@ -66,9 +66,9 @@ public class OuInfoDaoTest {
 	}
 
 	public void updateListTest() throws SQLException {
-		List<OuInfoEntity> list = dao.getAll();
+		List<OpOuInfoEntity> list = dao.getAll();
 
-		for (OuInfoEntity org : list) {
+		for (OpOuInfoEntity org : list) {
 			org.setDescription("test");
 		}
 
@@ -84,7 +84,7 @@ public class OuInfoDaoTest {
 	}
 
 	public void getByIdTest() throws SQLException {
-		OuInfoEntity org = dao.getById("org1");
+		OpOuInfoEntity org = dao.getById("org1");
 		System.out
 				.println(org.getID() + "==" + org.getOuName() + "==" + org.getParentID() + "==" + org.getDescription());
 	}
@@ -94,8 +94,8 @@ public class OuInfoDaoTest {
 	}
 
 	public void getAllTest() throws SQLException {
-		List<OuInfoEntity> list = dao.getAll();
-		for (OuInfoEntity org : list) {
+		List<OpOuInfoEntity> list = dao.getAll();
+		for (OpOuInfoEntity org : list) {
 			System.out.println(
 					org.getID() + "==" + org.getOuName() + "==" + org.getParentID() + "==" + org.getDescription());
 		}

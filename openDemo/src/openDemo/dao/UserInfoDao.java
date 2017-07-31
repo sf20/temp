@@ -1,8 +1,8 @@
 package openDemo.dao;
 
-import openDemo.entity.UserInfoEntity;
+import openDemo.entity.OpUserInfoEntity;
 
-public class UserInfoDao extends GenericDaoImpl<UserInfoEntity> {
+public class UserInfoDao extends GenericDaoImpl<OpUserInfoEntity> {
 
 	@Override
 	String getTableNamePrefix() {
@@ -55,7 +55,7 @@ public class UserInfoDao extends GenericDaoImpl<UserInfoEntity> {
 	}
 
 	@Override
-	Object[] getInsertObjectParamArray(UserInfoEntity user) {
+	Object[] getInsertObjectParamArray(OpUserInfoEntity user) {
 		Object[] params = { user.getID(), user.getUserName(), user.getCnName(), user.getPassword(), user.getSex(),
 				user.getMobile(), user.getMail(), user.getOrgOuCode(), user.getEncryptionType(), user.getPostionNo(),
 				user.getEntryTime(), user.getBirthday(), user.getExpireDate(), user.getSpare1(), user.getSpare2(),
@@ -65,7 +65,7 @@ public class UserInfoDao extends GenericDaoImpl<UserInfoEntity> {
 	}
 
 	@Override
-	Object[] getUpdateObjectParamArray(UserInfoEntity user) {
+	Object[] getUpdateObjectParamArray(OpUserInfoEntity user) {
 		Object[] params = { user.getUserName(), user.getCnName(), user.getPassword(), user.getSex(), user.getMobile(),
 				user.getMail(), user.getOrgOuCode(), user.getEncryptionType(), user.getPostionNo(), user.getEntryTime(),
 				user.getBirthday(), user.getExpireDate(), user.getSpare1(), user.getSpare2(), user.getSpare3(),

@@ -6,7 +6,7 @@ package openDemo.entity;
  * @author yanl
  *
  */
-public class UserInfoEntity {
+public class OpUserInfoEntity {
 
 	/**
 	 * 用户ID(同步必传)
@@ -309,7 +309,7 @@ public class UserInfoEntity {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		UserInfoEntity other = (UserInfoEntity) obj;
+		OpUserInfoEntity other = (OpUserInfoEntity) obj;
 		if (ID == null) {
 			if (other.ID != null)
 				return false;
