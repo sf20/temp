@@ -6,6 +6,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import openDemo.common.OppleConfig;
 import openDemo.entity.GroupInfoEntity;
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
@@ -17,7 +18,7 @@ import openDemo.service.RoleService;
 import openDemo.service.SsoService;
 import openDemo.service.SyncUserService;
 
-public class OpenDemoTest {
+public class OpenDemoTest implements OppleConfig {
 
 	public static void main(String[] args) throws IOException {
 		new OpenDemoTest();
@@ -71,7 +72,7 @@ public class OpenDemoTest {
 		p.setpNames("未分类;岗位修改");
 		p.setpNo("201707241745489031");
 		positionInfos.add(p);
-		ResultEntity resultEntity = posService.syncPos(positionInfos);
+		ResultEntity resultEntity = posService.syncPos(positionInfos, apikey, secretkey, baseUrl);
 		print("岗位同步", resultEntity);
 	}
 
@@ -93,7 +94,7 @@ public class OpenDemoTest {
 		userEntity.setCnName("testId");
 		userEntity.setOrgOuCode("10086");
 		users.add(userEntity);
-		ResultEntity resultEntity = userService.userSync(true, users);
+		ResultEntity resultEntity = userService.userSync(true, users, apikey, secretkey, baseUrl);
 		print("同步用户", resultEntity);
 	}
 
@@ -102,7 +103,7 @@ public class OpenDemoTest {
 		SyncUserService userService = new SyncUserService();
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("lily11");
-		ResultEntity resultEntity = userService.disabledusersSync(userNames);
+		ResultEntity resultEntity = userService.disabledusersSync(userNames, apikey, secretkey, baseUrl);
 		print("同步禁用用户", resultEntity);
 	}
 
@@ -111,7 +112,7 @@ public class OpenDemoTest {
 		SyncUserService userService = new SyncUserService();
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("lily11");
-		ResultEntity resultEntity = userService.enabledusersSync(userNames);
+		ResultEntity resultEntity = userService.enabledusersSync(userNames, apikey, secretkey, baseUrl);
 		print("同步启用用户", resultEntity);
 	}
 
@@ -120,7 +121,7 @@ public class OpenDemoTest {
 		SyncUserService userService = new SyncUserService();
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("lily11");
-		ResultEntity resultEntity = userService.deletedusersSync(userNames);
+		ResultEntity resultEntity = userService.deletedusersSync(userNames, apikey, secretkey, baseUrl);
 		print("同步删除用户", resultEntity);
 	}
 
@@ -137,7 +138,7 @@ public class OpenDemoTest {
 		ouInfos.add(ouInfoEntity);
 		ResultEntity resultEntity = null;
 		try {
-			resultEntity = orgService.getOucodeByName(URLEncoder.encode("a&b", "utf-8"));
+			resultEntity = orgService.getOucodeByName(URLEncoder.encode("a&b", "utf-8"), apikey, secretkey, baseUrl);
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -150,7 +151,7 @@ public class OpenDemoTest {
 		SyncOrgService orgService = new SyncOrgService();
 		List<String> ouCodeOrThirdSystemIDs = new ArrayList<String>();
 		ouCodeOrThirdSystemIDs.add("java01");
-		ResultEntity resultEntity = orgService.deleteous(ouCodeOrThirdSystemIDs);
+		ResultEntity resultEntity = orgService.deleteous(ouCodeOrThirdSystemIDs, apikey, secretkey, baseUrl);
 		print("同步删除组织单位", resultEntity);
 	}
 
@@ -159,7 +160,7 @@ public class OpenDemoTest {
 		SyncOrgService orgService = new SyncOrgService();
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("lily12");
-		ResultEntity resultEntity = orgService.removeusersfromou(userNames);
+		ResultEntity resultEntity = orgService.removeusersfromou(userNames, apikey, secretkey, baseUrl);
 		print("同步用户移除组织单位", resultEntity);
 	}
 
@@ -169,7 +170,7 @@ public class OpenDemoTest {
 		List<String> userNames = new ArrayList<String>();
 		userNames.add("lily12");
 		String newOuID = "506799895";
-		ResultEntity resultEntity = orgService.batchchangeorgou(userNames, newOuID);
+		ResultEntity resultEntity = orgService.batchchangeorgou(userNames, newOuID, apikey, secretkey, baseUrl);
 		print("同步用户更改组织单位", resultEntity);
 	}
 

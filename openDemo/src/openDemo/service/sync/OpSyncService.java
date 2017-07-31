@@ -33,6 +33,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import openDemo.common.OppleConfig;
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
 import openDemo.entity.ResultEntity;
@@ -44,7 +45,7 @@ import openDemo.service.SyncOrgService;
 import openDemo.service.SyncPositionService;
 import openDemo.service.SyncUserService;
 
-public class OpSyncService {
+public class OpSyncService implements OppleConfig {
 	// 用户接口请求参数名
 	private static final String REQUESTID = "RequestId";
 	private static final String SERVICENAME = "ServiceName";
@@ -258,8 +259,7 @@ public class OpSyncService {
 	 *            最新获取岗位数据集合
 	 * @return
 	 */
-	private Map<String, List<PositionModel>> comparePosList(List<PositionModel> fullList,
-			List<PositionModel> newList) {
+	private Map<String, List<PositionModel>> comparePosList(List<PositionModel> fullList, List<PositionModel> newList) {
 		Map<String, List<PositionModel>> map = new HashMap<>();
 		List<PositionModel> posToSyncAdd = new ArrayList<>();
 
@@ -304,7 +304,7 @@ public class OpSyncService {
 		for (PositionModel pos : posToSync) {
 			tempList.add(pos);
 
-			resultEntity = positionService.syncPos(tempList);
+			resultEntity = positionService.syncPos(tempList, apikey, secretkey, baseUrl);
 
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 				positionList.add(pos);
@@ -485,7 +485,7 @@ public class OpSyncService {
 		List<String> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (OuInfoModel org : orgsToSyncDelete) {
-			resultEntity = orgService.deleteous(tempList);
+			resultEntity = orgService.deleteous(tempList, apikey, secretkey, baseUrl);
 
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 				ouInfoList.remove(org);
@@ -513,7 +513,7 @@ public class OpSyncService {
 		for (OuInfoModel org : orgsToSyncUpdate) {
 			tempList.add(org);
 
-			resultEntity = orgService.ous(isBaseInfo, tempList);
+			resultEntity = orgService.ous(isBaseInfo, tempList, apikey, secretkey, baseUrl);
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 				ouInfoList.remove(org);
 				ouInfoList.add(org);
@@ -540,7 +540,7 @@ public class OpSyncService {
 		for (OuInfoModel org : orgsToSyncAdd) {
 			tempList.add(org);
 
-			resultEntity = orgService.ous(isBaseInfo, tempList);
+			resultEntity = orgService.ous(isBaseInfo, tempList, apikey, secretkey, baseUrl);
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 				ouInfoList.add(org);
 			} else {
@@ -781,7 +781,7 @@ public class OpSyncService {
 		for (UserInfoModel user : usersToSyncAdd) {
 			tempList.add(user);
 
-			resultEntity = userService.userSync(islink, tempList);
+			resultEntity = userService.userSync(islink, tempList, apikey, secretkey, baseUrl);
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 				userInfoList.add(user);
 			} else {
@@ -808,7 +808,7 @@ public class OpSyncService {
 		for (UserInfoModel user : usersToSyncUpdate) {
 			tempList.add(user);
 
-			resultEntity = userService.userSync(islink, tempList);
+			resultEntity = userService.userSync(islink, tempList, apikey, secretkey, baseUrl);
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 				userInfoList.remove(user);
 				userInfoList.add(user);
@@ -835,7 +835,7 @@ public class OpSyncService {
 		for (UserInfoModel user : usersToEnable) {
 			tempList.add(user.getUserName());
 
-			resultEntity = userService.enabledusersSync(tempList);
+			resultEntity = userService.enabledusersSync(tempList, apikey, secretkey, baseUrl);
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 				userInfoList.remove(user);
 				userInfoList.add(user);
@@ -860,7 +860,7 @@ public class OpSyncService {
 		for (UserInfoModel user : usersToDisable) {
 			tempList.add(user.getUserName());
 
-			resultEntity = userService.disabledusersSync(tempList);
+			resultEntity = userService.disabledusersSync(tempList, apikey, secretkey, baseUrl);
 			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 				userInfoList.remove(user);
 				userInfoList.add(user);

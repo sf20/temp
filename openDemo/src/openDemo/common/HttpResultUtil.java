@@ -5,11 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.sf.json.JSONObject;
 import openDemo.entity.ResultEntity;
 
 public class HttpResultUtil {
-	
+	private static final Logger logger = LogManager.getLogger(HttpResultUtil.class);
 	/**
 	 * 获取企业大学接口数据
 	 * @param params
@@ -17,8 +20,14 @@ public class HttpResultUtil {
 	 * @return
 	 * @throws IOException 
 	 */
-	public static String getResult(Map<String, Object> params, String url) throws IOException{
-		String result = HttpRequestUtil.sendPost(url, params);
+	public static String getResult(Map<String, Object> params, String url){
+		String result = null;
+		try {
+			result = HttpRequestUtil.sendPost(url, params);
+		} catch (Exception e) {
+			// TODO
+			logger.error("获取企业大学接口数据失败!", e);
+		}
 		return result;
 	}
 	
@@ -42,6 +51,20 @@ public class HttpResultUtil {
 		params.put("apikey", Config.apikey);
 		params.put("salt", new Random().nextInt(10000));
 		String secretkey = Config.secretkey;
+		params.put("signature", SHA256Util.SHA256Encrypt(secretkey+params.get("salt")));
+		return params;
+	}
+	
+	/**
+	 * 初始化公共参数
+	 * @param apikey
+	 * @param secretkey
+	 * @return
+	 */
+	public static Map<String, Object> getParamsMap(String apikey, String secretkey){
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("apikey", apikey);
+		params.put("salt", new Random().nextInt(10000));
 		params.put("signature", SHA256Util.SHA256Encrypt(secretkey+params.get("salt")));
 		return params;
 	}
