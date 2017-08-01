@@ -54,9 +54,9 @@ public class OppleSyncService implements OppleConfig {
 	private static final String ESBREQHEAD = "EsbReqHead";
 	private static final String ESBREQDATA = "EsbReqData";
 	// 用户接口请求参数值
-	private static final String REQUEST_URL = "http://esbuat.opple.com:50831/esb_emp/json";
+	private static final String REQUEST_URL = "http://esb.opple.com:50831/esb_emp/json";
 	private static final String USERNAME = "yxtuser";
-	private static final String PASSWORD = "yxtpwd";
+	private static final String PASSWORD = "u#5QTwNDaq";
 	private static final String SERVICE_NAME = "YXT_ESB_EmpOrgQuery";
 	private static final String SERVICE_VERSION = "1.0";
 	private static final String SERVICEOPERATION_EMP = "QueryEmpInfo";
