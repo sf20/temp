@@ -5,14 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import net.sf.json.JSONObject;
 import openDemo.entity.ResultEntity;
 
 public class HttpResultUtil {
-	private static final Logger logger = LogManager.getLogger(HttpResultUtil.class);
 	/**
 	 * 获取企业大学接口数据
 	 * @param params
