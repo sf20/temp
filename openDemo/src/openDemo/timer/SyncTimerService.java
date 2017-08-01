@@ -33,6 +33,8 @@ public class SyncTimerService {
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static final Logger logger = LogManager.getLogger(SyncTimerService.class);
 
+	private OppleSyncService opSyncService = new OppleSyncService();
+
 	private Calendar calendar;
 	private Date initDate;// 定时器首次执行时间
 	private Date baseDate;// 定时器间隔执行计算基准日
@@ -56,7 +58,6 @@ public class SyncTimerService {
 
 	private void multiSyncTask() {
 		final ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
-		final OppleSyncService opSyncService = new OppleSyncService();
 
 		logger.info("初始化完成::定时器已启动");
 
