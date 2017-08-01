@@ -466,7 +466,7 @@ public class OppleSyncService implements OppleConfig {
 			OuInfoModel org = iterator.next();
 			if (isOrgExpired(org)) {
 				iterator.remove();
-				logger.warn("删除了过期组织：" + org.getOuName());
+				logger.info("删除了过期组织：" + org.getOuName());
 			}
 		}
 	}
@@ -932,7 +932,7 @@ public class OppleSyncService implements OppleConfig {
 				if (!isOrgExpired(org)) {
 					orgsToSyncAdd.add(org);
 				} else {
-					logger.warn("包含过期组织：" + org.getOuName());
+					logger.info("包含过期组织：" + org.getOuName());
 				}
 			}
 		}

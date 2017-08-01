@@ -186,6 +186,7 @@ public class SyncTimerService {
 	 */
 	private void shutdowmAndPrintLog(ScheduledExecutorService threadPool, Exception e) {
 		threadPool.shutdown();
+		logger.info("发生异常::定时器已停止");
 		logger.error("定时同步[OpSyncService]出现异常", e);
 	}
 }
