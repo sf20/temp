@@ -65,40 +65,38 @@ public class OppleSyncService implements OppleConfig {
 	private static final String MODE_UPDATE = "2";
 	// json请求及转换时字符集类型
 	private static final String CHARSET_UTF8 = "UTF-8";
-
 	// 客户提供接口返回的json数据中组织数据和员工数据的key
 	private static final String ORG_RES_DATA_KEY = "SapMiddleOrg";
 	private static final String EMP_RES_DATA_KEY = "SapMiddleEmp";
-
-	private static String MAPKEY_USER_SYNC_ADD = "userSyncAdd";
-	private static String MAPKEY_USER_SYNC_UPDATE = "userSyncUpdate";
-	// private static String MAPKEY_USER_SYNC_DELETE = "userSyncDelete";
-	private static String MAPKEY_USER_SYNC_ENABLE = "userSyncEnable";
-	private static String MAPKEY_USER_SYNC_DISABLE = "userSyncDisable";
-	private static String MAPKEY_ORG_SYNC_ADD = "orgSyncAdd";
-	private static String MAPKEY_ORG_SYNC_UPDATE = "orgSyncUpdate";
-	private static String MAPKEY_ORG_SYNC_DELETE = "orgSyncDelete";
-	private static String MAPKEY_POS_SYNC_ADD = "posSyncAdd";
-	// private static String MAPKEY_POS_SYNC_UPDATE = "posSyncUpdate";
-
-	private static String SYNC_CODE_SUCCESS = "0";
+	// 自定义map的key
+	private static final String MAPKEY_USER_SYNC_ADD = "userSyncAdd";
+	private static final String MAPKEY_USER_SYNC_UPDATE = "userSyncUpdate";
+	private static final String MAPKEY_USER_SYNC_ENABLE = "userSyncEnable";
+	private static final String MAPKEY_USER_SYNC_DISABLE = "userSyncDisable";
+	private static final String MAPKEY_ORG_SYNC_ADD = "orgSyncAdd";
+	private static final String MAPKEY_ORG_SYNC_UPDATE = "orgSyncUpdate";
+	private static final String MAPKEY_ORG_SYNC_DELETE = "orgSyncDelete";
+	private static final String MAPKEY_POS_SYNC_ADD = "posSyncAdd";
+	// 请求同步接口成功返回码
+	private static final String SYNC_CODE_SUCCESS = "0";
 	// 岗位类别的默认值
-	private static String POSITION_CLASS_DEFAULT = "未分类";
-	private static String POSITION_CLASS_SEPARATOR = ";";
+	private static final String POSITION_CLASS_DEFAULT = "未分类";
+	private static final String POSITION_CLASS_SEPARATOR = ";";
+	// 日期格式化用
+	private static final SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
+	private static final SimpleDateFormat JAVA_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+	// 记录日志
+	private static final Logger logger = LogManager.getLogger(OppleSyncService.class);
 
-	private static SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
-	private static SimpleDateFormat JAVA_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-
+	// 请求同步接口的service
 	private SyncPositionService positionService = new SyncPositionService();
 	private SyncOrgService orgService = new SyncOrgService();
 	private SyncUserService userService = new SyncUserService();
 	// 用于存放请求获取到的数据的集合
-	private List<PositionModel> positionList = new LinkedList<>();
-	private List<OuInfoModel> ouInfoList = new LinkedList<>();
-	private List<UserInfoModel> userInfoList = new LinkedList<>();
+	private List<PositionModel> positionList = new LinkedList<PositionModel>();
+	private List<OuInfoModel> ouInfoList = new LinkedList<OuInfoModel>();
+	private List<UserInfoModel> userInfoList = new LinkedList<UserInfoModel>();
 	private ObjectMapper mapper;
-
-	private static final Logger logger = LogManager.getLogger(OppleSyncService.class);
 
 	public OppleSyncService() {
 		// 创建用于json反序列化的对象
@@ -114,7 +112,7 @@ public class OppleSyncService implements OppleConfig {
 	/**
 	 * 初始化同步
 	 */
-	private void initSync() {
+	public void initSync() {
 		try {
 			// 岗位全量同步
 			logger.info("[岗位全量]同步开始...");
@@ -219,12 +217,12 @@ public class OppleSyncService implements OppleConfig {
 	 */
 	private List<PositionModel> getPosListFromUsers(List<OpUserInfoModel> userModelList) {
 		// 使用Set保证无重复
-		Set<String> posNames = new HashSet<>();
+		Set<String> posNames = new HashSet<String>();
 		for (OpUserInfoModel modle : userModelList) {
 			posNames.add(modle.getPostionName());
 		}
 
-		List<PositionModel> list = new ArrayList<>(posNames.size());
+		List<PositionModel> list = new ArrayList<PositionModel>(posNames.size());
 		PositionModel temp = null;
 		for (String posName : posNames) {
 			temp = new PositionModel();
@@ -256,8 +254,8 @@ public class OppleSyncService implements OppleConfig {
 	 * @return
 	 */
 	private Map<String, List<PositionModel>> comparePosList(List<PositionModel> fullList, List<PositionModel> newList) {
-		Map<String, List<PositionModel>> map = new HashMap<>();
-		List<PositionModel> posToSyncAdd = new ArrayList<>();
+		Map<String, List<PositionModel>> map = new HashMap<String, List<PositionModel>>();
+		List<PositionModel> posToSyncAdd = new ArrayList<PositionModel>();
 
 		// 待新增岗位
 		for (PositionModel newPos : newList) {
@@ -293,7 +291,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @param posToSync
 	 */
 	private void syncAddPosOneByOne(List<PositionModel> posToSync) {
-		List<PositionModel> tempList = new ArrayList<>();
+		List<PositionModel> tempList = new ArrayList<PositionModel>();
 		ResultEntity resultEntity = null;
 		for (PositionModel pos : posToSync) {
 			tempList.add(pos);
@@ -388,16 +386,16 @@ public class OppleSyncService implements OppleConfig {
 	 */
 	private String buildReqJson(String serviceOperation, String mode) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> map = new HashMap<>();
+		Map<String, Object> map = new HashMap<String, Object>();
 
-		Map<String, Object> reqHeadMap = new HashMap<>();
+		Map<String, Object> reqHeadMap = new HashMap<String, Object>();
 		reqHeadMap.put(REQUESTID, UUID.randomUUID().toString());
 		reqHeadMap.put(SERVICENAME, SERVICE_NAME);
 		reqHeadMap.put(SERVICEOPERATION, serviceOperation);
 		reqHeadMap.put(SERVICEVERSION, SERVICE_VERSION);
 		map.put(ESBREQHEAD, reqHeadMap);
 
-		Map<String, Object> reqDataMap = new HashMap<>();
+		Map<String, Object> reqDataMap = new HashMap<String, Object>();
 		reqDataMap.put(MODE, mode);
 		map.put(ESBREQDATA, reqDataMap);
 
@@ -477,7 +475,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @param orgsToSyncDelete
 	 */
 	private void syncDeleteOrgOneByOne(List<OuInfoModel> orgsToSyncDelete) {
-		List<String> tempList = new ArrayList<>();
+		List<String> tempList = new ArrayList<String>();
 		ResultEntity resultEntity = null;
 		for (OuInfoModel org : orgsToSyncDelete) {
 			tempList.add(org.getID());
@@ -506,7 +504,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @param isBaseInfo
 	 */
 	private void syncUpdateOrgOneByOne(List<OuInfoModel> orgsToSyncUpdate, boolean isBaseInfo) {
-		List<OuInfoModel> tempList = new ArrayList<>();
+		List<OuInfoModel> tempList = new ArrayList<OuInfoModel>();
 		ResultEntity resultEntity = null;
 		for (OuInfoModel org : orgsToSyncUpdate) {
 			tempList.add(org);
@@ -534,7 +532,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @param isBaseInfo
 	 */
 	private void syncAddOrgOneByOne(List<OuInfoModel> orgsToSyncAdd, boolean isBaseInfo) {
-		List<OuInfoModel> tempList = new ArrayList<>();
+		List<OuInfoModel> tempList = new ArrayList<OuInfoModel>();
 		ResultEntity resultEntity = null;
 		for (OuInfoModel org : orgsToSyncAdd) {
 			tempList.add(org);
@@ -713,7 +711,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @return
 	 */
 	private List<UserInfoModel> getExpiredUsers(List<UserInfoModel> list) {
-		List<UserInfoModel> expiredUsers = new ArrayList<>();
+		List<UserInfoModel> expiredUsers = new ArrayList<UserInfoModel>();
 		for (UserInfoModel user : list) {
 			if (user.getExpireDate() != null) {
 				expiredUsers.add(user);
@@ -774,7 +772,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @param islink
 	 */
 	private void syncAddUserOneByOne(List<UserInfoModel> usersToSyncAdd, boolean islink) {
-		List<UserInfoModel> tempList = new ArrayList<>();
+		List<UserInfoModel> tempList = new ArrayList<UserInfoModel>();
 		ResultEntity resultEntity = null;
 		for (UserInfoModel user : usersToSyncAdd) {
 			tempList.add(user);
@@ -801,7 +799,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @param islink
 	 */
 	private void syncUpdateUserOneByOne(List<UserInfoModel> usersToSyncUpdate, boolean islink) {
-		List<UserInfoModel> tempList = new ArrayList<>();
+		List<UserInfoModel> tempList = new ArrayList<UserInfoModel>();
 		ResultEntity resultEntity = null;
 
 		for (UserInfoModel user : usersToSyncUpdate) {
@@ -830,7 +828,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @param usersToEnable
 	 */
 	private void syncEnableOneByOne(List<UserInfoModel> usersToEnable) {
-		List<String> tempList = new ArrayList<>();
+		List<String> tempList = new ArrayList<String>();
 		ResultEntity resultEntity = null;
 
 		for (UserInfoModel user : usersToEnable) {
@@ -858,7 +856,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @param usersToDisable
 	 */
 	private void syncDisableOneByOne(List<UserInfoModel> usersToDisable) {
-		List<String> tempList = new ArrayList<>();
+		List<String> tempList = new ArrayList<String>();
 		ResultEntity resultEntity = null;
 		for (UserInfoModel user : usersToDisable) {
 			tempList.add(user.getUserName());
@@ -889,11 +887,11 @@ public class OppleSyncService implements OppleConfig {
 	 * @return 包含 同步新增、更新、 删除等组织集合的Map对象
 	 */
 	private Map<String, List<OuInfoModel>> compareOrgList(List<OuInfoModel> fullList, List<OuInfoModel> newList) {
-		Map<String, List<OuInfoModel>> map = new HashMap<>();
+		Map<String, List<OuInfoModel>> map = new HashMap<String, List<OuInfoModel>>();
 
-		List<OuInfoModel> orgsToSyncAdd = new ArrayList<>();
-		List<OuInfoModel> orgsToSyncUpdate = new ArrayList<>();
-		List<OuInfoModel> orgsToSyncDelete = new ArrayList<>();
+		List<OuInfoModel> orgsToSyncAdd = new ArrayList<OuInfoModel>();
+		List<OuInfoModel> orgsToSyncUpdate = new ArrayList<OuInfoModel>();
+		List<OuInfoModel> orgsToSyncDelete = new ArrayList<OuInfoModel>();
 
 		for (OuInfoModel fullOrg : fullList) {
 			for (OuInfoModel newOrg : newList) {
@@ -974,12 +972,12 @@ public class OppleSyncService implements OppleConfig {
 	 */
 	private Map<String, List<UserInfoModel>> compareUserList(List<UserInfoModel> fullList,
 			List<UserInfoModel> newList) {
-		Map<String, List<UserInfoModel>> map = new HashMap<>();
+		Map<String, List<UserInfoModel>> map = new HashMap<String, List<UserInfoModel>>();
 
-		List<UserInfoModel> usersToSyncAdd = new ArrayList<>();
-		List<UserInfoModel> usersToSyncUpdate = new ArrayList<>();
-		List<UserInfoModel> usersToEnable = new ArrayList<>();
-		List<UserInfoModel> usersToDisable = new ArrayList<>();
+		List<UserInfoModel> usersToSyncAdd = new ArrayList<UserInfoModel>();
+		List<UserInfoModel> usersToSyncUpdate = new ArrayList<UserInfoModel>();
+		List<UserInfoModel> usersToEnable = new ArrayList<UserInfoModel>();
+		List<UserInfoModel> usersToDisable = new ArrayList<UserInfoModel>();
 
 		// 待更新用户
 		for (UserInfoModel fullUser : fullList) {
