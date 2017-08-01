@@ -1,7 +1,6 @@
 package openDemo.test;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -15,7 +14,19 @@ import openDemo.service.sync.OppleSyncService;
 
 public class OppleSyncServiceTest {
 
-	public static void main(String[] args) throws IOException, ReflectiveOperationException, SQLException {
+	public static void main(String[] args) throws Exception {
+		// opSyncServiceTest();
+
+		postGetJsonTest();
+	}
+
+	static void postGetJsonTest() throws Exception {
+		// String query = "QueryEmpInfo";// QueryOrgInfo
+		// String mode = "2";
+		// System.out.println(OppleSyncService.getJsonPost(query, mode));
+	}
+
+	static void opSyncServiceTest() {
 		Date startDate = new Date();
 		System.out.println("同步中......");
 
@@ -25,16 +36,11 @@ public class OppleSyncServiceTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		// String query = "QueryEmpInfo";// QueryOrgInfo
-		// String mode = "3";
-		// System.out.println(opSyncService.getJsonPost(query, mode));
-		// printOpOuInfoModel(opSyncService.getJsonPost(query, mode));
-		// opSyncService.opOrgSync(query, mode, false);
 
 		System.out.println("同步时间：" + calcMinutesBetween(startDate, new Date()));
 	}
 
-	static void printOpOuInfoModel(String jsonString) throws IOException {
+	void printOpOuInfoModel(String jsonString) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		mapper.setDateFormat(new SimpleDateFormat("yyyyMMdd"));
