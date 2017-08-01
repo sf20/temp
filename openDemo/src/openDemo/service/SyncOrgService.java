@@ -1,5 +1,6 @@
 package openDemo.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -25,8 +26,9 @@ public class SyncOrgService {
 	 * @param secretkey
 	 * @param baseUrl
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity ous(boolean isBaseInfo,List<OuInfoModel> ouInfos, String apikey, String secretkey, String baseUrl){
+	public ResultEntity ous(boolean isBaseInfo,List<OuInfoModel> ouInfos, String apikey, String secretkey, String baseUrl) throws IOException{
 		JsonConfig jsonConfig = JsonUtil.jsonConfig(OuInfoModel.class);
 		JSONArray array = JSONArray.fromObject(ouInfos, jsonConfig);
 		Map<String, Object> params = HttpResultUtil.getParamsMap(apikey, secretkey);
@@ -44,8 +46,9 @@ public class SyncOrgService {
 	 * @param secretkey
 	 * @param baseUrl
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity deleteous(List<String> ouCodeOrThirdSystemIDs, String apikey, String secretkey, String baseUrl){
+	public ResultEntity deleteous(List<String> ouCodeOrThirdSystemIDs, String apikey, String secretkey, String baseUrl) throws IOException{
 		Map<String, Object> params = HttpResultUtil.getParamsMap(apikey, secretkey);
 		JSONArray ouCodeOrThirdSystemIDArray = JSONArray.fromObject(ouCodeOrThirdSystemIDs);
 		params.put("OuCodeOrThirdSystemID", ouCodeOrThirdSystemIDArray.toString());
@@ -61,8 +64,9 @@ public class SyncOrgService {
 	 * @param secretkey
 	 * @param baseUrl
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity removeusersfromou(List<String> userNames, String apikey, String secretkey, String baseUrl){
+	public ResultEntity removeusersfromou(List<String> userNames, String apikey, String secretkey, String baseUrl) throws IOException{
 		Map<String, Object> params = HttpResultUtil.getParamsMap(apikey, secretkey);
 		JSONArray userNamesArray = JSONArray.fromObject(userNames);
 		params.put("userNames", userNamesArray.toString());
@@ -79,8 +83,9 @@ public class SyncOrgService {
 	 * @param secretkey
 	 * @param baseUrl
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity batchchangeorgou(List<String> userNames, String newOuID, String apikey, String secretkey, String baseUrl){
+	public ResultEntity batchchangeorgou(List<String> userNames, String newOuID, String apikey, String secretkey, String baseUrl) throws IOException{
 		Map<String, Object> params = HttpResultUtil.getParamsMap(apikey, secretkey);
 		JSONArray userNamesArray = JSONArray.fromObject(userNames);
 		params.put("userNames", userNamesArray.toString());
@@ -99,8 +104,9 @@ public class SyncOrgService {
 	 * @param secretkey
 	 * @param baseUrl
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity getOucodeByName(String ouname, String apikey, String secretkey, String baseUrl) {
+	public ResultEntity getOucodeByName(String ouname, String apikey, String secretkey, String baseUrl) throws IOException {
 		Map<String, Object> params = HttpResultUtil.getParamsMap(apikey, secretkey);
 		params.put("ouname", ouname);
 		String url = baseUrl + "el/sync/getoucodebyouname";

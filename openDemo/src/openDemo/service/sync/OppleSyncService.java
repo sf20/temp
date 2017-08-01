@@ -2,7 +2,6 @@ package openDemo.service.sync;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -133,7 +132,7 @@ public class OppleSyncService implements OppleConfig {
 			logger.error("初始化同步出现异常", e);
 		} catch (ReflectiveOperationException e) {
 			logger.error("初始化同步出现异常", e);
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			logger.error("初始化同步出现异常", e);
 		}
 
@@ -144,9 +143,8 @@ public class OppleSyncService implements OppleConfig {
 	 * 
 	 * @throws IOException
 	 * @throws ReflectiveOperationException
-	 * @throws SQLException
 	 */
-	public void sync() throws IOException, ReflectiveOperationException, SQLException {
+	public void sync() throws IOException, ReflectiveOperationException {
 		int posCount = positionList.size();
 		if (posCount > 0) {
 			// 岗位增量同步
@@ -194,10 +192,8 @@ public class OppleSyncService implements OppleConfig {
 	 * @param mode
 	 * @throws ReflectiveOperationException
 	 * @throws IOException
-	 * @throws SQLException
 	 */
-	public void opPosSync(String serviceOperation, String mode)
-			throws IOException, ReflectiveOperationException, SQLException {
+	public void opPosSync(String serviceOperation, String mode) throws IOException, ReflectiveOperationException {
 		List<OpUserInfoModel> userModelList = getUserModelList(serviceOperation, mode);
 		List<PositionModel> newList = getPosListFromUsers(userModelList);
 
@@ -295,21 +291,23 @@ public class OppleSyncService implements OppleConfig {
 	 * 逐个岗位同步新增
 	 * 
 	 * @param posToSync
-	 * @throws SQLException
-	 * @throws IOException
 	 */
-	private void syncAddPosOneByOne(List<PositionModel> posToSync) throws SQLException, IOException {
+	private void syncAddPosOneByOne(List<PositionModel> posToSync) {
 		List<PositionModel> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (PositionModel pos : posToSync) {
 			tempList.add(pos);
 
-			resultEntity = positionService.syncPos(tempList, apikey, secretkey, baseUrl);
+			try {
+				resultEntity = positionService.syncPos(tempList, apikey, secretkey, baseUrl);
 
-			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				positionList.add(pos);
-			} else {
-				printLog("岗位同步新增失败", pos.getpNames(), resultEntity);
+				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+					positionList.add(pos);
+				} else {
+					printLog("岗位同步新增失败 ", pos.getpNames(), resultEntity);
+				}
+			} catch (IOException e) {
+				logger.error("岗位同步新增失败 " + pos.getpNames(), e);
 			}
 
 			tempList.clear();
@@ -358,7 +356,7 @@ public class OppleSyncService implements OppleConfig {
 			}
 		}
 		// TODO to delete
-		logger.info("=====" + responseStr);
+		logger.info("请求用户接口返回数据：" + responseStr);
 		return responseStr;
 	}
 
@@ -416,10 +414,9 @@ public class OppleSyncService implements OppleConfig {
 	 * @param isBaseInfo
 	 * @throws IOException
 	 * @throws ReflectiveOperationException
-	 * @throws SQLException
 	 */
 	public void opOrgSync(String serviceOperation, String mode, boolean isBaseInfo)
-			throws IOException, ReflectiveOperationException, SQLException {
+			throws IOException, ReflectiveOperationException {
 		String jsonString = getJsonPost(serviceOperation, MODE_FULL);// Org只有全量模式
 
 		// 将json字符串转为组织单位json对象数据模型
@@ -478,19 +475,23 @@ public class OppleSyncService implements OppleConfig {
 	 * 逐个组织同步删除
 	 * 
 	 * @param orgsToSyncDelete
-	 * @throws SQLException
-	 * @throws IOException
 	 */
-	private void syncDeleteOrgOneByOne(List<OuInfoModel> orgsToSyncDelete) throws SQLException, IOException {
+	private void syncDeleteOrgOneByOne(List<OuInfoModel> orgsToSyncDelete) {
 		List<String> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (OuInfoModel org : orgsToSyncDelete) {
-			resultEntity = orgService.deleteous(tempList, apikey, secretkey, baseUrl);
+			tempList.add(org.getID());
 
-			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				ouInfoList.remove(org);
-			} else {
-				printLog("组织同步删除失败", org.getOuName(), resultEntity);
+			try {
+				resultEntity = orgService.deleteous(tempList, apikey, secretkey, baseUrl);
+
+				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+					ouInfoList.remove(org);
+				} else {
+					printLog("组织同步删除失败 ", org.getOuName(), resultEntity);
+				}
+			} catch (IOException e) {
+				logger.error("组织同步删除失败 " + org.getOuName(), e);
 			}
 
 			tempList.clear();
@@ -503,22 +504,23 @@ public class OppleSyncService implements OppleConfig {
 	 * 
 	 * @param orgsToSyncUpdate
 	 * @param isBaseInfo
-	 * @throws SQLException
-	 * @throws IOException
 	 */
-	private void syncUpdateOrgOneByOne(List<OuInfoModel> orgsToSyncUpdate, boolean isBaseInfo)
-			throws SQLException, IOException {
+	private void syncUpdateOrgOneByOne(List<OuInfoModel> orgsToSyncUpdate, boolean isBaseInfo) {
 		List<OuInfoModel> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (OuInfoModel org : orgsToSyncUpdate) {
 			tempList.add(org);
 
-			resultEntity = orgService.ous(isBaseInfo, tempList, apikey, secretkey, baseUrl);
-			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				ouInfoList.remove(org);
-				ouInfoList.add(org);
-			} else {
-				printLog("组织同步更新失败", org.getOuName(), resultEntity);
+			try {
+				resultEntity = orgService.ous(isBaseInfo, tempList, apikey, secretkey, baseUrl);
+				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+					ouInfoList.remove(org);
+					ouInfoList.add(org);
+				} else {
+					printLog("组织同步更新失败 ", org.getOuName(), resultEntity);
+				}
+			} catch (IOException e) {
+				logger.error("组织同步更新失败 " + org.getOuName(), e);
 			}
 
 			tempList.clear();
@@ -530,21 +532,22 @@ public class OppleSyncService implements OppleConfig {
 	 * 
 	 * @param orgsToSyncAdd
 	 * @param isBaseInfo
-	 * @throws SQLException
-	 * @throws IOException
 	 */
-	private void syncAddOrgOneByOne(List<OuInfoModel> orgsToSyncAdd, boolean isBaseInfo)
-			throws SQLException, IOException {
+	private void syncAddOrgOneByOne(List<OuInfoModel> orgsToSyncAdd, boolean isBaseInfo) {
 		List<OuInfoModel> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (OuInfoModel org : orgsToSyncAdd) {
 			tempList.add(org);
 
-			resultEntity = orgService.ous(isBaseInfo, tempList, apikey, secretkey, baseUrl);
-			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				ouInfoList.add(org);
-			} else {
-				printLog("组织同步新增失败", org.getOuName(), resultEntity);
+			try {
+				resultEntity = orgService.ous(isBaseInfo, tempList, apikey, secretkey, baseUrl);
+				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+					ouInfoList.add(org);
+				} else {
+					printLog("组织同步新增失败 ", org.getOuName(), resultEntity);
+				}
+			} catch (IOException e) {
+				logger.error("组织同步新增失败 " + org.getOuName(), e);
 			}
 
 			tempList.clear();
@@ -587,10 +590,9 @@ public class OppleSyncService implements OppleConfig {
 	 * @param islink
 	 * @throws IOException
 	 * @throws ReflectiveOperationException
-	 * @throws SQLException
 	 */
 	public void opUserSync(String serviceOperation, String mode, boolean islink)
-			throws IOException, ReflectiveOperationException, SQLException {
+			throws IOException, ReflectiveOperationException {
 		List<OpUserInfoModel> modelList = getUserModelList(serviceOperation, mode);
 		List<UserInfoModel> newList = copyCreateEntityList(modelList, UserInfoModel.class);
 
@@ -644,9 +646,8 @@ public class OppleSyncService implements OppleConfig {
 	 * 关联岗位到用户
 	 * 
 	 * @param newList
-	 * @throws SQLException
 	 */
-	private void setPositionNoToUser(List<UserInfoModel> newList) throws SQLException {
+	private void setPositionNoToUser(List<UserInfoModel> newList) {
 
 		for (UserInfoModel user : newList) {
 			String pNameInUser = user.getPostionName();
@@ -771,21 +772,22 @@ public class OppleSyncService implements OppleConfig {
 	 * 
 	 * @param usersToSyncAdd
 	 * @param islink
-	 * @throws SQLException
-	 * @throws IOException
 	 */
-	private void syncAddUserOneByOne(List<UserInfoModel> usersToSyncAdd, boolean islink)
-			throws SQLException, IOException {
+	private void syncAddUserOneByOne(List<UserInfoModel> usersToSyncAdd, boolean islink) {
 		List<UserInfoModel> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (UserInfoModel user : usersToSyncAdd) {
 			tempList.add(user);
 
-			resultEntity = userService.userSync(islink, tempList, apikey, secretkey, baseUrl);
-			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				userInfoList.add(user);
-			} else {
-				printLog("用户同步新增失败", user.getID(), resultEntity);
+			try {
+				resultEntity = userService.userSync(islink, tempList, apikey, secretkey, baseUrl);
+				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+					userInfoList.add(user);
+				} else {
+					printLog("用户同步新增失败 ", user.getID(), resultEntity);
+				}
+			} catch (IOException e) {
+				logger.error("用户同步新增失败 " + user.getID(), e);
 			}
 
 			tempList.clear();
@@ -797,23 +799,24 @@ public class OppleSyncService implements OppleConfig {
 	 * 
 	 * @param usersToSyncUpdate
 	 * @param islink
-	 * @throws SQLException
-	 * @throws IOException
 	 */
-	private void syncUpdateUserOneByOne(List<UserInfoModel> usersToSyncUpdate, boolean islink)
-			throws SQLException, IOException {
+	private void syncUpdateUserOneByOne(List<UserInfoModel> usersToSyncUpdate, boolean islink) {
 		List<UserInfoModel> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 
 		for (UserInfoModel user : usersToSyncUpdate) {
 			tempList.add(user);
 
-			resultEntity = userService.userSync(islink, tempList, apikey, secretkey, baseUrl);
-			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				userInfoList.remove(user);
-				userInfoList.add(user);
-			} else {
-				printLog("用户同步更新失败", user.getID(), resultEntity);
+			try {
+				resultEntity = userService.userSync(islink, tempList, apikey, secretkey, baseUrl);
+				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+					userInfoList.remove(user);
+					userInfoList.add(user);
+				} else {
+					printLog("用户同步更新失败 ", user.getID(), resultEntity);
+				}
+			} catch (Exception e) {
+				logger.error("用户同步更新失败 " + user.getID(), e);
 			}
 
 			tempList.clear();
@@ -825,22 +828,24 @@ public class OppleSyncService implements OppleConfig {
 	 * 逐个用户同步启用
 	 * 
 	 * @param usersToEnable
-	 * @throws SQLException
-	 * @throws IOException
 	 */
-	private void syncEnableOneByOne(List<UserInfoModel> usersToEnable) throws SQLException, IOException {
+	private void syncEnableOneByOne(List<UserInfoModel> usersToEnable) {
 		List<String> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 
 		for (UserInfoModel user : usersToEnable) {
 			tempList.add(user.getUserName());
 
-			resultEntity = userService.enabledusersSync(tempList, apikey, secretkey, baseUrl);
-			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				userInfoList.remove(user);
-				userInfoList.add(user);
-			} else {
-				printLog("用户同步启用失败", user.getID(), resultEntity);
+			try {
+				resultEntity = userService.enabledusersSync(tempList, apikey, secretkey, baseUrl);
+				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+					userInfoList.remove(user);
+					userInfoList.add(user);
+				} else {
+					printLog("用户同步启用失败 ", user.getID(), resultEntity);
+				}
+			} catch (IOException e) {
+				logger.error("用户同步启用失败  " + user.getID(), e);
 			}
 
 			tempList.clear();
@@ -851,21 +856,23 @@ public class OppleSyncService implements OppleConfig {
 	 * 逐个用户同步禁用
 	 * 
 	 * @param usersToDisable
-	 * @throws SQLException
-	 * @throws IOException
 	 */
-	private void syncDisableOneByOne(List<UserInfoModel> usersToDisable) throws SQLException, IOException {
+	private void syncDisableOneByOne(List<UserInfoModel> usersToDisable) {
 		List<String> tempList = new ArrayList<>();
 		ResultEntity resultEntity = null;
 		for (UserInfoModel user : usersToDisable) {
 			tempList.add(user.getUserName());
 
-			resultEntity = userService.disabledusersSync(tempList, apikey, secretkey, baseUrl);
-			if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-				userInfoList.remove(user);
-				userInfoList.add(user);
-			} else {
-				printLog("用户同步禁用失败", user.getID(), resultEntity);
+			try {
+				resultEntity = userService.disabledusersSync(tempList, apikey, secretkey, baseUrl);
+				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+					userInfoList.remove(user);
+					userInfoList.add(user);
+				} else {
+					printLog("用户同步禁用失败 ", user.getID(), resultEntity);
+				}
+			} catch (IOException e) {
+				logger.error("用户同步禁用失败 " + user.getID(), e);
 			}
 
 			tempList.clear();
@@ -1028,7 +1035,7 @@ public class OppleSyncService implements OppleConfig {
 	 */
 	private void printLog(String type, String id, ResultEntity resultEntity) {
 		// TODO
-		logger.warn(type + "ID:" + id + " ErrMsg:" + resultEntity.getCode() + "-" + resultEntity.getMessage());
+		logger.info(type + "ID:" + id + " ErrMsg:" + resultEntity.getCode() + "-" + resultEntity.getMessage());
 	}
 
 }

@@ -1,5 +1,6 @@
 package openDemo.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -27,8 +28,9 @@ public class SyncPositionService {
 	 * @param secretkey
 	 * @param baseUrl
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity syncPos(List<PositionModel> positionInfos, String apikey, String secretkey, String baseUrl){
+	public ResultEntity syncPos(List<PositionModel> positionInfos, String apikey, String secretkey, String baseUrl) throws IOException{
 		JsonConfig jsonConfig = JsonUtil.jsonConfig(PositionModel.class);
 		JSONArray array = JSONArray.fromObject(positionInfos, jsonConfig);
 		Map<String, Object> params = HttpResultUtil.getParamsMap(apikey, secretkey);
@@ -47,8 +49,9 @@ public class SyncPositionService {
 	 * @param secretkey
 	 * @param baseUrl
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity syncPosGetPNo(List<PositionModel> positionInfos, String apikey, String secretkey, String baseUrl){
+	public ResultEntity syncPosGetPNo(List<PositionModel> positionInfos, String apikey, String secretkey, String baseUrl) throws IOException{
 		JsonConfig jsonConfig = JsonUtil.jsonConfig(PositionModel.class);
 		JSONArray array = JSONArray.fromObject(positionInfos, jsonConfig);
 		Map<String, Object> params = HttpResultUtil.getParamsMap(apikey, secretkey);
@@ -69,8 +72,9 @@ public class SyncPositionService {
 	 * @param secretkey
 	 * @param baseUrl
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity changePosName(String positionNo, String positionName, String apikey, String secretkey, String baseUrl){
+	public ResultEntity changePosName(String positionNo, String positionName, String apikey, String secretkey, String baseUrl) throws IOException{
 		Map<String, Object> params = HttpResultUtil.getParamsMap(apikey, secretkey);
 		params.put("positionNo", positionNo);
 		params.put("positionName", positionName);

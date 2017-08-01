@@ -20,13 +20,17 @@ public class HttpResultUtil {
 	 * @return
 	 * @throws IOException 
 	 */
-	public static String getResult(Map<String, Object> params, String url){
+	public static String getResult(Map<String, Object> params, String url) throws IOException{
 		String result = null;
 		try {
 			result = HttpRequestUtil.sendPost(url, params);
-		} catch (Exception e) {
-			// TODO
-			logger.error("获取企业大学接口数据失败!", e);
+		} catch (IOException e) {
+			try {
+				// 发生异常重新请求一次
+				result = HttpRequestUtil.sendPost(url, params);
+			} catch (IOException e2) {
+				throw new IOException("获取企业大学接口数据失败!", e2);
+			}
 		}
 		return result;
 	}

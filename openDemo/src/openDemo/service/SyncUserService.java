@@ -1,5 +1,6 @@
 package openDemo.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -26,8 +27,9 @@ public class SyncUserService {
 	 * @param secretkey
 	 * @param baseUrl
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity userSync(boolean islink, List<UserInfoModel> users, String apikey, String secretkey, String baseUrl){
+	public ResultEntity userSync(boolean islink, List<UserInfoModel> users, String apikey, String secretkey, String baseUrl) throws IOException{
 		JsonConfig jsonConfig = JsonUtil.jsonConfig(UserInfoModel.class);
 		JSONArray array = JSONArray.fromObject(users, jsonConfig);
 		Map<String, Object> params = HttpResultUtil.getParamsMap(apikey, secretkey);
@@ -45,8 +47,9 @@ public class SyncUserService {
 	 * @param secretkey
 	 * @param baseUrl
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity disabledusersSync(List<String> userNames, String apikey, String secretkey, String baseUrl){
+	public ResultEntity disabledusersSync(List<String> userNames, String apikey, String secretkey, String baseUrl) throws IOException{
 		String url = baseUrl + "el/sync/disabledusers";
 		ResultEntity result = userOp(userNames, url, apikey, secretkey, baseUrl);
 		return result;
@@ -59,8 +62,9 @@ public class SyncUserService {
 	 * @param secretkey
 	 * @param baseUrl
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity enabledusersSync(List<String> userNames, String apikey, String secretkey, String baseUrl){
+	public ResultEntity enabledusersSync(List<String> userNames, String apikey, String secretkey, String baseUrl) throws IOException{
 		String url = baseUrl + "el/sync/enabledusers";
 		ResultEntity result = userOp(userNames, url, apikey, secretkey, baseUrl);
 		return result;
@@ -73,8 +77,9 @@ public class SyncUserService {
 	 * @param secretkey
 	 * @param baseUrl
 	 * @return
+	 * @throws IOException 
 	 */
-	public ResultEntity deletedusersSync(List<String> userNames, String apikey, String secretkey, String baseUrl){
+	public ResultEntity deletedusersSync(List<String> userNames, String apikey, String secretkey, String baseUrl) throws IOException{
 		String url = baseUrl + "el/sync/deletedusers";
 		ResultEntity result = userOp(userNames, url, apikey, secretkey, baseUrl);
 		return result;
@@ -88,8 +93,9 @@ public class SyncUserService {
 	 * @param secretkey
 	 * @param baseUrl
 	 * @return
+	 * @throws IOException 
 	 */
-	private ResultEntity userOp(List<String> userNames, String url, String apikey, String secretkey, String baseUrl){
+	private ResultEntity userOp(List<String> userNames, String url, String apikey, String secretkey, String baseUrl) throws IOException{
 		Map<String, Object> params = HttpResultUtil.getParamsMap(apikey, secretkey);
 		JSONArray userNameArray = JSONArray.fromObject(userNames);
 		params.put("userNames", userNameArray.toString());

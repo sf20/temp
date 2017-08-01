@@ -1,7 +1,6 @@
 package openDemo.timer;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -83,8 +82,6 @@ public class SyncTimerService {
 				} catch (IOException e) {
 					shutdowmAndPrintLog(threadPool, e);
 				} catch (ReflectiveOperationException e) {
-					shutdowmAndPrintLog(threadPool, e);
-				} catch (SQLException e) {
 					shutdowmAndPrintLog(threadPool, e);
 				} catch (Exception e) {
 					shutdowmAndPrintLog(threadPool, e);
