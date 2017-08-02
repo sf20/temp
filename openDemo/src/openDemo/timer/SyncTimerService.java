@@ -13,7 +13,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import openDemo.service.sync.OppleSyncService;
-import openDemo.service.sync.SyncService;
 
 /**
  * 同步定时器
@@ -35,7 +34,6 @@ public class SyncTimerService {
 	private static final Logger logger = LogManager.getLogger(SyncTimerService.class);
 
 	private Calendar calendar;
-	private Date initDate;// 定时器首次执行时间
 	private Date baseDate;// 定时器间隔执行计算基准日
 
 	public SyncTimerService() {
@@ -45,37 +43,38 @@ public class SyncTimerService {
 		calendar.set(Calendar.MINUTE, TIMER_EXEC_TIME_MINUTE);
 		calendar.set(Calendar.SECOND, TIMER_EXEC_TIME_SECOND);
 
-		initDate = calendar.getTime();
 		// 间隔执行基于首次执行时间
-		baseDate = initDate;
+		baseDate = calendar.getTime();
 	}
 
 	public static void main(String[] args) {
-		logger.info("程序初始化::首次同步中请稍候...");
 
 		SyncTimerService syncTimerService = new SyncTimerService();
+
+		logger.info("程序初始化::定时器启动...");
 		syncTimerService.addTimingService(new OppleSyncService());
+
+		logger.info("====测试优先执行====");
 	}
 
-	public void addTimingService(SyncService syncService) {
-		execSyncTask(syncService);
-	}
-
-	public void execSyncTask(final SyncService syncService) {
+	/**
+	 * 增加定时服务
+	 * 
+	 * @param syncService
+	 */
+	public void addTimingService(final OppleSyncService syncService) {
+		// 用于执行定时任务的线程池
 		final ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 
-		logger.info("初始化完成::定时器已启动");
-
-		TimerTask task1 = new TimerTask() {
+		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
 				try {
 					// 预定下次执行时间
 					Date nextTime = getNextTime();
 
-					logger.info("定时同步[OpSyncService]开始...");
+					// 执行同步方法
 					syncService.sync();
-					logger.info("定时同步[OpSyncService]结束");
 
 					// 实际任务结束时间
 					Date taskEndTime = new Date();
@@ -95,9 +94,10 @@ public class SyncTimerService {
 			}
 		};
 
-		// 定时器初始化
-		threadPool.schedule(task1, compareGetDelay(new Date(), initDate), TimeUnit.MILLISECONDS);
-		// threadPool.schedule(task2, 2, TimeUnit.MILLISECONDS);
+		// 定时器首次任务立即执行
+		threadPool.schedule(task, 0, TimeUnit.MILLISECONDS);
+		// threadPool.schedule(task1, compareGetDelay(new Date(), initDate),
+		// TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -160,7 +160,7 @@ public class SyncTimerService {
 	 * @param delay
 	 * @return
 	 */
-	public static String timeMillsToHMS(long delay) {
+	private String timeMillsToHMS(long delay) {
 		long oneSecondMills = 1000;
 		long oneMinuteMills = 60 * oneSecondMills;
 		long oneHourMills = 60 * oneMinuteMills;

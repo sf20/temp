@@ -44,7 +44,7 @@ import openDemo.service.SyncOrgService;
 import openDemo.service.SyncPositionService;
 import openDemo.service.SyncUserService;
 
-public class OppleSyncService extends SyncService implements OppleConfig {
+public class OppleSyncService implements OppleConfig {
 	// 用户接口请求参数名
 	private static final String REQUESTID = "RequestId";
 	private static final String SERVICENAME = "ServiceName";
@@ -105,8 +105,6 @@ public class OppleSyncService extends SyncService implements OppleConfig {
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		// json字符串的日期格式
 		mapper.setDateFormat(JSON_DATE_FORMAT);
-
-		// initSync();
 	}
 
 	/**
@@ -152,7 +150,7 @@ public class OppleSyncService extends SyncService implements OppleConfig {
 		} else {
 			// 岗位全量同步
 			logger.info("[岗位全量]同步开始...");
-			opPosSync(SERVICEOPERATION_EMP, MODE_FULL);
+			// opPosSync(SERVICEOPERATION_EMP, MODE_FULL);
 			logger.info("[岗位全量]同步结束");
 		}
 
@@ -165,7 +163,7 @@ public class OppleSyncService extends SyncService implements OppleConfig {
 		} else {
 			// 组织全量同步
 			logger.info("[组织全量]同步开始...");
-			opOrgSync(SERVICEOPERATION_ORG, MODE_FULL, false);
+			// opOrgSync(SERVICEOPERATION_ORG, MODE_FULL, false);
 			logger.info("[组织全量]同步结束");
 		}
 
@@ -178,7 +176,7 @@ public class OppleSyncService extends SyncService implements OppleConfig {
 		} else {
 			// 用户全量同步
 			logger.info("[用户全量]同步开始...");
-			opUserSync(SERVICEOPERATION_EMP, MODE_FULL, true);
+			// opUserSync(SERVICEOPERATION_EMP, MODE_FULL, true);
 			logger.info("[用户全量]同步结束");
 		}
 	}
