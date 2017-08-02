@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import openDemo.service.sync.OppleSyncService;
+import openDemo.service.sync.SyncService;
 
 /**
  * 同步定时器
@@ -33,8 +34,6 @@ public class SyncTimerService {
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static final Logger logger = LogManager.getLogger(SyncTimerService.class);
 
-	private OppleSyncService opSyncService = new OppleSyncService();
-
 	private Calendar calendar;
 	private Date initDate;// 定时器首次执行时间
 	private Date baseDate;// 定时器间隔执行计算基准日
@@ -53,10 +52,16 @@ public class SyncTimerService {
 
 	public static void main(String[] args) {
 		logger.info("程序初始化::首次同步中请稍候...");
-		new SyncTimerService().multiSyncTask();
+
+		SyncTimerService syncTimerService = new SyncTimerService();
+		syncTimerService.addTimingService(new OppleSyncService());
 	}
 
-	private void multiSyncTask() {
+	public void addTimingService(SyncService syncService) {
+		execSyncTask(syncService);
+	}
+
+	public void execSyncTask(final SyncService syncService) {
 		final ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 
 		logger.info("初始化完成::定时器已启动");
@@ -69,7 +74,7 @@ public class SyncTimerService {
 					Date nextTime = getNextTime();
 
 					logger.info("定时同步[OpSyncService]开始...");
-					opSyncService.sync();
+					syncService.sync();
 					logger.info("定时同步[OpSyncService]结束");
 
 					// 实际任务结束时间

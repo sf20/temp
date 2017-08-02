@@ -44,7 +44,7 @@ import openDemo.service.SyncOrgService;
 import openDemo.service.SyncPositionService;
 import openDemo.service.SyncUserService;
 
-public class OppleSyncService implements OppleConfig {
+public class OppleSyncService extends SyncService implements OppleConfig {
 	// 用户接口请求参数名
 	private static final String REQUESTID = "RequestId";
 	private static final String SERVICENAME = "ServiceName";
@@ -106,7 +106,7 @@ public class OppleSyncService implements OppleConfig {
 		// json字符串的日期格式
 		mapper.setDateFormat(JSON_DATE_FORMAT);
 
-		initSync();
+		// initSync();
 	}
 
 	/**
