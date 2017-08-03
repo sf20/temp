@@ -26,7 +26,6 @@ public class ThreadPoolTest {
 	private static final Logger logger = LogManager.getLogger(ThreadPoolTest.class);
 
 	private Calendar calendar;
-	private Date initDate;// 定时器首次执行时间
 	private Date baseDate;// 定时器间隔执行计算基准日
 
 	ThreadPoolTest() {
@@ -36,9 +35,8 @@ public class ThreadPoolTest {
 		calendar.set(Calendar.MINUTE, TIMER_EXEC_TIME_MINUTE);
 		calendar.set(Calendar.SECOND, TIMER_EXEC_TIME_SECOND);
 
-		initDate = calendar.getTime();
 		// 间隔执行基于首次执行时间
-		baseDate = initDate;
+		baseDate = calendar.getTime();
 	}
 
 	public static void main(String[] args) {
@@ -87,8 +85,10 @@ public class ThreadPoolTest {
 			}
 		};
 
-		// 定时器初始化
-		threadPool.schedule(task, compareGetDelay(new Date(), initDate), TimeUnit.MILLISECONDS);
+		// 定时器首次执行
+		threadPool.schedule(task, 0, TimeUnit.MILLISECONDS);
+		// threadPool.schedule(task, compareGetDelay(new Date(), initDate),
+		// TimeUnit.MILLISECONDS);
 
 		// threadPool.execute(task2);
 		// threadPool.scheduleWithFixedDelay(task2, 1, 1000,
