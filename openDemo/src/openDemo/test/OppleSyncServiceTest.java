@@ -21,9 +21,9 @@ public class OppleSyncServiceTest {
 	}
 
 	static void postGetJsonTest() throws Exception {
-		// String query = "QueryEmpInfo";// QueryOrgInfo
-		// String mode = "2";
-		// System.out.println(OppleSyncService.getJsonPost(query, mode));
+		 String query = "QueryEmpInfo";// QueryOrgInfo
+		 String mode = "1";
+		 System.out.println(OppleSyncService.getJsonPost(query, mode));
 	}
 
 	static void opSyncServiceTest() {

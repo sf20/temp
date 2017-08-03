@@ -320,7 +320,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @return 响应的json字符串
 	 * @throws IOException
 	 */
-	public String getJsonPost(String serviceOperation, String mode) throws IOException {
+	public static String getJsonPost(String serviceOperation, String mode) throws IOException {
 		HttpClient httpClient = HttpClientBuilder.create().build();
 
 		HttpPost httpPost = new HttpPost(REQUEST_URL);
@@ -364,7 +364,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @return Auth请求头内容
 	 * @throws UnsupportedEncodingException
 	 */
-	private String getBasicAuthHeader(String username, String password) throws UnsupportedEncodingException {
+	private static String getBasicAuthHeader(String username, String password) throws UnsupportedEncodingException {
 		String auth = username + ":" + password;
 		byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(CHARSET_UTF8));
 		String authHeader = "Basic " + new String(encodedAuth, CHARSET_UTF8);
@@ -382,7 +382,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	private String buildReqJson(String serviceOperation, String mode) throws JsonProcessingException {
+	private static String buildReqJson(String serviceOperation, String mode) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> map = new HashMap<String, Object>();
 
