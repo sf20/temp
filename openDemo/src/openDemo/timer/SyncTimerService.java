@@ -53,8 +53,8 @@ public class SyncTimerService {
 		SyncTimerService syncTimerService = new SyncTimerService();
 
 		logger.info("程序初始化::定时器启动...");
-		syncTimerService.addTimingService(new OppleSyncService());
-		syncTimerService.addTimingService(new OppleSyncService());
+		syncTimerService.singleAddTimingService(new OppleSyncService());
+		syncTimerService.singleAddTimingService(new OppleSyncService());
 
 		logger.info("====测试优先执行====");
 	}
@@ -64,14 +64,14 @@ public class SyncTimerService {
 	 * 
 	 * @param syncService
 	 */
-	public void addTimingService(OppleSyncService syncService) {
+	public void singleAddTimingService(OppleSyncService syncService) {
 		// 保证只有一个定时器在运行
 		if (executor == null) {
-			singleAddTimingService(syncService);
+			addTimingService(syncService);
 		}
 	}
 
-	private void singleAddTimingService(final OppleSyncService syncService) {
+	private void addTimingService(final OppleSyncService syncService) {
 		executor = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 
 		TimerTask task = new TimerTask() {
