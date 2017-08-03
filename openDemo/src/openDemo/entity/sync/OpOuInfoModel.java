@@ -29,8 +29,7 @@ public class OpOuInfoModel {
 	/**
 	 * 父节点ID
 	 */
-	// TODO @JsonProperty("ParentCode")
-	@JsonIgnore
+	@JsonProperty("ParentCode")
 	private String parentID;
 
 	/**
