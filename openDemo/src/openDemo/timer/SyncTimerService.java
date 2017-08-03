@@ -32,12 +32,12 @@ public class SyncTimerService {
 
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static final Logger logger = LogManager.getLogger(SyncTimerService.class);
-
-	private Calendar calendar;
-	private Date baseDate;// 定时器间隔执行计算基准日
+	
+	// 定时器间隔执行计算基准日
+	private Date baseDate;
 
 	public SyncTimerService() {
-		calendar = Calendar.getInstance();
+		Calendar calendar = Calendar.getInstance();
 		// 设置定时器首次执行时间
 		calendar.set(Calendar.HOUR_OF_DAY, TIMER_EXEC_TIME_HOUR);
 		calendar.set(Calendar.MINUTE, TIMER_EXEC_TIME_MINUTE);
@@ -71,7 +71,7 @@ public class SyncTimerService {
 			public void run() {
 				try {
 					// 预定下次执行时间
-					Date nextTime = getNextTime();
+					Date nextTime = getNextTime(new Date());
 
 					// 执行同步方法
 					syncService.sync();
@@ -130,12 +130,18 @@ public class SyncTimerService {
 	 * 
 	 * @return
 	 */
-	private Date getNextTime() {
-		Date nextTime = addTime(baseDate, PERIOD);
-		// 调整下次计算基准日
-		baseDate = nextTime;
+	private Date getNextTime(Date nowTime) {
+		// 首次调用时处理
+		if(nowTime.compareTo(baseDate) < 0){
+			
+			return baseDate;
+		}else{
+			Date nextTime = addTime(baseDate, PERIOD);
+			// 调整下次计算基准日
+			baseDate = nextTime;
 
-		return nextTime;
+			return nextTime;
+		}
 	}
 
 	/**
@@ -148,6 +154,7 @@ public class SyncTimerService {
 	 * @return
 	 */
 	private Date addTime(Date baseDate, long period) {
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(baseDate);
 		calendar.add(Calendar.MILLISECOND, (int) period);
 

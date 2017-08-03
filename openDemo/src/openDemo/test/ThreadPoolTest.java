@@ -62,7 +62,7 @@ public class ThreadPoolTest {
 				try {
 					logger.info("开始执行task：" + dateFormat.format(new Date()));
 					// 预定下次执行时间
-					Date nextTime = getNextTime();
+					Date nextTime = getNextTime(new Date());
 					// logger.info("定时器预定下次执行时间: " + dateFormat.format(nextTime));
 
 					// 模拟任务执行耗时
@@ -126,12 +126,18 @@ public class ThreadPoolTest {
 	 * 
 	 * @return
 	 */
-	public Date getNextTime() {
-		Date nextTime = addTime(baseDate, PERIOD);
-		// 调整下次计算基准日
-		baseDate = nextTime;
+	private Date getNextTime(Date nowTime) {
+		// 首次调用时处理
+		if(nowTime.compareTo(baseDate) < 0){
+			
+			return baseDate;
+		}else{
+			Date nextTime = addTime(baseDate, PERIOD);
+			// 调整下次计算基准日
+			baseDate = nextTime;
 
-		return nextTime;
+			return nextTime;
+		}
 	}
 
 	/**
