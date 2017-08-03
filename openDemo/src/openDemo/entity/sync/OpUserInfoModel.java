@@ -102,13 +102,19 @@ public class OpUserInfoModel {
 	/**
 	 * 扩展字段 1~10
 	 */
-	@JsonProperty("Gbort")
+	@JsonIgnore
 	private String spare1;
-	@JsonIgnore
+	/*
+	 * 工作地点
+	 */
+	@JsonProperty("Gbort")
 	private String spare2;
-	@JsonIgnore
+	/*
+	 * 职级
+	 */
+	@JsonProperty("PositionLevel")
 	private String spare3;
-	@JsonIgnore
+	@JsonProperty("ZzGzddwb")
 	private String spare4;
 	@JsonIgnore
 	private String spare5;
