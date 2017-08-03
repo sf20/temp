@@ -1,6 +1,5 @@
 package openDemo.timer;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -32,7 +31,9 @@ public class SyncTimerService {
 
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static final Logger logger = LogManager.getLogger(SyncTimerService.class);
-	
+
+	// 用于执行定时任务的定时器
+	private ScheduledExecutorService executor;
 	// 定时器间隔执行计算基准日
 	private Date baseDate;
 
@@ -53,6 +54,7 @@ public class SyncTimerService {
 
 		logger.info("程序初始化::定时器启动...");
 		syncTimerService.addTimingService(new OppleSyncService());
+		syncTimerService.addTimingService(new OppleSyncService());
 
 		logger.info("====测试优先执行====");
 	}
@@ -62,9 +64,15 @@ public class SyncTimerService {
 	 * 
 	 * @param syncService
 	 */
-	public void addTimingService(final OppleSyncService syncService) {
-		// 用于执行定时任务的线程池
-		final ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+	public void addTimingService(OppleSyncService syncService) {
+		// 保证只有一个定时器在运行
+		if (executor == null) {
+			singleAddTimingService(syncService);
+		}
+	}
+
+	private void singleAddTimingService(final OppleSyncService syncService) {
+		executor = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 
 		TimerTask task = new TimerTask() {
 			@Override
@@ -83,19 +91,15 @@ public class SyncTimerService {
 					logger.info(System.lineSeparator());
 
 					// 继续设置下一个定时任务
-					threadPool.schedule(this, delay, TimeUnit.MILLISECONDS);
-				} catch (IOException e) {
-					shutdowmAndPrintLog(threadPool, e);
-				} catch (ReflectiveOperationException e) {
-					shutdowmAndPrintLog(threadPool, e);
+					executor.schedule(this, delay, TimeUnit.MILLISECONDS);
 				} catch (Exception e) {
-					shutdowmAndPrintLog(threadPool, e);
+					shutdowmAndPrintLog(executor, e);
 				}
 			}
 		};
 
 		// 定时器首次任务立即执行
-		threadPool.schedule(task, 0, TimeUnit.MILLISECONDS);
+		executor.schedule(task, 0, TimeUnit.MILLISECONDS);
 		// threadPool.schedule(task1, compareGetDelay(new Date(), initDate),
 		// TimeUnit.MILLISECONDS);
 	}
@@ -132,10 +136,10 @@ public class SyncTimerService {
 	 */
 	private Date getNextTime(Date nowTime) {
 		// 首次调用时处理
-		if(nowTime.compareTo(baseDate) < 0){
-			
+		if (nowTime.compareTo(baseDate) < 0) {
+
 			return baseDate;
-		}else{
+		} else {
 			Date nextTime = addTime(baseDate, PERIOD);
 			// 调整下次计算基准日
 			baseDate = nextTime;
