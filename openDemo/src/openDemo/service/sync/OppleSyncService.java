@@ -108,33 +108,6 @@ public class OppleSyncService implements OppleConfig {
 	}
 
 	/**
-	 * 初始化同步
-	 */
-	public void initSync() {
-		try {
-			// 岗位全量同步
-			logger.info("[岗位全量]同步开始...");
-			opPosSync(SERVICEOPERATION_EMP, MODE_FULL);
-			logger.info("[岗位全量]同步结束");
-			// 组织全量同步
-			logger.info("[组织全量]同步开始...");
-			opOrgSync(SERVICEOPERATION_ORG, MODE_FULL, false);
-			logger.info("[组织全量]同步结束");
-			// 用户全量同步
-			logger.info("[用户全量]同步开始...");
-			opUserSync(SERVICEOPERATION_EMP, MODE_FULL, true);
-			logger.info("[用户全量]同步结束");
-		} catch (IOException e) {
-			logger.error("初始化同步出现异常", e);
-		} catch (ReflectiveOperationException e) {
-			logger.error("初始化同步出现异常", e);
-		} catch (Exception e) {
-			logger.error("初始化同步出现异常", e);
-		}
-
-	}
-
-	/**
 	 * 对外提供的同步方法
 	 * 
 	 * @throws IOException
