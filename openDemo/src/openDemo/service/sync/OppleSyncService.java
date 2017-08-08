@@ -54,7 +54,7 @@ public class OppleSyncService implements OppleConfig {
 	private static final String ESBREQHEAD = "EsbReqHead";
 	private static final String ESBREQDATA = "EsbReqData";
 	// 用户接口请求参数值
-	private static final String REQUEST_URL = "http://esb.opple.com:50831/esb_emp/json";
+	private static final String REQUEST_URL = "https://esb.opple.com:50830/esb_emp/json"; //"http://esb.opple.com:50831/esb_emp/json";
 	private static final String USERNAME = "yxtuser";
 	private static final String PASSWORD = "u#5QTwNDaq";
 	private static final String SERVICE_NAME = "YXT_ESB_EmpOrgQuery";
@@ -396,14 +396,16 @@ public class OppleSyncService implements OppleConfig {
 		List<OuInfoModel> newList = copyCreateEntityList(modle.getEsbResData().get(ORG_RES_DATA_KEY),
 				OuInfoModel.class);
 
-		// replaceIllegalChar(newList);
+		removeExpiredOrgs(newList, mode);
 
 		logger.info("组织同步Total Size: " + newList.size());
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
-			removeExpiredOrgs(newList);
 			logger.info("组织同步新增Size: " + newList.size());
-			syncAddOrgOneByOne(newList, isBaseInfo);
+			// 进行多次同步
+			for (int i = 0; i < 5; i++) {
+				syncAddOrgOneByOne(newList, isBaseInfo);
+			}
 		}
 		// 增量模式
 		else {
@@ -426,16 +428,25 @@ public class OppleSyncService implements OppleConfig {
 	}
 
 	/**
-	 * 去除过期组织
+	 * 去除过期组织和除了编号为00000001之外的所有无parentcode的部门组织
 	 * 
 	 * @param list
+	 * @param mode
 	 */
-	private void removeExpiredOrgs(List<OuInfoModel> list) {
+	private void removeExpiredOrgs(List<OuInfoModel> list, String mode) {
 		for (Iterator<OuInfoModel> iterator = list.iterator(); iterator.hasNext();) {
 			OuInfoModel org = iterator.next();
-			if (isOrgExpired(org)) {
+			// 仅全量模式下执行
+			if (MODE_FULL.equals(mode)) {
+				if (isOrgExpired(org)) {
+					iterator.remove();
+					logger.info("删除了过期组织：" + org.getOuName());
+				}
+			}
+
+			// 除了编号为 00000001 之外的所有无parentcode的部门都不同步
+			if (org.getParentID() == null && Integer.parseInt(org.getID()) != 1) {
 				iterator.remove();
-				logger.info("删除了过期组织：" + org.getOuName());
 			}
 		}
 	}

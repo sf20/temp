@@ -197,12 +197,12 @@ public class SyncTimerService {
 	/**
 	 * 关闭定时器同时记录异常日志
 	 * 
-	 * @param threadPool
-	 *            定时器线程池
+	 * @param executor
+	 *            定时器执行器
 	 * @param e
 	 */
-	private void shutdowmAndPrintLog(ScheduledExecutorService threadPool, Exception e) {
-		threadPool.shutdown();
+	private void shutdowmAndPrintLog(ScheduledExecutorService executor, Exception e) {
+		executor.shutdown();
 		logger.info("发生异常::定时器已停止");
 		logger.error("定时同步[OpSyncService]出现异常", e);
 	}
