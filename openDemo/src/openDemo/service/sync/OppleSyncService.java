@@ -2,6 +2,8 @@ package openDemo.service.sync;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,15 +16,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.HttpClientUtils;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -136,7 +145,7 @@ public class OppleSyncService implements OppleConfig {
 		} else {
 			// 组织全量同步
 			logger.info("[组织全量]同步开始...");
-			// opOrgSync(SERVICEOPERATION_ORG, MODE_FULL, false);
+			opOrgSync(SERVICEOPERATION_ORG, MODE_FULL, false);
 			logger.info("[组织全量]同步结束");
 		}
 
@@ -294,7 +303,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @throws IOException
 	 */
 	public static String getJsonPost(String serviceOperation, String mode) throws IOException {
-		HttpClient httpClient = HttpClientBuilder.create().build();
+		HttpClient httpClient = createSSLHttpClient();// HttpClientBuilder.create().build();
 
 		HttpPost httpPost = new HttpPost(REQUEST_URL);
 		HttpResponse httpResponse = null;
@@ -329,6 +338,40 @@ public class OppleSyncService implements OppleConfig {
 		return responseStr;
 	}
 
+	/**
+	 * 创建用于https请求的HttpClient
+	 * 
+	 * @return
+	 */
+	private static CloseableHttpClient createSSLHttpClient() {
+		try {
+			SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+			// 实现一个X509TrustManager接口
+			X509TrustManager trustManager = new X509TrustManager() {
+				@Override
+				public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+				}
+
+				@Override
+				public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+				}
+
+				@Override
+				public X509Certificate[] getAcceptedIssuers() {
+					return null;
+				}
+			};
+			sslContext.init(null, new TrustManager[] { trustManager }, null);
+
+			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
+			return HttpClients.custom().setSSLSocketFactory(sslsf).build();
+		} catch (Exception e) {
+			logger.error("创建SSLClient失败", e);
+		}
+
+		return HttpClientBuilder.create().build();
+	}
+	
 	/**
 	 * 请求header中增加Auth部分 Auth类型：Basic
 	 * 
@@ -403,9 +446,9 @@ public class OppleSyncService implements OppleConfig {
 		if (MODE_FULL.equals(mode)) {
 			logger.info("组织同步新增Size: " + newList.size());
 			// 进行多次同步
-			for (int i = 0; i < 5; i++) {
+			// for (int i = 0; i < 5; i++) {
 				syncAddOrgOneByOne(newList, isBaseInfo);
-			}
+			// }
 		}
 		// 增量模式
 		else {
