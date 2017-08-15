@@ -47,13 +47,15 @@ public class OpUserInfoModel {
 	/**
 	 * 移动电话
 	 */
-	@JsonProperty("Mobile")
+	// @JsonProperty("Mobile")
+	@JsonIgnore
 	private String mobile;
 
 	/**
 	 * 电子邮件
 	 */
-	@JsonProperty("Mail")
+	// @JsonProperty("Mail")
+	@JsonIgnore
 	private String mail;
 
 	/**
