@@ -69,7 +69,7 @@ public class OppleSyncServiceTest {
 
 		for (UserInfoModel model : newList) {
 			System.out.println(model.getID() + "==" + model.getUserName() + "==" + model.getCnName() + "=="
-					+ model.getSpare3() + "==" + model.getSpare4());
+					+ model.getSpare2() + "==" + model.getSpare3());
 		}
 	}
 

@@ -108,17 +108,15 @@ public class OpUserInfoModel {
 	/*
 	 * 工作地点
 	 */
-	@JsonProperty("Gbort")
+	// @JsonProperty("Gbort")
+	@JsonProperty("ZzgZddWb")
 	private String spare2;
 	/*
 	 * 职级
 	 */
 	@JsonProperty("PositionLevel")
 	private String spare3;
-	/*
-	 * 工作地
-	 */
-	@JsonProperty("ZzgZddWb")
+	@JsonIgnore
 	private String spare4;
 	@JsonIgnore
 	private String spare5;
