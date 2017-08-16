@@ -16,14 +16,14 @@ public class OpUserInfoModel {
 	/**
 	 * 用户ID(同步必传)
 	 */
-	// TODO
 	@JsonProperty("OpUserId")
 	private String ID;
 
 	/**
 	 * 用户名(同步必传)
 	 */
-	@JsonProperty("OpUserId")
+	// 客户提供json数据中没有匹配字段
+	@JsonIgnore
 	private String userName;
 
 	/**

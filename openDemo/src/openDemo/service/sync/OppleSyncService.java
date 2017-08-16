@@ -619,7 +619,7 @@ public class OppleSyncService implements OppleConfig {
 		List<OpUserInfoModel> modelList = getUserModelList(serviceOperation, mode);
 		List<UserInfoModel> newList = copyCreateEntityList(modelList, UserInfoModel.class);
 
-		copySetUserId(newList);
+		copySetUserName(newList);
 		changeDateFormatAndSex(modelList, newList);
 
 		// 关联岗位到用户
@@ -778,15 +778,15 @@ public class OppleSyncService implements OppleConfig {
 	}
 
 	/**
-	 * 将userName字段值赋值给ID字段 用于解决返回json字符串中组织没有ID的问题
+	 * 将ID字段值赋值给userName字段
 	 * 
 	 * @param newList
 	 */
-	private void copySetUserId(List<UserInfoModel> newList) {
+	private void copySetUserName(List<UserInfoModel> newList) {
 		for (Iterator<UserInfoModel> iterator = newList.iterator(); iterator.hasNext();) {
 			UserInfoModel userInfoEntity = iterator.next();
-			// ID <= userName
-			userInfoEntity.setID(userInfoEntity.getUserName());
+			// userName <= ID
+			userInfoEntity.setUserName(userInfoEntity.getID());
 		}
 	}
 
@@ -813,7 +813,7 @@ public class OppleSyncService implements OppleConfig {
 					resultEntity = userService.userSync(islink, tempList, apikey, secretkey, baseUrl);
 					if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 						userInfoList.add(user);
-						logger.warn("邮箱格式有误或已被其他用户使用：" + user.getID() + "+" + user.getMail());
+						logger.warn("该用户邮箱异常未同步：" + user.getID());
 					} else {
 						printLog("用户同步新增失败 ", resultEntity);
 					}
@@ -852,7 +852,7 @@ public class OppleSyncService implements OppleConfig {
 					if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 						userInfoList.remove(user);
 						userInfoList.add(user);
-						logger.warn("邮箱格式有误或已被其他用户使用：" + user.getID() + "+" + user.getMail());
+						logger.warn("该用户邮箱异常未同步：" + user.getID());
 					} else {
 						printLog("用户同步更新失败 ", resultEntity);
 					}
