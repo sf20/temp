@@ -1077,7 +1077,6 @@ public class OppleSyncService implements OppleConfig {
 	 */
 	private void printLog(String type, ResultEntity resultEntity) {
 		// TODO
-		logger.info(type + "错误信息：" + resultEntity.getCode() + "-" + resultEntity.getMessage());
+		logger.error(type + "错误信息：" + resultEntity.getCode() + "-" + resultEntity.getMessage());
 	}
-
 }
