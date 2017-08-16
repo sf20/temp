@@ -63,7 +63,7 @@ public class OppleSyncService implements OppleConfig {
 	private static final String ESBREQHEAD = "EsbReqHead";
 	private static final String ESBREQDATA = "EsbReqData";
 	// 用户接口请求参数值
-	private static final String REQUEST_URL = "https://esb.opple.com:50830/esb_emp/json"; //"http://esb.opple.com:50831/esb_emp/json";
+	private static final String REQUEST_URL = "https://esb.opple.com:50830/esb_emp/json"; // "http://esb.opple.com:50831/esb_emp/json";
 	private static final String USERNAME = "yxtuser";
 	private static final String PASSWORD = "u#5QTwNDaq";
 	private static final String SERVICE_NAME = "YXT_ESB_EmpOrgQuery";
@@ -282,7 +282,7 @@ public class OppleSyncService implements OppleConfig {
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					positionList.add(pos);
 				} else {
-					printLog("岗位同步新增失败 ", pos.getpNames(), resultEntity);
+					printLog("岗位同步新增失败 ", resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("岗位同步新增失败 " + pos.getpNames(), e);
@@ -371,7 +371,7 @@ public class OppleSyncService implements OppleConfig {
 
 		return HttpClientBuilder.create().build();
 	}
-	
+
 	/**
 	 * 请求header中增加Auth部分 Auth类型：Basic
 	 * 
@@ -511,7 +511,7 @@ public class OppleSyncService implements OppleConfig {
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					ouInfoList.remove(org);
 				} else {
-					printLog("组织同步删除失败 ", org.getOuName(), resultEntity);
+					printLog("组织同步删除失败 ", resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("组织同步删除失败 " + org.getOuName(), e);
@@ -540,7 +540,7 @@ public class OppleSyncService implements OppleConfig {
 					ouInfoList.remove(org);
 					ouInfoList.add(org);
 				} else {
-					printLog("组织同步更新失败 ", org.getOuName(), resultEntity);
+					printLog("组织同步更新失败 ", resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("组织同步更新失败 " + org.getOuName(), e);
@@ -567,7 +567,7 @@ public class OppleSyncService implements OppleConfig {
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					ouInfoList.add(org);
 				} else {
-					printLog("组织同步新增失败 ", org.getOuName(), resultEntity);
+					printLog("组织同步新增失败 ", resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("组织同步新增失败 " + org.getOuName(), e);
@@ -807,7 +807,16 @@ public class OppleSyncService implements OppleConfig {
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步新增失败 ", user.getID(), resultEntity);
+					// 忽略邮箱再同步一次
+					user.setMail(null);
+					tempList.set(0, user);
+					resultEntity = userService.userSync(islink, tempList, apikey, secretkey, baseUrl);
+					if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+						userInfoList.add(user);
+						logger.warn("邮箱格式有误或已被其他用户使用：" + user.getID() + "+" + user.getMail());
+					} else {
+						printLog("用户同步新增失败 ", resultEntity);
+					}
 				}
 			} catch (IOException e) {
 				logger.error("用户同步新增失败 " + user.getID(), e);
@@ -836,7 +845,17 @@ public class OppleSyncService implements OppleConfig {
 					userInfoList.remove(user);
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步更新失败 ", user.getID(), resultEntity);
+					// 忽略邮箱再同步一次
+					user.setMail(null);
+					tempList.set(0, user);
+					resultEntity = userService.userSync(islink, tempList, apikey, secretkey, baseUrl);
+					if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+						userInfoList.remove(user);
+						userInfoList.add(user);
+						logger.warn("邮箱格式有误或已被其他用户使用：" + user.getID() + "+" + user.getMail());
+					} else {
+						printLog("用户同步更新失败 ", resultEntity);
+					}
 				}
 			} catch (Exception e) {
 				logger.error("用户同步更新失败 " + user.getID(), e);
@@ -865,7 +884,7 @@ public class OppleSyncService implements OppleConfig {
 					userInfoList.remove(user);
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步启用失败 ", user.getID(), resultEntity);
+					printLog("用户同步启用失败 ", resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("用户同步启用失败  " + user.getID(), e);
@@ -892,7 +911,7 @@ public class OppleSyncService implements OppleConfig {
 					userInfoList.remove(user);
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步禁用失败 ", user.getID(), resultEntity);
+					printLog("用户同步禁用失败 ", resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("用户同步禁用失败 " + user.getID(), e);
@@ -1056,9 +1075,9 @@ public class OppleSyncService implements OppleConfig {
 	 * @param type
 	 * @param resultEntity
 	 */
-	private void printLog(String type, String id, ResultEntity resultEntity) {
+	private void printLog(String type, ResultEntity resultEntity) {
 		// TODO
-		logger.info(type + "ID:" + id + " ErrMsg:" + resultEntity.getCode() + "-" + resultEntity.getMessage());
+		logger.info(type + "错误信息：" + resultEntity.getCode() + "-" + resultEntity.getMessage());
 	}
 
 }

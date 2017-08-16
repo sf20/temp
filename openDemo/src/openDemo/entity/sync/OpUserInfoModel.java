@@ -54,8 +54,7 @@ public class OpUserInfoModel {
 	/**
 	 * 电子邮件
 	 */
-	// @JsonProperty("Mail")
-	@JsonIgnore
+	@JsonProperty("Mail")
 	private String mail;
 
 	/**
