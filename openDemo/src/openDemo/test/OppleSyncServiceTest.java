@@ -15,8 +15,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.OuInfoTree;
+import openDemo.entity.UserInfoModel;
 import openDemo.entity.sync.OpOuInfoModel;
 import openDemo.entity.sync.OpReqJsonModle;
+import openDemo.entity.sync.OpUserInfoModel;
 import openDemo.service.sync.OppleSyncService;
 
 public class OppleSyncServiceTest {
@@ -28,11 +30,12 @@ public class OppleSyncServiceTest {
 	}
 
 	static void postGetJsonTest() throws Exception {
-		String query = "QueryOrgInfo";// QueryEmpInfo
-		String mode = "1";
+		String query = "QueryEmpInfo";// QueryOrgInfo
+		String mode = "2";
 		String jsonString = OppleSyncService.getJsonPost(query, mode);
 		System.out.println(jsonString);
 
+		printOpUserInfoModel(jsonString);
 		// printOpOuInfoModel(jsonString);
 	}
 
@@ -48,6 +51,26 @@ public class OppleSyncServiceTest {
 		}
 
 		System.out.println("同步时间：" + calcMinutesBetween(startDate, new Date()));
+	}
+
+	static void printOpUserInfoModel(String jsonString) throws IOException, ReflectiveOperationException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		mapper.setDateFormat(new SimpleDateFormat("yyyyMMdd"));
+
+		OpReqJsonModle<OpUserInfoModel> modle = new OpReqJsonModle<>();
+		modle = mapper.readValue(jsonString, new TypeReference<OpReqJsonModle<OpUserInfoModel>>() {
+		});
+
+		List<UserInfoModel> newList = copyCreateEntityList(modle.getEsbResData().get("SapMiddleEmp"),
+				UserInfoModel.class);
+
+		System.out.println(newList.size());
+
+		for (UserInfoModel model : newList) {
+			System.out.println(model.getID() + "==" + model.getUserName() + "==" + model.getCnName() + "=="
+					+ model.getSpare3() + "==" + model.getSpare4());
+		}
 	}
 
 	static void printOpOuInfoModel(String jsonString) throws IOException, ReflectiveOperationException {

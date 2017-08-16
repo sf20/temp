@@ -115,7 +115,10 @@ public class OpUserInfoModel {
 	 */
 	@JsonProperty("PositionLevel")
 	private String spare3;
-	@JsonProperty("ZzGzddwb")
+	/*
+	 * 工作地
+	 */
+	@JsonProperty("ZzgZddWb")
 	private String spare4;
 	@JsonIgnore
 	private String spare5;
