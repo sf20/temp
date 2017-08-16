@@ -145,7 +145,7 @@ public class OppleSyncService implements OppleConfig {
 		} else {
 			// 组织全量同步
 			logger.info("[组织全量]同步开始...");
-			opOrgSync(SERVICEOPERATION_ORG, MODE_FULL, false);
+			// opOrgSync(SERVICEOPERATION_ORG, MODE_FULL, false);
 			logger.info("[组织全量]同步结束");
 		}
 
@@ -158,7 +158,7 @@ public class OppleSyncService implements OppleConfig {
 		} else {
 			// 用户全量同步
 			logger.info("[用户全量]同步开始...");
-			// opUserSync(SERVICEOPERATION_EMP, MODE_FULL, true);
+			opUserSync(SERVICEOPERATION_EMP, MODE_UPDATE, true);
 			logger.info("[用户全量]同步结束");
 		}
 	}
@@ -591,8 +591,8 @@ public class OppleSyncService implements OppleConfig {
 			throws ReflectiveOperationException {
 		List<T> entityList = null;
 
-		int listSize = fromList.size();
-		if (fromList != null && listSize > 0) {
+		if (fromList != null) {
+			int listSize = fromList.size();
 			entityList = new ArrayList<T>(listSize);
 
 			for (int i = 0; i < listSize; i++) {
@@ -755,24 +755,29 @@ public class OppleSyncService implements OppleConfig {
 	 */
 	private void changeDateFormatAndSex(List<OpUserInfoModel> fromList, List<UserInfoModel> toList) {
 		int listSize = toList.size();
+		UserInfoModel toModel = null;
+		OpUserInfoModel fromModel = null;
 
 		for (int i = 0; i < listSize; i++) {
-			Date entryTime = fromList.get(i).getEntryTime();
+			toModel = toList.get(i);
+			fromModel = fromList.get(i);
+			
+			Date entryTime = fromModel.getEntryTime();
 			if (entryTime != null) {
-				toList.get(i).setEntryTime(JAVA_DATE_FORMAT.format(entryTime));
+				toModel.setEntryTime(JAVA_DATE_FORMAT.format(entryTime));
 			}
 
-			Date expireDate = fromList.get(i).getExpireDate();
+			Date expireDate = fromModel.getExpireDate();
 			if (expireDate != null) {
-				toList.get(i).setExpireDate(JAVA_DATE_FORMAT.format(expireDate));
+				toModel.setExpireDate(JAVA_DATE_FORMAT.format(expireDate));
 			}
 
 			// 性别字符串转换 1：男 2：女
-			String sex = fromList.get(i).getSex();
+			String sex = fromModel.getSex();
 			if ("1".equals(sex)) {
-				toList.get(i).setSex("男");
+				toModel.setSex("男");
 			} else if ("2".equals(sex)) {
-				toList.get(i).setSex("女");
+				toModel.setSex("女");
 			}
 		}
 	}
