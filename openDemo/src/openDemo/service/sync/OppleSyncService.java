@@ -245,8 +245,7 @@ public class OppleSyncService implements OppleConfig {
 				boolean isPosNameExist = false;
 
 				for (PositionModel fullPos : fullList) {
-					String fullPosName = fullPos.getpNames();
-					if (fullPosName != null && newPosName.equals(fullPosName)) {
+					if (newPosName.equals(fullPos.getpNames())) {
 						isPosNameExist = true;
 						break;
 					}
@@ -761,7 +760,7 @@ public class OppleSyncService implements OppleConfig {
 		for (int i = 0; i < listSize; i++) {
 			toModel = toList.get(i);
 			fromModel = fromList.get(i);
-			
+
 			Date entryTime = fromModel.getEntryTime();
 			if (entryTime != null) {
 				toModel.setEntryTime(JAVA_DATE_FORMAT.format(entryTime));
@@ -942,8 +941,10 @@ public class OppleSyncService implements OppleConfig {
 		List<OuInfoModel> orgsToSyncUpdate = new ArrayList<OuInfoModel>();
 		List<OuInfoModel> orgsToSyncDelete = new ArrayList<OuInfoModel>();
 
-		for (OuInfoModel fullOrg : fullList) {
-			for (OuInfoModel newOrg : newList) {
+		for (OuInfoModel newOrg : newList) {
+			String newOrgName = newOrg.getOuName();
+
+			for (OuInfoModel fullOrg : fullList) {
 				// 已经存在的组织比较
 				if (fullOrg.equals(newOrg)) {
 					// 组织过期待删除
@@ -951,23 +952,12 @@ public class OppleSyncService implements OppleConfig {
 						orgsToSyncDelete.add(newOrg);
 					} else {
 						String fullOrgName = fullOrg.getOuName();
-						String newOrgName = newOrg.getOuName();
 						// 组织名有变更
-						if (fullOrgName == null) {
-							if (newOrgName != null) {
-								orgsToSyncUpdate.add(newOrg);
-							}
-						} else {
-							// TODO
-							if (newOrgName == null) {
-								orgsToSyncUpdate.add(newOrg);
-							} else {
-								if (!newOrgName.equals(fullOrgName)) {
-									orgsToSyncUpdate.add(newOrg);
-								}
-							}
+						if (fullOrgName != null && newOrgName != null && !newOrgName.equals(fullOrgName)) {
+							orgsToSyncUpdate.add(newOrg);
 						}
 					}
+					break;
 				}
 			}
 		}
@@ -1029,8 +1019,8 @@ public class OppleSyncService implements OppleConfig {
 		List<UserInfoModel> usersToDisable = new ArrayList<UserInfoModel>();
 
 		// 待更新用户
-		for (UserInfoModel fullUser : fullList) {
-			for (UserInfoModel newUser : newList) {
+		for (UserInfoModel newUser : newList) {
+			for (UserInfoModel fullUser : fullList) {
 				// 已经存在的用户比较
 				if (fullUser.equals(newUser)) {
 					if (fullUser.getExpireDate() == null) {
@@ -1050,6 +1040,7 @@ public class OppleSyncService implements OppleConfig {
 							usersToSyncUpdate.add(newUser);
 						}
 					}
+					break;
 				}
 			}
 		}
