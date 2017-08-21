@@ -294,14 +294,12 @@ public class OppleSyncService implements OppleConfig {
 	/**
 	 * 向客户提供的接口发送POST请求并获取json数据
 	 * 
-	 * @param serviceOperation
-	 *            可在QueryEmpInfo（员工数据）和QueryOrgInfo（组织架构）中二选一
-	 * @param mode
-	 *            可在1（全量）和2（增量）中二选一。EMP拥有1和2两种模式。Org只有1，全量模式。
+	 * @param requestJsonParam
+	 *            请求参数
 	 * @return 响应的json字符串
 	 * @throws IOException
 	 */
-	public static String getJsonPost(String serviceOperation, String mode) throws IOException {
+	public String getJsonPost(String requestJsonParam) throws IOException {
 		HttpClient httpClient = createSSLHttpClient();// HttpClientBuilder.create().build();
 
 		HttpPost httpPost = new HttpPost(REQUEST_URL);
@@ -312,7 +310,7 @@ public class OppleSyncService implements OppleConfig {
 			httpPost.addHeader("Authorization", getBasicAuthHeader(USERNAME, PASSWORD));
 
 			// 构建消息实体 发送Json格式的数据
-			StringEntity entity = new StringEntity(buildReqJson(serviceOperation, mode), ContentType.APPLICATION_JSON);
+			StringEntity entity = new StringEntity(requestJsonParam, ContentType.APPLICATION_JSON);
 			entity.setContentEncoding(CHARSET_UTF8);
 			httpPost.setEntity(entity);
 
@@ -342,7 +340,7 @@ public class OppleSyncService implements OppleConfig {
 	 * 
 	 * @return
 	 */
-	private static CloseableHttpClient createSSLHttpClient() {
+	private CloseableHttpClient createSSLHttpClient() {
 		try {
 			SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
 			// 实现一个X509TrustManager接口
@@ -379,7 +377,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @return Auth请求头内容
 	 * @throws UnsupportedEncodingException
 	 */
-	private static String getBasicAuthHeader(String username, String password) throws UnsupportedEncodingException {
+	private String getBasicAuthHeader(String username, String password) throws UnsupportedEncodingException {
 		String auth = username + ":" + password;
 		byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(CHARSET_UTF8));
 		String authHeader = "Basic " + new String(encodedAuth, CHARSET_UTF8);
@@ -397,7 +395,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	private static String buildReqJson(String serviceOperation, String mode) throws JsonProcessingException {
+	public String buildReqJson(String serviceOperation, String mode) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> map = new HashMap<String, Object>();
 
@@ -428,7 +426,7 @@ public class OppleSyncService implements OppleConfig {
 	 */
 	public void opOrgSync(String serviceOperation, String mode, boolean isBaseInfo)
 			throws IOException, ReflectiveOperationException {
-		String jsonString = getJsonPost(serviceOperation, MODE_FULL);// Org只有全量模式
+		String jsonString = getJsonPost(buildReqJson(serviceOperation, MODE_FULL));// Org只有全量模式
 
 		// 将json字符串转为组织单位json对象数据模型
 		OpReqJsonModle<OpOuInfoModel> modle = mapper.readValue(jsonString,
@@ -718,7 +716,7 @@ public class OppleSyncService implements OppleConfig {
 	 */
 	private List<OpUserInfoModel> getUserModelList(String serviceOperation, String mode)
 			throws IOException, ReflectiveOperationException {
-		String jsonString = getJsonPost(serviceOperation, mode);
+		String jsonString = getJsonPost(buildReqJson(serviceOperation, mode));
 
 		// 将json字符串转为用户json对象数据模型
 		OpReqJsonModle<OpUserInfoModel> modle = mapper.readValue(jsonString,

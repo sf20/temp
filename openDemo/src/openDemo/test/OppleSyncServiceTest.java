@@ -32,10 +32,11 @@ public class OppleSyncServiceTest {
 	static void postGetJsonTest() throws Exception {
 		String query = "QueryEmpInfo";// QueryOrgInfo
 		String mode = "2";
-		String jsonString = OppleSyncService.getJsonPost(query, mode);
+		OppleSyncService syncService = new OppleSyncService();
+		String jsonString = syncService.getJsonPost(syncService.buildReqJson(query, mode));
 		System.out.println(jsonString);
 
-		printOpUserInfoModel(jsonString);
+		// printOpUserInfoModel(jsonString);
 		// printOpOuInfoModel(jsonString);
 	}
 
