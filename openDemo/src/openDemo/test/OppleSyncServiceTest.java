@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
 
@@ -24,16 +26,18 @@ import openDemo.service.sync.OppleSyncService;
 public class OppleSyncServiceTest {
 
 	public static void main(String[] args) throws Exception {
-		// opSyncServiceTest();
+		opSyncServiceTest();
 
-		postGetJsonTest();
+		// postGetJsonTest();
 	}
 
 	static void postGetJsonTest() throws Exception {
-		String query = "QueryEmpInfo";// QueryOrgInfo
-		String mode = "2";
+		String serviceOperation = "QueryEmpInfo";// QueryOrgInfo
+		String mode = "4";
+		Map<String, String> paramAdded = new HashMap<>();
+		paramAdded.put("OpUserId", "OP050279");
 		OppleSyncService syncService = new OppleSyncService();
-		String jsonString = syncService.getJsonPost(syncService.buildReqJson(query, mode));
+		String jsonString = syncService.getJsonPost(syncService.buildReqJson(serviceOperation, mode, paramAdded));
 		System.out.println(jsonString);
 
 		// printOpUserInfoModel(jsonString);
@@ -45,8 +49,13 @@ public class OppleSyncServiceTest {
 		System.out.println("同步中......");
 
 		OppleSyncService opSyncService = new OppleSyncService();
+		// String serviceOperation = "QueryEmpInfo";
+		// String mode = "3";
+		// Map<String, String> paramAdded = new HashMap<>();
+		// paramAdded.put("FromDate", "20170820");
 		try {
 			opSyncService.sync();
+			// opSyncService.opUserSync(serviceOperation, mode, true, paramAdded);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

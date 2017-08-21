@@ -72,6 +72,8 @@ public class OppleSyncService implements OppleConfig {
 	private static final String SERVICEOPERATION_ORG = "QueryOrgInfo";
 	private static final String MODE_FULL = "1";
 	private static final String MODE_UPDATE = "2";
+	private static final String MODE_3 = "3";
+	private static final String MODE_4 = "4";
 	// json请求及转换时字符集类型
 	private static final String CHARSET_UTF8 = "UTF-8";
 	// 客户提供接口返回的json数据中组织数据和员工数据的key
@@ -153,12 +155,12 @@ public class OppleSyncService implements OppleConfig {
 		if (userCount > 0) {
 			// 用户增量同步
 			logger.info("[用户增量]同步开始...");
-			opUserSync(SERVICEOPERATION_EMP, MODE_UPDATE, true);
+			opUserSync(SERVICEOPERATION_EMP, MODE_UPDATE, true, null);
 			logger.info("[用户增量]同步结束");
 		} else {
 			// 用户全量同步
 			logger.info("[用户全量]同步开始...");
-			opUserSync(SERVICEOPERATION_EMP, MODE_UPDATE, true);
+			opUserSync(SERVICEOPERATION_EMP, MODE_UPDATE, true, null);
 			logger.info("[用户全量]同步结束");
 		}
 	}
@@ -172,7 +174,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @throws IOException
 	 */
 	public void opPosSync(String serviceOperation, String mode) throws IOException, ReflectiveOperationException {
-		List<OpUserInfoModel> userModelList = getUserModelList(serviceOperation, mode);
+		List<OpUserInfoModel> userModelList = getUserModelList(serviceOperation, mode, null);
 		List<PositionModel> newList = getPosListFromUsers(userModelList);
 
 		logger.info("岗位同步Total Size: " + newList.size());
@@ -392,10 +394,13 @@ public class OppleSyncService implements OppleConfig {
 	 *            可在QueryEmpInfo（员工数据）和QueryOrgInfo（组织架构）中二选一
 	 * @param mode
 	 *            可在1（全量）和2（增量）中二选一。EMP拥有1和2两种模式。Org只有1，全量模式。
+	 * @param paramAdded
+	 *            模式增加了Mode3和Mode4, 该参数为相应增加的参数的键值。Mode1和Mode2不需要传该参数。
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	public String buildReqJson(String serviceOperation, String mode) throws JsonProcessingException {
+	public String buildReqJson(String serviceOperation, String mode, Map<String, String> paramAdded)
+			throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> map = new HashMap<String, Object>();
 
@@ -408,6 +413,11 @@ public class OppleSyncService implements OppleConfig {
 
 		Map<String, Object> reqDataMap = new HashMap<String, Object>();
 		reqDataMap.put(MODE, mode);
+		if (MODE_3.equals(mode) || MODE_4.equals(mode)) {
+			for (String key : paramAdded.keySet()) {
+				reqDataMap.put(key, paramAdded.get(key));
+			}
+		}
 		map.put(ESBREQDATA, reqDataMap);
 
 		String str = mapper.writeValueAsString(map);
@@ -426,7 +436,7 @@ public class OppleSyncService implements OppleConfig {
 	 */
 	public void opOrgSync(String serviceOperation, String mode, boolean isBaseInfo)
 			throws IOException, ReflectiveOperationException {
-		String jsonString = getJsonPost(buildReqJson(serviceOperation, MODE_FULL));// Org只有全量模式
+		String jsonString = getJsonPost(buildReqJson(serviceOperation, MODE_FULL, null));// Org只有全量模式
 
 		// 将json字符串转为组织单位json对象数据模型
 		OpReqJsonModle<OpOuInfoModel> modle = mapper.readValue(jsonString,
@@ -608,12 +618,13 @@ public class OppleSyncService implements OppleConfig {
 	 * @param serviceOperation
 	 * @param mode
 	 * @param islink
+	 * @param paramAdded
 	 * @throws IOException
 	 * @throws ReflectiveOperationException
 	 */
-	public void opUserSync(String serviceOperation, String mode, boolean islink)
+	public void opUserSync(String serviceOperation, String mode, boolean islink, Map<String, String> paramAdded)
 			throws IOException, ReflectiveOperationException {
-		List<OpUserInfoModel> modelList = getUserModelList(serviceOperation, mode);
+		List<OpUserInfoModel> modelList = getUserModelList(serviceOperation, mode, paramAdded);
 		List<UserInfoModel> newList = copyCreateEntityList(modelList, UserInfoModel.class);
 
 		copySetUserName(newList);
@@ -624,7 +635,7 @@ public class OppleSyncService implements OppleConfig {
 
 		logger.info("用户同步Total Size: " + newList.size());
 		// 全量模式
-		if (MODE_FULL.equals(mode)) {
+		if (MODE_FULL.equals(mode) || MODE_3.equals(mode) || MODE_4.equals(mode)) {
 			logger.info("用户同步新增Size: " + newList.size());
 			syncAddUserOneByOne(newList, islink);
 
@@ -710,13 +721,14 @@ public class OppleSyncService implements OppleConfig {
 	 * 
 	 * @param serviceOperation
 	 * @param mode
+	 * @param paramAdded
 	 * @return
 	 * @throws IOException
 	 * @throws ReflectiveOperationException
 	 */
-	private List<OpUserInfoModel> getUserModelList(String serviceOperation, String mode)
+	private List<OpUserInfoModel> getUserModelList(String serviceOperation, String mode, Map<String, String> paramAdded)
 			throws IOException, ReflectiveOperationException {
-		String jsonString = getJsonPost(buildReqJson(serviceOperation, mode));
+		String jsonString = getJsonPost(buildReqJson(serviceOperation, mode, paramAdded));
 
 		// 将json字符串转为用户json对象数据模型
 		OpReqJsonModle<OpUserInfoModel> modle = mapper.readValue(jsonString,
