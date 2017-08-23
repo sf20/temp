@@ -356,19 +356,19 @@ public class HttpClientUtil {
 	}
 
 	public static void main(String[] args) {
-		String url = "https://www.baidu.com/s?ie=UTF-8&wd=";
+		String url = "http://tu.duowan.com/gallery/";
 		try {
 			// HttpClientUtil.doPost(null);
 			Date start = new Date();
-			for (int i = 0; i < 50; i++) {
-				HttpClientUtil.doGet(url + i);
+			for (int i = 125600; i < 125700; i++) {
+				HttpClientUtil.doGet(url + i + ".html#p1");
 			}
 			Date end = new Date();
 			System.out.println("无连接池总耗时：" + (end.getTime() - start.getTime()));
 
 			Date start2 = new Date();
-			for (int i = 50; i < 100; i++) {
-				HttpClientUtil.doGetUsePool(url + i);
+			for (int i = 125600; i < 125700; i++) {
+				HttpClientUtil.doGetUsePool(url + i + ".html#p1");
 			}
 			Date end2 = new Date();
 			System.out.println("使用连接池总耗时：" + (end2.getTime() - start2.getTime()));
