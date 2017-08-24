@@ -117,7 +117,7 @@ public class HttpClientUtil {
 		return doGet(url, null);
 	}
 
-	public static String doGet(String url, Map<String, String> params) throws IOException {
+	public static String doGet(String url, Map<String, Object> params) throws IOException {
 		CloseableHttpClient httpClient = getHttpClient();
 		HttpGet httpGet = new HttpGet(url + buildGetParams(params));
 		CloseableHttpResponse response = null;
@@ -145,15 +145,15 @@ public class HttpClientUtil {
 	 * @param params
 	 * @return
 	 */
-	private static String buildGetParams(Map<String, String> params) {
+	private static String buildGetParams(Map<String, Object> params) {
 		if (params == null) {
 			return "";
 		}
 		StringBuilder paramStr = new StringBuilder();
-		for (Map.Entry<String, String> entry : params.entrySet()) {
+		for (Map.Entry<String, Object> entry : params.entrySet()) {
 			try {
 				paramStr.append("&").append(entry.getKey()).append("=")
-						.append(URLEncoder.encode(entry.getValue(), CHARSET_UTF8));
+						.append(URLEncoder.encode(String.valueOf(entry.getValue()), CHARSET_UTF8));
 			} catch (UnsupportedEncodingException e) {
 				LOGGER.error("UnsupportedEncoding", e);
 				return null;
@@ -199,7 +199,7 @@ public class HttpClientUtil {
 		return post(url, getHttpEntity(jsonParams));
 	}
 
-	public static String doPost(String url, Map<String, String> params) throws IOException {
+	public static String doPost(String url, Map<String, Object> params) throws IOException {
 		return post(url, getHttpEntity(params));
 	}
 
@@ -215,7 +215,7 @@ public class HttpClientUtil {
 		return doSSLGet(url, protocol, null);
 	}
 
-	public static String doSSLGet(String url, String protocol, Map<String, String> params) throws IOException {
+	public static String doSSLGet(String url, String protocol, Map<String, Object> params) throws IOException {
 		CloseableHttpClient httpClient = getSSLHttpClient(protocol);
 		HttpGet httpGet = new HttpGet(url + buildGetParams(params));
 		CloseableHttpResponse response = null;
@@ -274,7 +274,7 @@ public class HttpClientUtil {
 		return sslPost(url, protocol, getHttpEntity(jsonParams));
 	}
 
-	public static String doSSLPost(String url, String protocol, Map<String, String> params)
+	public static String doSSLPost(String url, String protocol, Map<String, Object> params)
 			throws IOException, KeyManagementException, NoSuchAlgorithmException {
 		return sslPost(url, protocol, getHttpEntity(params));
 	}
@@ -290,7 +290,7 @@ public class HttpClientUtil {
 		return doGetUsePool(url, null);
 	}
 
-	public static String doGetUsePool(String url, Map<String, String> params) throws IOException {
+	public static String doGetUsePool(String url, Map<String, Object> params) throws IOException {
 		return getPoolingHttpClient().execute(new HttpGet(url + buildGetParams(params)), responseHandler);
 	}
 
@@ -310,7 +310,7 @@ public class HttpClientUtil {
 		return postUsePool(url, getHttpEntity(jsonParams));
 	}
 
-	public static String doPostUsePool(String url, Map<String, String> params) throws IOException {
+	public static String doPostUsePool(String url, Map<String, Object> params) throws IOException {
 		return postUsePool(url, getHttpEntity(params));
 	}
 
@@ -334,7 +334,7 @@ public class HttpClientUtil {
 		return sslPostUsePool(url, protocol, getHttpEntity(jsonParams));
 	}
 
-	public static String doSSLPostUsePool(String url, Map<String, String> params, String protocol)
+	public static String doSSLPostUsePool(String url, Map<String, Object> params, String protocol)
 			throws IOException, KeyManagementException, NoSuchAlgorithmException {
 		return sslPostUsePool(url, protocol, getHttpEntity(params));
 	}
@@ -347,11 +347,11 @@ public class HttpClientUtil {
 		return entity;
 	}
 
-	private static HttpEntity getHttpEntity(Map<String, String> params) {
+	private static HttpEntity getHttpEntity(Map<String, Object> params) {
 		HttpEntity entity = null;
 		List<NameValuePair> paramsList = new ArrayList<NameValuePair>(params.size());
-		for (Map.Entry<String, String> entry : params.entrySet()) {
-			paramsList.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+		for (Map.Entry<String, Object> entry : params.entrySet()) {
+			paramsList.add(new BasicNameValuePair(entry.getKey(), String.valueOf(entry.getValue())));
 		}
 
 		try {
