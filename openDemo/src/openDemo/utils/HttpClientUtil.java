@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -31,6 +30,10 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -46,26 +49,20 @@ import org.apache.logging.log4j.Logger;
 public class HttpClientUtil {
 	public static final Logger LOGGER = LogManager.getLogger(HttpClientUtil.class);
 	public static final String CHARSET_UTF8 = "UTF-8";
+	public static final String TLS = "TLS";
 	public static final String TLS_1_2 = "TLSv1.2";
-	// 池连接管理器
-	private static PoolingHttpClientConnectionManager connManager;
+	public static final int MAX_TOTAL = 100;
+	public static final int MAX_PER_ROUTE = 20;
 	// 请求配置
 	private static RequestConfig requestConfig;
 	// 请求头配置
 	private static List<Header> headers;
 	// 默认响应处理器
 	private static ResponseHandler<String> responseHandler;
-	//
+	// SSL连接配置
 	private static SSLConnectionSocketFactory sslConnSocketFactory;
 
 	static {
-		// 池连接管理器
-		connManager = new PoolingHttpClientConnectionManager(30, TimeUnit.SECONDS);
-		// 最大总连接数
-		connManager.setMaxTotal(100);
-		// 同路由的并发数
-		connManager.setDefaultMaxPerRoute(20);
-
 		// 设置超时时间
 		requestConfig = RequestConfig.custom().setConnectTimeout(5000).setConnectionRequestTimeout(1000)
 				.setSocketTimeout(5000).build();
@@ -109,12 +106,19 @@ public class HttpClientUtil {
 		System.out.println("static construct");
 	}
 
+	/**
+	 * 使用简单的HttpClient发送Get请求
+	 * 
+	 * @param url
+	 * @return
+	 * @throws IOException
+	 */
 	public static String doGet(String url) throws IOException {
 		return doGet(url, null);
 	}
 
 	public static String doGet(String url, Map<String, String> params) throws IOException {
-		CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpClient httpClient = getHttpClient();
 		HttpGet httpGet = new HttpGet(url + buildGetParams(params));
 		CloseableHttpResponse response = null;
 		String retStr = null;
@@ -141,7 +145,7 @@ public class HttpClientUtil {
 	 * @param params
 	 * @return
 	 */
-	public static String buildGetParams(Map<String, String> params) {
+	private static String buildGetParams(Map<String, String> params) {
 		if (params == null) {
 			return "";
 		}
@@ -161,10 +165,10 @@ public class HttpClientUtil {
 		return paramStr.toString();
 	}
 
-	public static String doPost(String url, HttpEntity httpEntity) throws IOException {
-		CloseableHttpClient httpClient = HttpClients.createDefault();
+	private static String post(String url, HttpEntity httpEntity) throws IOException {
+		CloseableHttpClient httpClient = getHttpClient();
 		HttpPost httpPost = new HttpPost(url);
-		if (httpEntity.getContentLength() > 0) {
+		if (httpEntity != null) {
 			httpPost.setEntity(httpEntity);
 		}
 
@@ -188,23 +192,56 @@ public class HttpClientUtil {
 	}
 
 	public static String doPost(String url) throws IOException {
-		return doPost(url, new StringEntity(""));// TODO
+		return post(url, null);
 	}
 
 	public static String doPost(String url, String jsonParams) throws IOException {
-		return doPost(url, getHttpEntity(jsonParams));
+		return post(url, getHttpEntity(jsonParams));
 	}
 
 	public static String doPost(String url, Map<String, String> params) throws IOException {
-		return doPost(url, getHttpEntity(params));
+		return post(url, getHttpEntity(params));
 	}
 
-	public static String doSSLPost(String url, HttpEntity httpEntity)
-			throws IOException, KeyManagementException, NoSuchAlgorithmException {
+	/**
+	 * 使用配置了SSL的HttpClient发送Get请求
+	 * 
+	 * @param url
+	 * @param protocol
+	 * @return
+	 * @throws IOException
+	 */
+	public static String doSSLGet(String url, String protocol) throws IOException {
+		return doSSLGet(url, protocol, null);
+	}
 
-		CloseableHttpClient httpClient = getSslHttpClient(TLS_1_2);
+	public static String doSSLGet(String url, String protocol, Map<String, String> params) throws IOException {
+		CloseableHttpClient httpClient = getSSLHttpClient(protocol);
+		HttpGet httpGet = new HttpGet(url + buildGetParams(params));
+		CloseableHttpResponse response = null;
+		String retStr = null;
+		try {
+			response = httpClient.execute(httpGet);
+			try {
+				HttpEntity entity = response.getEntity();
+				if (entity != null) {
+					retStr = EntityUtils.toString(entity, CHARSET_UTF8);
+					EntityUtils.consume(entity);
+				}
+			} finally {
+				response.close();
+			}
+		} finally {
+			httpClient.close();
+		}
+		return retStr;
+	}
+
+	private static String sslPost(String url, String protocol, HttpEntity httpEntity)
+			throws IOException, KeyManagementException, NoSuchAlgorithmException {
+		CloseableHttpClient httpClient = getSSLHttpClient(protocol);
 		HttpPost httpPost = new HttpPost(url);
-		if (httpEntity.getContentLength() > 0) {
+		if (httpEntity != null) {
 			httpPost.setEntity(httpEntity);
 		}
 
@@ -227,55 +264,82 @@ public class HttpClientUtil {
 		return retStr;
 	}
 
-	public static String doSSLPost(String url) throws IOException, KeyManagementException, NoSuchAlgorithmException {
-		return doSSLPost(url, new StringEntity(""));// TODO
-	}
-
-	public static String doSSLPost(String url, String jsonParams)
+	public static String doSSLPost(String url, String protocol)
 			throws IOException, KeyManagementException, NoSuchAlgorithmException {
-		return doSSLPost(url, getHttpEntity(jsonParams));
+		return sslPost(url, protocol, null);
 	}
 
-	public static String doSSLPost(String url, Map<String, String> params)
+	public static String doSSLPost(String url, String protocol, String jsonParams)
 			throws IOException, KeyManagementException, NoSuchAlgorithmException {
-		return doSSLPost(url, getHttpEntity(params));
+		return sslPost(url, protocol, getHttpEntity(jsonParams));
 	}
 
+	public static String doSSLPost(String url, String protocol, Map<String, String> params)
+			throws IOException, KeyManagementException, NoSuchAlgorithmException {
+		return sslPost(url, protocol, getHttpEntity(params));
+	}
+
+	/**
+	 * 使用配置了池连接管理的HttpClient发送Get请求
+	 * 
+	 * @param url
+	 * @return
+	 * @throws IOException
+	 */
 	public static String doGetUsePool(String url) throws IOException {
-		return getPoolingHttpClient().execute(new HttpGet(url), responseHandler);
+		return doGetUsePool(url, null);
 	}
 
 	public static String doGetUsePool(String url, Map<String, String> params) throws IOException {
 		return getPoolingHttpClient().execute(new HttpGet(url + buildGetParams(params)), responseHandler);
 	}
 
-	public static String doPostUsePool(String url, HttpEntity httpEntity) throws IOException {
+	private static String postUsePool(String url, HttpEntity httpEntity) throws IOException {
 		HttpPost httpPost = new HttpPost(url);
-		httpPost.setEntity(httpEntity);
+		if (httpEntity != null) {
+			httpPost.setEntity(httpEntity);
+		}
 		return getPoolingHttpClient().execute(httpPost, responseHandler);
 	}
 
 	public static String doPostUsePool(String url) throws IOException {
-		return doPostUsePool(url, new StringEntity("", CHARSET_UTF8));// TODO
+		return postUsePool(url, null);
 	}
 
 	public static String doPostUsePool(String url, String jsonParams) throws IOException {
-		return doPostUsePool(url, getHttpEntity(jsonParams));
+		return postUsePool(url, getHttpEntity(jsonParams));
 	}
 
 	public static String doPostUsePool(String url, Map<String, String> params) throws IOException {
-		return doPostUsePool(url, getHttpEntity(params));
+		return postUsePool(url, getHttpEntity(params));
 	}
 
-	public static String doSSLPostUsePool(String url, HttpEntity httpEntity)
+	private static String sslPostUsePool(String url, String protocol, HttpEntity httpEntity)
 			throws IOException, KeyManagementException, NoSuchAlgorithmException {
-		HttpClient httpClient = getPoolingSslHttpClient(TLS_1_2);
+		HttpClient httpClient = getPoolingSSLHttpClient(protocol);
 		HttpPost httpPost = new HttpPost(url);
-		httpPost.setEntity(httpEntity);
+		if (httpEntity != null) {
+			httpPost.setEntity(httpEntity);
+		}
 		return httpClient.execute(httpPost, responseHandler);
 	}
 
-	public static HttpEntity getHttpEntity(String jsonParams) {
+	public static String doSSLPostUsePool(String url, String protocol)
+			throws IOException, KeyManagementException, NoSuchAlgorithmException {
+		return sslPostUsePool(url, protocol, null);
+	}
+
+	public static String doSSLPostUsePool(String url, String jsonParams, String protocol)
+			throws IOException, KeyManagementException, NoSuchAlgorithmException {
+		return sslPostUsePool(url, protocol, getHttpEntity(jsonParams));
+	}
+
+	public static String doSSLPostUsePool(String url, Map<String, String> params, String protocol)
+			throws IOException, KeyManagementException, NoSuchAlgorithmException {
+		return sslPostUsePool(url, protocol, getHttpEntity(params));
+	}
+
+	private static HttpEntity getHttpEntity(String jsonParams) {
 		// 构建消息实体 发送Json格式的数据
 		StringEntity entity = new StringEntity(jsonParams, ContentType.APPLICATION_JSON);
 		entity.setContentEncoding(CHARSET_UTF8);
@@ -283,7 +347,7 @@ public class HttpClientUtil {
 		return entity;
 	}
 
-	public static HttpEntity getHttpEntity(Map<String, String> params) {
+	private static HttpEntity getHttpEntity(Map<String, String> params) {
 		HttpEntity entity = null;
 		List<NameValuePair> paramsList = new ArrayList<NameValuePair>(params.size());
 		for (Map.Entry<String, String> entry : params.entrySet()) {
@@ -298,42 +362,85 @@ public class HttpClientUtil {
 		return entity;
 	}
 
-	public static CloseableHttpClient getHttpClient() {
+	/**
+	 * 创建通常的HttpClient
+	 * 
+	 * @return
+	 */
+	private static CloseableHttpClient getHttpClient() {
 		return HttpClients.custom().setDefaultRequestConfig(requestConfig).setDefaultHeaders(headers).build();
 	}
 
-	public static CloseableHttpClient getPoolingHttpClient() {
+	/**
+	 * 创建设置了池连接管理的HttpClient
+	 * 
+	 * @return
+	 */
+	private static CloseableHttpClient getPoolingHttpClient() {
+		// 池连接管理器
+		PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+		connManager.setMaxTotal(MAX_TOTAL);// 最大总连接数
+		connManager.setDefaultMaxPerRoute(MAX_PER_ROUTE);// 同路由的并发数
+
 		return HttpClients.custom().setConnectionManager(connManager).setDefaultRequestConfig(requestConfig)
 				.setDefaultHeaders(headers).build();
 	}
 
-	public static CloseableHttpClient getSslHttpClient(String protocol) {
+	/**
+	 * 创建支持SSL的HttpClient
+	 * 
+	 * @param protocol
+	 * @return
+	 */
+	private static CloseableHttpClient getSSLHttpClient(String protocol) {
 		try {
-			return HttpClients.custom().setDefaultRequestConfig(requestConfig).setDefaultHeaders(headers)
-					.setSSLSocketFactory(getSSLConnSocketFactory(protocol)).build();
+			return HttpClients.custom().setSSLSocketFactory(getSSLConnSocketFactory(protocol))
+					.setDefaultRequestConfig(requestConfig).setDefaultHeaders(headers).build();
 		} catch (Exception e) {
 			LOGGER.error("创建SSLClient失败", e);
 		}
 		return HttpClients.createDefault();
 	}
 
-	public static CloseableHttpClient getPoolingSslHttpClient(String protocol) {
+	/**
+	 * 创建设置了池连接管理且支持SSL的HttpClient
+	 * 
+	 * @param protocol
+	 * @return
+	 */
+	private static CloseableHttpClient getPoolingSSLHttpClient(String protocol) {
 		try {
-			return HttpClients.custom().setConnectionManager(connManager).setDefaultRequestConfig(requestConfig)
-					.setDefaultHeaders(headers).setSSLSocketFactory(getSSLConnSocketFactory(protocol)).build();
+			// 注册ConnectionSocketFactory实例
+			Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
+					.register("http", PlainConnectionSocketFactory.getSocketFactory())
+					.register("https", getSSLConnSocketFactory(protocol)).build();
+			PoolingHttpClientConnectionManager connManager4SSL = new PoolingHttpClientConnectionManager(registry);
+			connManager4SSL.setMaxTotal(MAX_TOTAL);
+			connManager4SSL.setDefaultMaxPerRoute(MAX_PER_ROUTE);
+
+			return HttpClients.custom().setConnectionManager(connManager4SSL).setDefaultRequestConfig(requestConfig)
+					.setDefaultHeaders(headers).build();
 		} catch (Exception e) {
 			LOGGER.error("创建SSLClient失败", e);
 		}
 		return HttpClients.createDefault();
 	}
 
-	public static SSLConnectionSocketFactory getSSLConnSocketFactory(String protocol)
+	/**
+	 * 创建指定协议的SSLConnectionSocketFactory
+	 * 
+	 * @param protocol
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws KeyManagementException
+	 */
+	private static SSLConnectionSocketFactory getSSLConnSocketFactory(String protocol)
 			throws NoSuchAlgorithmException, KeyManagementException {
 		if (sslConnSocketFactory != null) {
 			return sslConnSocketFactory;
 		}
 
-		SSLContext sslContext = SSLContext.getInstance(protocol);
+		SSLContext sslContext = SSLContext.getInstance(protocol == null ? TLS : protocol);
 		// 实现一个X509TrustManager接口
 		X509TrustManager trustManager = new X509TrustManager() {
 			@Override
@@ -356,6 +463,20 @@ public class HttpClientUtil {
 	}
 
 	public static void main(String[] args) {
+		poolTest();
+		// sslTest();
+	}
+
+	public static void sslTest() {
+		String url = "https://www.taobao.com";
+		try {
+			HttpClientUtil.doGetUsePool(url);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void poolTest() {
 		String url = "http://tu.duowan.com/gallery/";
 		try {
 			// HttpClientUtil.doPost(null);
