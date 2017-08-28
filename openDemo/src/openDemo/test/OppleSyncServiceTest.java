@@ -21,7 +21,7 @@ import openDemo.entity.UserInfoModel;
 import openDemo.entity.sync.OpOuInfoModel;
 import openDemo.entity.sync.OpReqJsonModle;
 import openDemo.entity.sync.OpUserInfoModel;
-import openDemo.service.sync.OppleSyncService;
+import openDemo.service.sync.opple.OppleSyncService;
 
 public class OppleSyncServiceTest {
 
