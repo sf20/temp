@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import openDemo.service.sync.opple.OppleSyncService;
+import openDemo.service.sync.OppleSyncService;
 
 /**
  * 同步定时器

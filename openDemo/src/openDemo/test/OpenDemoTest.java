@@ -12,11 +12,11 @@ import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
 import openDemo.entity.ResultEntity;
 import openDemo.entity.UserInfoModel;
+import openDemo.service.SyncOrgService;
+import openDemo.service.SyncPositionService;
 import openDemo.service.RoleService;
 import openDemo.service.SsoService;
-import openDemo.service.sync.SyncOrgService;
-import openDemo.service.sync.SyncPositionService;
-import openDemo.service.sync.SyncUserService;
+import openDemo.service.SyncUserService;
 
 public class OpenDemoTest implements OppleConfig {
 
