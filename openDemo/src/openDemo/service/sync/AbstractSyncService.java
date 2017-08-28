@@ -7,9 +7,6 @@ import java.util.List;
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
 import openDemo.entity.UserInfoModel;
-import openDemo.service.SyncOrgService;
-import openDemo.service.SyncPositionService;
-import openDemo.service.SyncUserService;
 
 public abstract class AbstractSyncService {
 	// 全量模式/增量模式

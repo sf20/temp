@@ -1,4 +1,4 @@
-package openDemo.service;
+package openDemo.service.sync;
 
 import java.io.IOException;
 import java.util.List;
