@@ -1,4 +1,4 @@
-package openDemo.dao.test;
+package openDemo.test;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
