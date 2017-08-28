@@ -51,8 +51,8 @@ public class HttpClientUtil {
 	public static final String CHARSET_UTF8 = "UTF-8";
 	public static final String TLS = "TLS";
 	public static final String TLS_1_2 = "TLSv1.2";
-	public static final int MAX_TOTAL = 100;
-	public static final int MAX_PER_ROUTE = 20;
+	public static final int MAX_TOTAL = 200;
+	public static final int MAX_PER_ROUTE = 100;
 	// 请求配置
 	private static RequestConfig requestConfig;
 	// 请求头配置
@@ -64,8 +64,8 @@ public class HttpClientUtil {
 
 	static {
 		// 设置超时时间
-		requestConfig = RequestConfig.custom().setConnectTimeout(5000).setConnectionRequestTimeout(1000)
-				.setSocketTimeout(5000).build();
+		requestConfig = RequestConfig.custom().setConnectTimeout(5000).setConnectionRequestTimeout(5000)
+				.setSocketTimeout(10000).build();
 
 		// 重试次数，默认是3次，没有开启。已有默认值无需设置！！！
 		// httpClientBuilder.setRetryHandler(new DefaultHttpRequestRetryHandler());
@@ -102,8 +102,6 @@ public class HttpClientUtil {
 			}
 
 		};
-
-		System.out.println("static construct");
 	}
 
 	/**
