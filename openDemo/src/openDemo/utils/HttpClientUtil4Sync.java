@@ -46,8 +46,8 @@ import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class HttpClientUtil {
-	public static final Logger LOGGER = LogManager.getLogger(HttpClientUtil.class);
+public class HttpClientUtil4Sync {
+	public static final Logger LOGGER = LogManager.getLogger(HttpClientUtil4Sync.class);
 	public static final String CHARSET_UTF8 = "UTF-8";
 	public static final String TLS = "TLS";
 	public static final String TLS_1_2 = "TLSv1.2";
@@ -468,7 +468,7 @@ public class HttpClientUtil {
 	public static void sslTest() {
 		String url = "https://www.taobao.com";
 		try {
-			HttpClientUtil.doGetUsePool(url);
+			HttpClientUtil4Sync.doGetUsePool(url);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -480,14 +480,14 @@ public class HttpClientUtil {
 			// HttpClientUtil.doPost(null);
 			Date start = new Date();
 			for (int i = 125600; i < 125700; i++) {
-				HttpClientUtil.doGet(url + i + ".html#p1");
+				HttpClientUtil4Sync.doGet(url + i + ".html#p1");
 			}
 			Date end = new Date();
 			System.out.println("无连接池总耗时：" + (end.getTime() - start.getTime()));
 
 			Date start2 = new Date();
 			for (int i = 125600; i < 125700; i++) {
-				HttpClientUtil.doGetUsePool(url + i + ".html#p1");
+				HttpClientUtil4Sync.doGetUsePool(url + i + ".html#p1");
 			}
 			Date end2 = new Date();
 			System.out.println("使用连接池总耗时：" + (end2.getTime() - start2.getTime()));
