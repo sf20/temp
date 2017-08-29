@@ -112,12 +112,19 @@ public class HttpClientUtil4Sync {
 	 * @throws IOException
 	 */
 	public static String doGet(String url) throws IOException {
-		return doGet(url, null);
+		return doGet(url, null, null);
 	}
 
-	public static String doGet(String url, Map<String, Object> params) throws IOException {
+	public static String doGet(String url, Map<String, Object> params, List<Header> headers) throws IOException {
 		CloseableHttpClient httpClient = getHttpClient();
 		HttpGet httpGet = new HttpGet(url + buildGetParams(params));
+		// 增加请求头
+		if (headers != null && headers.size() > 0) {
+			for (Header header : headers) {
+				httpGet.addHeader(header);
+			}
+		}
+
 		CloseableHttpResponse response = null;
 		String retStr = null;
 		try {
@@ -285,11 +292,17 @@ public class HttpClientUtil4Sync {
 	 * @throws IOException
 	 */
 	public static String doGetUsePool(String url) throws IOException {
-		return doGetUsePool(url, null);
+		return doGetUsePool(url, null, null);
 	}
 
-	public static String doGetUsePool(String url, Map<String, Object> params) throws IOException {
-		return getPoolingHttpClient().execute(new HttpGet(url + buildGetParams(params)), responseHandler);
+	public static String doGetUsePool(String url, Map<String, Object> params, List<Header> headers) throws IOException {
+		HttpGet httpGet = new HttpGet(url + buildGetParams(params));
+		if (headers != null && headers.size() > 0) {
+			for (Header header : headers) {
+				httpGet.addHeader(header);
+			}
+		}
+		return getPoolingHttpClient().execute(httpGet, responseHandler);
 	}
 
 	private static String postUsePool(String url, HttpEntity httpEntity) throws IOException {
