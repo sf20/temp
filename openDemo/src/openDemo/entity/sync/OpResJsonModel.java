@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @param <T>
  *            EsbResData类型：员工类型或组织类型
  */
-public class OpReqJsonModle<T> {
+public class OpResJsonModel<T> {
 	@JsonProperty("EsbResHead")
 	Map<String, String> EsbResHead = new HashMap<>();
 
