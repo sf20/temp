@@ -19,7 +19,7 @@ import openDemo.entity.OuInfoModel;
 import openDemo.entity.OuInfoTree;
 import openDemo.entity.UserInfoModel;
 import openDemo.entity.sync.OpOuInfoModel;
-import openDemo.entity.sync.OpReqJsonModle;
+import openDemo.entity.sync.OpResJsonModel;
 import openDemo.entity.sync.OpUserInfoModel;
 import openDemo.service.sync.OppleSyncService;
 
@@ -68,8 +68,8 @@ public class OppleSyncServiceTest {
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		mapper.setDateFormat(new SimpleDateFormat("yyyyMMdd"));
 
-		OpReqJsonModle<OpUserInfoModel> modle = new OpReqJsonModle<>();
-		modle = mapper.readValue(jsonString, new TypeReference<OpReqJsonModle<OpUserInfoModel>>() {
+		OpResJsonModel<OpUserInfoModel> modle = new OpResJsonModel<>();
+		modle = mapper.readValue(jsonString, new TypeReference<OpResJsonModel<OpUserInfoModel>>() {
 		});
 
 		List<UserInfoModel> newList = copyCreateEntityList(modle.getEsbResData().get("SapMiddleEmp"),
@@ -88,8 +88,8 @@ public class OppleSyncServiceTest {
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		mapper.setDateFormat(new SimpleDateFormat("yyyyMMdd"));
 
-		OpReqJsonModle<OpOuInfoModel> modle = new OpReqJsonModle<>();
-		modle = mapper.readValue(jsonString, new TypeReference<OpReqJsonModle<OpOuInfoModel>>() {
+		OpResJsonModel<OpOuInfoModel> modle = new OpResJsonModel<>();
+		modle = mapper.readValue(jsonString, new TypeReference<OpResJsonModel<OpOuInfoModel>>() {
 		});
 
 		List<OuInfoModel> newList = copyCreateEntityList(modle.getEsbResData().get("SapMiddleOrg"), OuInfoModel.class);

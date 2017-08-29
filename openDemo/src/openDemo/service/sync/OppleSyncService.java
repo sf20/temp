@@ -47,7 +47,7 @@ import openDemo.entity.PositionModel;
 import openDemo.entity.ResultEntity;
 import openDemo.entity.UserInfoModel;
 import openDemo.entity.sync.OpOuInfoModel;
-import openDemo.entity.sync.OpReqJsonModle;
+import openDemo.entity.sync.OpResJsonModel;
 import openDemo.entity.sync.OpUserInfoModel;
 import openDemo.service.SyncOrgService;
 import openDemo.service.SyncPositionService;
@@ -439,8 +439,8 @@ public class OppleSyncService implements OppleConfig {
 		String jsonString = getJsonPost(buildReqJson(serviceOperation, MODE_FULL, null));// Org只有全量模式
 
 		// 将json字符串转为组织单位json对象数据模型
-		OpReqJsonModle<OpOuInfoModel> modle = mapper.readValue(jsonString,
-				new TypeReference<OpReqJsonModle<OpOuInfoModel>>() {
+		OpResJsonModel<OpOuInfoModel> modle = mapper.readValue(jsonString,
+				new TypeReference<OpResJsonModel<OpOuInfoModel>>() {
 				});
 
 		List<OuInfoModel> newList = copyCreateEntityList(modle.getEsbResData().get(ORG_RES_DATA_KEY),
@@ -731,8 +731,8 @@ public class OppleSyncService implements OppleConfig {
 		String jsonString = getJsonPost(buildReqJson(serviceOperation, mode, paramAdded));
 
 		// 将json字符串转为用户json对象数据模型
-		OpReqJsonModle<OpUserInfoModel> modle = mapper.readValue(jsonString,
-				new TypeReference<OpReqJsonModle<OpUserInfoModel>>() {
+		OpResJsonModel<OpUserInfoModel> modle = mapper.readValue(jsonString,
+				new TypeReference<OpResJsonModel<OpUserInfoModel>>() {
 				});
 
 		return modle.getEsbResData().get(EMP_RES_DATA_KEY);
