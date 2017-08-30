@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import openDemo.entity.sync.LeoOuInfoModel;
@@ -28,19 +29,22 @@ import openDemo.utils.HttpClientUtil4Sync;
 
 public class LeoSyncServiceTest {
 	private static final SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
+	private static ObjectMapper mapper;
+
+	static {
+		mapper = new ObjectMapper();
+		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		mapper.setDateFormat(JSON_DATE_FORMAT);
+	}
 
 	public static void main(String[] args) throws UnsupportedOperationException, IOException {
-		// getToken();
-		// getEmps();
+		 getEmps();
 		// getOrgs();
 		// getPoss();
-		readJson();
+		// readJson();
 	}
 
 	static void readJson() throws JsonParseException, JsonMappingException, IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		mapper.setDateFormat(JSON_DATE_FORMAT);
 
 		LeoResJsonModel<LeoResEmpData> empModel = mapper.readValue(
 				new File("D:\\Repository\\GitRemote\\temp\\openDemo\\src\\test1.json"),
@@ -95,20 +99,23 @@ public class LeoSyncServiceTest {
 		System.out.println(HttpClientUtil4Sync.doGet(url, map, getAuthHeader()));
 	}
 
-	static void getToken() throws IOException {
+	private static String getToken() throws IOException {
 		String url = "https://open.leo.cn/v1/authentication/oauth2/get-token";
 
-		Map<String, Object> map = new HashMap<>();
-		map.put("access_key", "oleo_42db6ee396eb8765435e44446befad8e");
-		map.put("secret_key", "5f81f9a50e7c4043efece652b7a82be2d0d90839b9b550b66c1fb865480a6aad");
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("access_key", "oleo_42db6ee396eb8765435e44446befad8e");
+		paramMap.put("secret_key", "5f81f9a50e7c4043efece652b7a82be2d0d90839b9b550b66c1fb865480a6aad");
 
-		System.out.println(HttpClientUtil4Sync.doPost(url, map));
+		JsonNode jsonNode = mapper.readTree(HttpClientUtil4Sync.doPost(url, paramMap));
+		String token = jsonNode.get("data").get("token").asText();
+		System.out.println(token);
+
+		return token;
 	}
 
-	private static List<Header> getAuthHeader() {
+	private static List<Header> getAuthHeader() throws IOException {
 		List<Header> headers = new ArrayList<>();
-		headers.add(new BasicHeader("Authorization",
-				"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJvbGVvXzQyZGI2ZWUzOTZlYjg3NjU0MzVlNDQ0NDZiZWZhZDhlIiwiaWF0IjoxNTAzOTc1MTQ1LCJleHAiOjE1MDM5Nzg3NDV9.1H-SBikY3uSMB7mKH1eJTRjZtAggp9TtHJPgajWMPJk"));
+		headers.add(new BasicHeader("Authorization", "Bearer " + getToken()));
 		return headers;
 	}
 }
