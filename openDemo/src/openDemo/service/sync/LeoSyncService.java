@@ -1,44 +1,24 @@
 package openDemo.service.sync;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.HttpClientUtils;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import openDemo.common.OppleConfig;
@@ -46,39 +26,28 @@ import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
 import openDemo.entity.ResultEntity;
 import openDemo.entity.UserInfoModel;
-import openDemo.entity.sync.OpOuInfoModel;
-import openDemo.entity.sync.OpResJsonModel;
+import openDemo.entity.sync.LeoOuInfoModel;
+import openDemo.entity.sync.LeoPositionModel;
+import openDemo.entity.sync.LeoResEmpData;
+import openDemo.entity.sync.LeoResJsonModel;
+import openDemo.entity.sync.LeoResOrgData;
+import openDemo.entity.sync.LeoResPosData;
+import openDemo.entity.sync.LeoUserInfoModel;
 import openDemo.entity.sync.OpUserInfoModel;
 import openDemo.service.SyncOrgService;
 import openDemo.service.SyncPositionService;
 import openDemo.service.SyncUserService;
+import openDemo.utils.HttpClientUtil4Sync;
 
 public class LeoSyncService implements OppleConfig {
-	// 用户接口请求参数名
-	private static final String REQUESTID = "RequestId";
-	private static final String SERVICENAME = "ServiceName";
-	private static final String SERVICEOPERATION = "ServiceOperation";
-	private static final String SERVICEVERSION = "ServiceVersion";
-	private static final String MODE = "Mode";
-	private static final String ESBREQHEAD = "EsbReqHead";
-	private static final String ESBREQDATA = "EsbReqData";
 	// 用户接口请求参数值
-	private static final String REQUEST_URL = "https://esb.opple.com:50830/esb_emp/json"; // "http://esb.opple.com:50831/esb_emp/json";
-	private static final String USERNAME = "yxtuser";
-	private static final String PASSWORD = "u#5QTwNDaq";
-	private static final String SERVICE_NAME = "YXT_ESB_EmpOrgQuery";
-	private static final String SERVICE_VERSION = "1.0";
-	private static final String SERVICEOPERATION_EMP = "QueryEmpInfo";
-	private static final String SERVICEOPERATION_ORG = "QueryOrgInfo";
+	private static final String REQUEST_EMP_URL = "https://open.leo.cn/v1/hr/employees/last-updated";
+	private static final String REQUEST_ORG_URL = "https://open.leo.cn/v1/hr/origizations/last-updated";
+	private static final String REQUEST_POS_URL = "https://open.leo.cn/v1/hr/job-positions/last-updated";
+	private static final String REQUEST_PARAM_FROM = "from";
 	private static final String MODE_FULL = "1";
 	private static final String MODE_UPDATE = "2";
-	private static final String MODE_3 = "3";
-	private static final String MODE_4 = "4";
-	// json请求及转换时字符集类型
-	private static final String CHARSET_UTF8 = "UTF-8";
-	// 客户提供接口返回的json数据中组织数据和员工数据的key
-	private static final String ORG_RES_DATA_KEY = "SapMiddleOrg";
-	private static final String EMP_RES_DATA_KEY = "SapMiddleEmp";
+	private static final int TIMESTAMP = 1503973512;
 	// 自定义map的key
 	private static final String MAPKEY_USER_SYNC_ADD = "userSyncAdd";
 	private static final String MAPKEY_USER_SYNC_UPDATE = "userSyncUpdate";
@@ -129,12 +98,12 @@ public class LeoSyncService implements OppleConfig {
 		if (posCount > 0) {
 			// 岗位增量同步
 			logger.info("[岗位增量]同步开始...");
-			opPosSync(SERVICEOPERATION_EMP, MODE_UPDATE);
+			opPosSync(MODE_UPDATE);
 			logger.info("[岗位增量]同步结束");
 		} else {
 			// 岗位全量同步
 			logger.info("[岗位全量]同步开始...");
-			opPosSync(SERVICEOPERATION_EMP, MODE_FULL);
+			opPosSync(MODE_FULL);
 			logger.info("[岗位全量]同步结束");
 		}
 
@@ -142,12 +111,12 @@ public class LeoSyncService implements OppleConfig {
 		if (orgCount > 0) {
 			// 组织增量同步
 			logger.info("[组织增量]同步开始...");
-			opOrgSync(SERVICEOPERATION_ORG, MODE_UPDATE, false);
+			opOrgSync(MODE_UPDATE, false);
 			logger.info("[组织增量]同步结束");
 		} else {
 			// 组织全量同步
 			logger.info("[组织全量]同步开始...");
-			opOrgSync(SERVICEOPERATION_ORG, MODE_FULL, false);
+			opOrgSync(MODE_FULL, false);
 			logger.info("[组织全量]同步结束");
 		}
 
@@ -155,12 +124,12 @@ public class LeoSyncService implements OppleConfig {
 		if (userCount > 0) {
 			// 用户增量同步
 			logger.info("[用户增量]同步开始...");
-			opUserSync(SERVICEOPERATION_EMP, MODE_UPDATE, true, null);
+			opUserSync(MODE_UPDATE, true);
 			logger.info("[用户增量]同步结束");
 		} else {
 			// 用户全量同步
 			logger.info("[用户全量]同步开始...");
-			opUserSync(SERVICEOPERATION_EMP, MODE_FULL, true, null);
+			opUserSync(MODE_FULL, true);
 			logger.info("[用户全量]同步结束");
 		}
 	}
@@ -168,14 +137,13 @@ public class LeoSyncService implements OppleConfig {
 	/**
 	 * 岗位同步
 	 * 
-	 * @param serviceOperation
 	 * @param mode
 	 * @throws ReflectiveOperationException
 	 * @throws IOException
 	 */
-	public void opPosSync(String serviceOperation, String mode) throws IOException, ReflectiveOperationException {
-		List<OpUserInfoModel> userModelList = getUserModelList(serviceOperation, mode, null);
-		List<PositionModel> newList = getPosListFromUsers(userModelList);
+	public void opPosSync(String mode) throws IOException, ReflectiveOperationException {
+		List<LeoPositionModel> userModelList = getPosModelList(mode);
+		List<PositionModel> newList = copyCreateEntityList(userModelList, PositionModel.class);
 
 		logger.info("岗位同步Total Size: " + newList.size());
 		// 全量模式
@@ -189,31 +157,6 @@ public class LeoSyncService implements OppleConfig {
 
 			syncAddPosOneByOne(map.get(MAPKEY_POS_SYNC_ADD));
 		}
-	}
-
-	/**
-	 * 根据用户集合生成岗位对象集合
-	 * 
-	 * @param userModelList
-	 * @return
-	 */
-	private List<PositionModel> getPosListFromUsers(List<OpUserInfoModel> userModelList) {
-		// 使用Set保证无重复
-		Set<String> posNames = new HashSet<String>();
-		for (OpUserInfoModel modle : userModelList) {
-			posNames.add(modle.getPostionName());
-		}
-
-		List<PositionModel> list = new ArrayList<PositionModel>(posNames.size());
-		PositionModel temp = null;
-		for (String posName : posNames) {
-			temp = new PositionModel();
-			temp.setpNo(UUID.randomUUID().toString());
-			temp.setpNames(getFullPosNames(posName));
-			list.add(temp);
-		}
-
-		return list;
 	}
 
 	/**
@@ -294,159 +237,18 @@ public class LeoSyncService implements OppleConfig {
 	}
 
 	/**
-	 * 向客户提供的接口发送POST请求并获取json数据
-	 * 
-	 * @param requestJsonParam
-	 *            请求参数
-	 * @return 响应的json字符串
-	 * @throws IOException
-	 */
-	public String getJsonPost(String requestJsonParam) throws IOException {
-		HttpClient httpClient = createSSLHttpClient();// HttpClientBuilder.create().build();
-
-		HttpPost httpPost = new HttpPost(REQUEST_URL);
-		HttpResponse httpResponse = null;
-		String responseStr = null;
-		try {
-			// 请求header中增加Auth部分
-			httpPost.addHeader("Authorization", getBasicAuthHeader(USERNAME, PASSWORD));
-
-			// 构建消息实体 发送Json格式的数据
-			StringEntity entity = new StringEntity(requestJsonParam, ContentType.APPLICATION_JSON);
-			entity.setContentEncoding(CHARSET_UTF8);
-			httpPost.setEntity(entity);
-
-			// 发送post请求
-			httpResponse = httpClient.execute(httpPost);// TODO ClientProtocolException
-
-			if (httpResponse.getStatusLine().getStatusCode() == 200) {
-				responseStr = EntityUtils.toString(httpResponse.getEntity(), CHARSET_UTF8);
-			}
-
-		} finally {
-			if (httpClient != null) {
-				HttpClientUtils.closeQuietly(httpClient);
-			}
-
-			if (httpResponse != null) {
-				HttpClientUtils.closeQuietly(httpResponse);
-			}
-		}
-		// TODO to delete
-		logger.info("请求用户接口返回数据：" + responseStr);
-		return responseStr;
-	}
-
-	/**
-	 * 创建用于https请求的HttpClient
-	 * 
-	 * @return
-	 */
-	private CloseableHttpClient createSSLHttpClient() {
-		try {
-			SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-			// 实现一个X509TrustManager接口
-			X509TrustManager trustManager = new X509TrustManager() {
-				@Override
-				public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-				}
-
-				@Override
-				public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-				}
-
-				@Override
-				public X509Certificate[] getAcceptedIssuers() {
-					return null;
-				}
-			};
-			sslContext.init(null, new TrustManager[] { trustManager }, null);
-
-			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
-			return HttpClients.custom().setSSLSocketFactory(sslsf).build();
-		} catch (Exception e) {
-			logger.error("创建SSLClient失败", e);
-		}
-
-		return HttpClientBuilder.create().build();
-	}
-
-	/**
-	 * 请求header中增加Auth部分 Auth类型：Basic
-	 * 
-	 * @param username
-	 * @param password
-	 * @return Auth请求头内容
-	 * @throws UnsupportedEncodingException
-	 */
-	private String getBasicAuthHeader(String username, String password) throws UnsupportedEncodingException {
-		String auth = username + ":" + password;
-		byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(CHARSET_UTF8));
-		String authHeader = "Basic " + new String(encodedAuth, CHARSET_UTF8);
-
-		return authHeader;
-	}
-
-	/**
-	 * 构造符合客户要求的请求报文
-	 * 
-	 * @param serviceOperation
-	 *            可在QueryEmpInfo（员工数据）和QueryOrgInfo（组织架构）中二选一
-	 * @param mode
-	 *            可在1（全量）和2（增量）中二选一。EMP拥有1和2两种模式。Org只有1，全量模式。
-	 * @param paramAdded
-	 *            模式增加了Mode3和Mode4, 该参数为相应增加的参数的键值。Mode1和Mode2不需要传该参数。
-	 * @return
-	 * @throws JsonProcessingException
-	 */
-	public String buildReqJson(String serviceOperation, String mode, Map<String, String> paramAdded)
-			throws JsonProcessingException {
-		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> map = new HashMap<String, Object>();
-
-		Map<String, Object> reqHeadMap = new HashMap<String, Object>();
-		reqHeadMap.put(REQUESTID, UUID.randomUUID().toString());
-		reqHeadMap.put(SERVICENAME, SERVICE_NAME);
-		reqHeadMap.put(SERVICEOPERATION, serviceOperation);
-		reqHeadMap.put(SERVICEVERSION, SERVICE_VERSION);
-		map.put(ESBREQHEAD, reqHeadMap);
-
-		Map<String, Object> reqDataMap = new HashMap<String, Object>();
-		reqDataMap.put(MODE, mode);
-		if (MODE_3.equals(mode) || MODE_4.equals(mode)) {
-			for (String key : paramAdded.keySet()) {
-				reqDataMap.put(key, paramAdded.get(key));
-			}
-		}
-		map.put(ESBREQDATA, reqDataMap);
-
-		String str = mapper.writeValueAsString(map);
-
-		return str;
-	}
-
-	/**
 	 * 组织同步 用时：80-90s
 	 * 
-	 * @param serviceOperation
 	 * @param mode
 	 * @param isBaseInfo
 	 * @throws IOException
 	 * @throws ReflectiveOperationException
 	 */
-	public void opOrgSync(String serviceOperation, String mode, boolean isBaseInfo)
-			throws IOException, ReflectiveOperationException {
-		String jsonString = getJsonPost(buildReqJson(serviceOperation, MODE_FULL, null));// Org只有全量模式
+	public void opOrgSync(String mode, boolean isBaseInfo) throws IOException, ReflectiveOperationException {
+		List<LeoOuInfoModel> modelList = getOrgModelList(mode);
+		List<OuInfoModel> newList = copyCreateEntityList(modelList, OuInfoModel.class);
 
-		// 将json字符串转为组织单位json对象数据模型
-		OpResJsonModel<OpOuInfoModel> modle = mapper.readValue(jsonString,
-				new TypeReference<OpResJsonModel<OpOuInfoModel>>() {
-				});
-
-		List<OuInfoModel> newList = copyCreateEntityList(modle.getEsbResData().get(ORG_RES_DATA_KEY),
-				OuInfoModel.class);
-
-		removeExpiredOrgs(newList, mode);
+		// removeExpiredOrgs(newList, mode);
 
 		logger.info("组织同步Total Size: " + newList.size());
 		// 全量模式
@@ -478,7 +280,7 @@ public class LeoSyncService implements OppleConfig {
 	}
 
 	/**
-	 * 去除过期组织和除了编号为00000001之外的所有无parentcode的部门组织
+	 * 去除过期组织
 	 * 
 	 * @param list
 	 * @param mode
@@ -494,10 +296,6 @@ public class LeoSyncService implements OppleConfig {
 				}
 			}
 
-			// 除了编号为 00000001 之外的所有无parentcode的部门都不同步
-			if (org.getParentID() == null && Integer.parseInt(org.getID()) != 1) {
-				iterator.remove();
-			}
 		}
 	}
 
@@ -615,27 +413,24 @@ public class LeoSyncService implements OppleConfig {
 	/**
 	 * 用户同步
 	 * 
-	 * @param serviceOperation
 	 * @param mode
 	 * @param islink
-	 * @param paramAdded
 	 * @throws IOException
 	 * @throws ReflectiveOperationException
 	 */
-	public void opUserSync(String serviceOperation, String mode, boolean islink, Map<String, String> paramAdded)
-			throws IOException, ReflectiveOperationException {
-		List<OpUserInfoModel> modelList = getUserModelList(serviceOperation, mode, paramAdded);
+	public void opUserSync(String mode, boolean islink) throws IOException, ReflectiveOperationException {
+		List<LeoUserInfoModel> modelList = getUserModelList(mode);
 		List<UserInfoModel> newList = copyCreateEntityList(modelList, UserInfoModel.class);
 
-		copySetUserName(newList);
-		changeDateFormatAndSex(modelList, newList);
+		// copySetUserName(newList);
+		// changeDateFormatAndSex(modelList, newList);
 
 		// 关联岗位到用户
-		setPositionNoToUser(newList);
+		// setPositionNoToUser(newList);
 
 		logger.info("用户同步Total Size: " + newList.size());
 		// 全量模式
-		if (MODE_FULL.equals(mode) || MODE_3.equals(mode) || MODE_4.equals(mode)) {
+		if (MODE_FULL.equals(mode)) {
 			logger.info("用户同步新增Size: " + newList.size());
 			syncAddUserOneByOne(newList, islink);
 
@@ -674,28 +469,6 @@ public class LeoSyncService implements OppleConfig {
 	}
 
 	/**
-	 * 关联岗位到用户
-	 * 
-	 * @param newList
-	 */
-	private void setPositionNoToUser(List<UserInfoModel> newList) {
-
-		for (UserInfoModel user : newList) {
-			String pNameInUser = user.getPostionName();
-
-			if (pNameInUser != null) {
-				for (PositionModel pos : positionList) {
-					// 根据岗位名进行查找
-					if (pNameInUser.equals(getPositionName(pos.getpNames()))) {
-						user.setPostionNo(pos.getpNo());
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	/**
 	 * 从pNames中得到岗位名(pNames格式: 一级类别;二级类别;岗位名)
 	 * 
 	 * @param getpNames
@@ -714,28 +487,6 @@ public class LeoSyncService implements OppleConfig {
 
 		// 最后是岗位名
 		return arr[len - 1];
-	}
-
-	/**
-	 * 向客户接口发送请求并返回员工json数据模型集合
-	 * 
-	 * @param serviceOperation
-	 * @param mode
-	 * @param paramAdded
-	 * @return
-	 * @throws IOException
-	 * @throws ReflectiveOperationException
-	 */
-	private List<OpUserInfoModel> getUserModelList(String serviceOperation, String mode, Map<String, String> paramAdded)
-			throws IOException, ReflectiveOperationException {
-		String jsonString = getJsonPost(buildReqJson(serviceOperation, mode, paramAdded));
-
-		// 将json字符串转为用户json对象数据模型
-		OpResJsonModel<OpUserInfoModel> modle = mapper.readValue(jsonString,
-				new TypeReference<OpResJsonModel<OpUserInfoModel>>() {
-				});
-
-		return modle.getEsbResData().get(EMP_RES_DATA_KEY);
 	}
 
 	/**
@@ -788,19 +539,6 @@ public class LeoSyncService implements OppleConfig {
 			} else if ("2".equals(sex)) {
 				toModel.setSex("女");
 			}
-		}
-	}
-
-	/**
-	 * 将ID字段值赋值给userName字段
-	 * 
-	 * @param newList
-	 */
-	private void copySetUserName(List<UserInfoModel> newList) {
-		for (Iterator<UserInfoModel> iterator = newList.iterator(); iterator.hasNext();) {
-			UserInfoModel userInfoEntity = iterator.next();
-			// userName <= ID
-			userInfoEntity.setUserName(userInfoEntity.getID());
 		}
 	}
 
@@ -1073,6 +811,114 @@ public class LeoSyncService implements OppleConfig {
 		logger.info("用户同步禁用Size: " + usersToDisable.size());
 
 		return map;
+	}
+
+	/**
+	 * 向客户接口发送请求并返回员工json数据模型集合
+	 * 
+	 * @param mode
+	 * @return
+	 * @throws IOException
+	 */
+	private List<LeoUserInfoModel> getUserModelList(String mode) throws IOException {
+		Map<String, Object> paramMap = new HashMap<>();
+		// TODO from参数
+		if (MODE_FULL.equals(mode)) {
+			paramMap.put(REQUEST_PARAM_FROM, TIMESTAMP);
+		} else {
+			paramMap.put(REQUEST_PARAM_FROM, null);
+		}
+		String jsonString = HttpClientUtil4Sync.doGet(REQUEST_EMP_URL, paramMap, getAuthHeader());
+
+		// 将json字符串转为用户json对象数据模型
+		LeoResJsonModel<LeoResEmpData> modle = mapper.readValue(jsonString,
+				new TypeReference<LeoResJsonModel<LeoResEmpData>>() {
+				});
+
+		return modle.getData().getDataList();
+	}
+
+	/**
+	 * 向客户接口发送请求并返回部门json数据模型集合
+	 * 
+	 * @param mode
+	 * @return
+	 * @throws IOException
+	 */
+	private List<LeoOuInfoModel> getOrgModelList(String mode) throws IOException {
+		Map<String, Object> paramMap = new HashMap<>();
+		// TODO from参数
+		if (MODE_FULL.equals(mode)) {
+			paramMap.put(REQUEST_PARAM_FROM, TIMESTAMP);
+		} else {
+			paramMap.put(REQUEST_PARAM_FROM, null);
+		}
+		String jsonString = HttpClientUtil4Sync.doGet(REQUEST_ORG_URL, paramMap, getAuthHeader());
+
+		// 将json字符串转为用户json对象数据模型
+		LeoResJsonModel<LeoResOrgData> modle = mapper.readValue(jsonString,
+				new TypeReference<LeoResJsonModel<LeoResOrgData>>() {
+				});
+
+		return modle.getData().getDataList();
+	}
+
+	/**
+	 * 向客户接口发送请求并返回职位json数据模型集合
+	 * 
+	 * @param mode
+	 * @return
+	 * @throws IOException
+	 */
+	private List<LeoPositionModel> getPosModelList(String mode) throws IOException {
+		Map<String, Object> paramMap = new HashMap<>();
+		// TODO from参数
+		if (MODE_FULL.equals(mode)) {
+			paramMap.put(REQUEST_PARAM_FROM, TIMESTAMP);
+		} else {
+			paramMap.put(REQUEST_PARAM_FROM, null);
+		}
+		String jsonString = HttpClientUtil4Sync.doGet(REQUEST_POS_URL, paramMap, getAuthHeader());
+
+		// 将json字符串转为用户json对象数据模型
+		LeoResJsonModel<LeoResPosData> modle = mapper.readValue(jsonString,
+				new TypeReference<LeoResJsonModel<LeoResPosData>>() {
+				});
+
+		return modle.getData().getDataList();
+	}
+
+	/**
+	 * token放在请求header的Authorization中
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	private List<Header> getAuthHeader() throws IOException {
+		List<Header> headers = new ArrayList<>();
+		headers.add(new BasicHeader("Authorization", "Bearer " + getToken()));
+		return headers;
+	}
+
+	/**
+	 * 获取token
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	private String getToken() throws IOException {
+		String url = "https://open.leo.cn/v1/authentication/oauth2/get-token";
+
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("access_key", "oleo_42db6ee396eb8765435e44446befad8e");
+		paramMap.put("secret_key", "5f81f9a50e7c4043efece652b7a82be2d0d90839b9b550b66c1fb865480a6aad");
+
+		// 从json字符串中解析token
+		JsonNode jsonNode = mapper.readTree(HttpClientUtil4Sync.doPost(url, paramMap));
+		String token = jsonNode.get("data").get("token").asText();
+		System.out.println(token);
+
+		return token;
 	}
 
 	/**
