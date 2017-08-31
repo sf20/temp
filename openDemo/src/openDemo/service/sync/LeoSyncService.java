@@ -425,6 +425,7 @@ public class LeoSyncService implements LeoConfig {
 		List<LeoUserInfoModel> modelList = getUserModelList(mode);
 		List<UserInfoModel> newList = copyCreateEntityList(modelList, UserInfoModel.class);
 
+		copySetUserName(newList);
 		changeDateFormatAndSex(modelList, newList);
 
 		logger.info("用户同步Total Size: " + newList.size());
@@ -476,7 +477,8 @@ public class LeoSyncService implements LeoConfig {
 	private List<UserInfoModel> getExpiredUsers(List<UserInfoModel> list) {
 		List<UserInfoModel> expiredUsers = new ArrayList<UserInfoModel>();
 		for (UserInfoModel user : list) {
-			if (user.getExpireDate() != null) {
+			// TODO
+			if ("1".equals(user.getStatus())) {
 				expiredUsers.add(user);
 			}
 		}
@@ -510,11 +512,6 @@ public class LeoSyncService implements LeoConfig {
 				toModel.setBirthday(DATE_FORMAT.format(birthday));
 			}
 
-			Date expireDate = fromModel.getExpireDate();
-			if (expireDate != null) {
-				toModel.setExpireDate(DATE_FORMAT.format(expireDate));
-			}
-
 			// 性别字符串转换 0：男 1：女
 			String sex = fromModel.getSex();
 			if ("0".equals(sex)) {
@@ -522,6 +519,19 @@ public class LeoSyncService implements LeoConfig {
 			} else if ("1".equals(sex)) {
 				toModel.setSex("女");
 			}
+		}
+	}
+
+	/**
+	 * 将mail字段值赋值给userName字段
+	 * 
+	 * @param newList
+	 */
+	private void copySetUserName(List<UserInfoModel> newList) {
+		for (Iterator<UserInfoModel> iterator = newList.iterator(); iterator.hasNext();) {
+			UserInfoModel userInfoEntity = iterator.next();
+			// userName <= mail
+			userInfoEntity.setUserName(userInfoEntity.getMail());
 		}
 	}
 
@@ -724,12 +734,13 @@ public class LeoSyncService implements LeoConfig {
 	 */
 	// TODO
 	private boolean isOrgExpired(OuInfoModel org) {
-		Date endDate = org.getEndDate();
-		if (endDate == null) {
+		String status = org.getStatus();
+		if (status == null) {
 			return true;
 		}
 
-		return endDate.compareTo(new Date()) < 0;
+		// TODO
+		return "1".equals(status) ? true : false;
 	}
 
 	/**
