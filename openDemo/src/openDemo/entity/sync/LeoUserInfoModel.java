@@ -15,7 +15,7 @@ public class LeoUserInfoModel {
 	/*
 	 * 用户ID(同步必传)
 	 */
-	@JsonProperty("id") // TODO
+	@JsonProperty("id")
 	private String ID;
 
 	/*
@@ -57,7 +57,7 @@ public class LeoUserInfoModel {
 	/*
 	 * 部门编号
 	 */
-	@JsonProperty("oid_organization") // TODO
+	@JsonProperty("oid_department") // TODO
 	private String orgOuCode;
 
 	/*
