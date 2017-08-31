@@ -11,7 +11,7 @@ public class LeoPositionModel {
 	/*
 	 * 岗位编号
 	 */
-	@JsonProperty("id") // TODO code or oid ??
+	@JsonProperty("oid")
 	private String pNo;
 
 	/*

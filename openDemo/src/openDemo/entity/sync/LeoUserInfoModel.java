@@ -15,13 +15,13 @@ public class LeoUserInfoModel {
 	/*
 	 * 用户ID(同步必传)
 	 */
-	@JsonProperty("id")
+	@JsonProperty("id") // TODO
 	private String ID;
 
 	/*
 	 * 用户名(同步必传)
 	 */
-	@JsonProperty("job_number")
+	@JsonIgnore // TODO
 	private String userName;
 
 	/*
@@ -57,7 +57,7 @@ public class LeoUserInfoModel {
 	/*
 	 * 部门编号
 	 */
-	@JsonProperty("oid_department") // TODO oid_organization
+	@JsonProperty("oid_organization") // TODO
 	private String orgOuCode;
 
 	/*
@@ -95,6 +95,12 @@ public class LeoUserInfoModel {
 	 */
 	@JsonIgnore
 	private Date expireDate;
+
+	/*
+	 * 组织状态
+	 */
+	@JsonProperty("is_delete") // TODO
+	private String status;
 
 	/*
 	 * 扩展字段 1~10
@@ -230,6 +236,14 @@ public class LeoUserInfoModel {
 
 	public void setExpireDate(Date expireDate) {
 		this.expireDate = expireDate;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	public String getSpare1() {

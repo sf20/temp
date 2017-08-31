@@ -16,7 +16,7 @@ public class LeoOuInfoModel {
 	/*
 	 * 组织单位ID
 	 */
-	@JsonProperty("id") // TODO code or oid ??
+	@JsonProperty("oid")
 	private String ID;
 
 	/*
@@ -28,7 +28,7 @@ public class LeoOuInfoModel {
 	/*
 	 * 父节点ID
 	 */
-	@JsonProperty("p_oid_org_reserve2") // TODO p_oid_org_admin
+	@JsonProperty("p_oid_org_admin")
 	private String parentID;
 
 	/*
@@ -60,6 +60,12 @@ public class LeoOuInfoModel {
 	 */
 	@JsonIgnore
 	private Date endDate;
+
+	/*
+	 * 组织状态
+	 */
+	@JsonProperty("is_delete")
+	private String status;
 
 	public String getID() {
 		return ID;
@@ -123,6 +129,14 @@ public class LeoOuInfoModel {
 
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 }

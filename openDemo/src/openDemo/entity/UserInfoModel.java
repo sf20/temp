@@ -79,6 +79,11 @@ public class UserInfoModel {
 	private String expireDate;
 
 	/**
+	 * 组织状态
+	 */
+	private String status;
+
+	/**
 	 * 扩展字段 1~10
 	 */
 	private String spare1;
@@ -211,6 +216,14 @@ public class UserInfoModel {
 
 	public void setExpireDate(String expireDate) {
 		this.expireDate = expireDate;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	public String getSpare1() {

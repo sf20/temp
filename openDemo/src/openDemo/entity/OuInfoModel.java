@@ -46,7 +46,15 @@ public class OuInfoModel {
 	 */
 	private Integer orderIndex;
 
+	/**
+	 * 过期日期
+	 */
 	private Date endDate;
+
+	/**
+	 * 组织状态
+	 */
+	private String status;
 
 	public String getID() {
 		return ID;
@@ -110,6 +118,14 @@ public class OuInfoModel {
 
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	@Override
