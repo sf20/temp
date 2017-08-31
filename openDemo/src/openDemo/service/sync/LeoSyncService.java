@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import openDemo.common.OppleConfig;
+import openDemo.config.LeoConfig;
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
 import openDemo.entity.ResultEntity;
@@ -35,13 +35,12 @@ import openDemo.entity.sync.LeoResJsonModel;
 import openDemo.entity.sync.LeoResOrgData;
 import openDemo.entity.sync.LeoResPosData;
 import openDemo.entity.sync.LeoUserInfoModel;
-import openDemo.entity.sync.OpUserInfoModel;
 import openDemo.service.SyncOrgService;
 import openDemo.service.SyncPositionService;
 import openDemo.service.SyncUserService;
 import openDemo.utils.HttpClientUtil4Sync;
 
-public class LeoSyncService implements OppleConfig {
+public class LeoSyncService implements LeoConfig {
 	// 用户接口请求参数值
 	private static final String REQUEST_EMP_URL = "https://open.leo.cn/v1/hr/employees/last-updated";
 	private static final String REQUEST_ORG_URL = "https://open.leo.cn/v1/hr/origizations/last-updated";
@@ -183,6 +182,7 @@ public class LeoSyncService implements OppleConfig {
 		Map<String, List<PositionModel>> map = new HashMap<String, List<PositionModel>>();
 		List<PositionModel> posToSyncAdd = new ArrayList<PositionModel>();
 
+		// TODO
 		// 待新增岗位
 		for (PositionModel newPos : newList) {
 			String newPosName = newPos.getpNames();
@@ -219,6 +219,8 @@ public class LeoSyncService implements OppleConfig {
 		List<PositionModel> tempList = new ArrayList<PositionModel>();
 		ResultEntity resultEntity = null;
 		for (PositionModel pos : posToSync) {
+			// 同步pNames需带类别
+			pos.setpNames(getFullPosNames(pos.getpNames()));
 			tempList.add(pos);
 
 			try {
@@ -249,7 +251,7 @@ public class LeoSyncService implements OppleConfig {
 		List<LeoOuInfoModel> modelList = getOrgModelList(mode);
 		List<OuInfoModel> newList = copyCreateEntityList(modelList, OuInfoModel.class);
 
-		// removeExpiredOrgs(newList, mode);
+		removeExpiredOrgs(newList, mode);
 
 		logger.info("组织同步Total Size: " + newList.size());
 		// 全量模式
@@ -423,11 +425,7 @@ public class LeoSyncService implements OppleConfig {
 		List<LeoUserInfoModel> modelList = getUserModelList(mode);
 		List<UserInfoModel> newList = copyCreateEntityList(modelList, UserInfoModel.class);
 
-		// copySetUserName(newList);
-		// changeDateFormatAndSex(modelList, newList);
-
-		// 关联岗位到用户
-		// setPositionNoToUser(newList);
+		changeDateFormatAndSex(modelList, newList);
 
 		logger.info("用户同步Total Size: " + newList.size());
 		// 全量模式
@@ -470,27 +468,6 @@ public class LeoSyncService implements OppleConfig {
 	}
 
 	/**
-	 * 从pNames中得到岗位名(pNames格式: 一级类别;二级类别;岗位名)
-	 * 
-	 * @param getpNames
-	 * @return
-	 */
-	private String getPositionName(String pNames) {
-		if (pNames == null) {
-			return null;
-		}
-
-		String[] arr = pNames.split(POSITION_CLASS_SEPARATOR);
-		int len = arr.length;
-		if (len == 0) {
-			return null;
-		}
-
-		// 最后是岗位名
-		return arr[len - 1];
-	}
-
-	/**
 	 * 返回过期员工
 	 * 
 	 * @param list
@@ -514,10 +491,10 @@ public class LeoSyncService implements OppleConfig {
 	 * @param toList
 	 *            java同步对象集合
 	 */
-	private void changeDateFormatAndSex(List<OpUserInfoModel> fromList, List<UserInfoModel> toList) {
+	private void changeDateFormatAndSex(List<LeoUserInfoModel> fromList, List<UserInfoModel> toList) {
 		int listSize = toList.size();
 		UserInfoModel toModel = null;
-		OpUserInfoModel fromModel = null;
+		LeoUserInfoModel fromModel = null;
 
 		for (int i = 0; i < listSize; i++) {
 			toModel = toList.get(i);
@@ -528,16 +505,21 @@ public class LeoSyncService implements OppleConfig {
 				toModel.setEntryTime(DATE_FORMAT.format(entryTime));
 			}
 
+			Date birthday = fromModel.getBirthday();
+			if (birthday != null) {
+				toModel.setBirthday(DATE_FORMAT.format(birthday));
+			}
+
 			Date expireDate = fromModel.getExpireDate();
 			if (expireDate != null) {
 				toModel.setExpireDate(DATE_FORMAT.format(expireDate));
 			}
 
-			// 性别字符串转换 1：男 2：女
+			// 性别字符串转换 0：男 1：女
 			String sex = fromModel.getSex();
-			if ("1".equals(sex)) {
+			if ("0".equals(sex)) {
 				toModel.setSex("男");
-			} else if ("2".equals(sex)) {
+			} else if ("1".equals(sex)) {
 				toModel.setSex("女");
 			}
 		}
@@ -740,6 +722,7 @@ public class LeoSyncService implements OppleConfig {
 	 * @param org
 	 * @return
 	 */
+	// TODO
 	private boolean isOrgExpired(OuInfoModel org) {
 		Date endDate = org.getEndDate();
 		if (endDate == null) {
@@ -931,7 +914,6 @@ public class LeoSyncService implements OppleConfig {
 		// 从json字符串中解析token
 		JsonNode jsonNode = mapper.readTree(HttpClientUtil4Sync.doPost(url, paramMap));
 		String token = jsonNode.get("data").get("token").asText();
-		System.out.println(token);
 
 		return token;
 	}
