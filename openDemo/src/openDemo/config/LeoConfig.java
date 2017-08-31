@@ -1,9 +1,9 @@
 package openDemo.config;
 
 public interface LeoConfig {
-	String apikey = "57dac39f-aa0c-42dc-a64f-eae4618dd128";
+	String apikey = "abb15aa6-3b5d-4160-97f0-12366c0cfd06";
 	
-	String secretkey  = "d0781377-ab21-4d05-b6c2-034ffadda54d";
+	String secretkey  = "cc734695-aa30-413a-b59a-7326403694a3";
 	
-	String baseUrl = "http://api.qida.yunxuetang.com.cn/";
+	String baseUrl = "http://leogroup.qida.yunxuetang.com.cn/";
 }
