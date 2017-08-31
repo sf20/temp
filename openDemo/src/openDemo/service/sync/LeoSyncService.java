@@ -1,8 +1,10 @@
 package openDemo.service.sync;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -47,7 +49,7 @@ public class LeoSyncService implements OppleConfig {
 	private static final String REQUEST_PARAM_FROM = "from";
 	private static final String MODE_FULL = "1";
 	private static final String MODE_UPDATE = "2";
-	private static final int TIMESTAMP = 1503973512;
+	private static final String FROM_DATE = "2017-08-28";
 	// 自定义map的key
 	private static final String MAPKEY_USER_SYNC_ADD = "userSyncAdd";
 	private static final String MAPKEY_USER_SYNC_UPDATE = "userSyncUpdate";
@@ -63,8 +65,7 @@ public class LeoSyncService implements OppleConfig {
 	private static final String POSITION_CLASS_DEFAULT = "未分类";
 	private static final String POSITION_CLASS_SEPARATOR = ";";
 	// 日期格式化用
-	private static final SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
-	private static final SimpleDateFormat JAVA_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	// 记录日志
 	private static final Logger logger = LogManager.getLogger(LeoSyncService.class);
 
@@ -84,7 +85,7 @@ public class LeoSyncService implements OppleConfig {
 		// 忽略json中多余的属性字段
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		// json字符串的日期格式
-		mapper.setDateFormat(JSON_DATE_FORMAT);
+		mapper.setDateFormat(DATE_FORMAT);
 	}
 
 	/**
@@ -524,12 +525,12 @@ public class LeoSyncService implements OppleConfig {
 
 			Date entryTime = fromModel.getEntryTime();
 			if (entryTime != null) {
-				toModel.setEntryTime(JAVA_DATE_FORMAT.format(entryTime));
+				toModel.setEntryTime(DATE_FORMAT.format(entryTime));
 			}
 
 			Date expireDate = fromModel.getExpireDate();
 			if (expireDate != null) {
-				toModel.setExpireDate(JAVA_DATE_FORMAT.format(expireDate));
+				toModel.setExpireDate(DATE_FORMAT.format(expireDate));
 			}
 
 			// 性别字符串转换 1：男 2：女
@@ -822,12 +823,8 @@ public class LeoSyncService implements OppleConfig {
 	 */
 	private List<LeoUserInfoModel> getUserModelList(String mode) throws IOException {
 		Map<String, Object> paramMap = new HashMap<>();
-		// TODO from参数
-		if (MODE_FULL.equals(mode)) {
-			paramMap.put(REQUEST_PARAM_FROM, TIMESTAMP);
-		} else {
-			paramMap.put(REQUEST_PARAM_FROM, null);
-		}
+		paramMap.put(REQUEST_PARAM_FROM, getTimestamp(mode));// TODO from参数
+
 		String jsonString = HttpClientUtil4Sync.doGet(REQUEST_EMP_URL, paramMap, getAuthHeader());
 
 		// 将json字符串转为用户json对象数据模型
@@ -847,12 +844,8 @@ public class LeoSyncService implements OppleConfig {
 	 */
 	private List<LeoOuInfoModel> getOrgModelList(String mode) throws IOException {
 		Map<String, Object> paramMap = new HashMap<>();
-		// TODO from参数
-		if (MODE_FULL.equals(mode)) {
-			paramMap.put(REQUEST_PARAM_FROM, TIMESTAMP);
-		} else {
-			paramMap.put(REQUEST_PARAM_FROM, null);
-		}
+		paramMap.put(REQUEST_PARAM_FROM, getTimestamp(mode));// TODO from参数
+
 		String jsonString = HttpClientUtil4Sync.doGet(REQUEST_ORG_URL, paramMap, getAuthHeader());
 
 		// 将json字符串转为用户json对象数据模型
@@ -872,12 +865,8 @@ public class LeoSyncService implements OppleConfig {
 	 */
 	private List<LeoPositionModel> getPosModelList(String mode) throws IOException {
 		Map<String, Object> paramMap = new HashMap<>();
-		// TODO from参数
-		if (MODE_FULL.equals(mode)) {
-			paramMap.put(REQUEST_PARAM_FROM, TIMESTAMP);
-		} else {
-			paramMap.put(REQUEST_PARAM_FROM, null);
-		}
+		paramMap.put(REQUEST_PARAM_FROM, getTimestamp(mode));// TODO from参数
+
 		String jsonString = HttpClientUtil4Sync.doGet(REQUEST_POS_URL, paramMap, getAuthHeader());
 
 		// 将json字符串转为用户json对象数据模型
@@ -886,6 +875,32 @@ public class LeoSyncService implements OppleConfig {
 				});
 
 		return modle.getData().getDataList();
+	}
+
+	/**
+	 * 获取全量或增量模式下请求的时间戳参数值
+	 * 
+	 * @param mode
+	 * @return
+	 */
+	private int getTimestamp(String mode) {
+		// 默认时间戳
+		int timestamp = (int) (new Date().getTime() / 1000);
+		if (MODE_FULL.equals(mode)) {
+			try {
+				timestamp = (int) (DATE_FORMAT.parse(FROM_DATE).getTime() / 1000);
+			} catch (ParseException e) {
+				logger.error("获取时间戳失败", e);
+			}
+		} else {
+			// 当日零点时间
+			Calendar c = Calendar.getInstance();
+			c.set(Calendar.HOUR_OF_DAY, 0);
+			c.set(Calendar.MINUTE, 0);
+			c.set(Calendar.SECOND, 0);
+			timestamp = (int) (c.getTimeInMillis() / 1000);
+		}
+		return timestamp;
 	}
 
 	/**
