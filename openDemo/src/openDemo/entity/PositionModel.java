@@ -17,6 +17,16 @@ public class PositionModel {
 	 */
 	private String pNames;
 
+	/**
+	 * 岗位状态
+	 */
+	private String status;
+
+	/**
+	 * 岗位删除状态
+	 */
+	private String deleteStatus;
+
 	public String getpNo() {
 		return pNo;
 	}
@@ -31,6 +41,22 @@ public class PositionModel {
 
 	public void setpNames(String pNames) {
 		this.pNames = pNames;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getDeleteStatus() {
+		return deleteStatus;
+	}
+
+	public void setDeleteStatus(String deleteStatus) {
+		this.deleteStatus = deleteStatus;
 	}
 
 	@Override

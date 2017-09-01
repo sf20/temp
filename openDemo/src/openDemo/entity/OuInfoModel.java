@@ -56,6 +56,11 @@ public class OuInfoModel {
 	 */
 	private String status;
 
+	/**
+	 * 组织删除状态
+	 */
+	private String deleteStatus;
+
 	public String getID() {
 		return ID;
 	}
@@ -126,6 +131,14 @@ public class OuInfoModel {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getDeleteStatus() {
+		return deleteStatus;
+	}
+
+	public void setDeleteStatus(String deleteStatus) {
+		this.deleteStatus = deleteStatus;
 	}
 
 	@Override

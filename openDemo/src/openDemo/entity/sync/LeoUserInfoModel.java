@@ -21,7 +21,7 @@ public class LeoUserInfoModel {
 	/*
 	 * 用户名(同步必传)
 	 */
-	@JsonIgnore // TODO
+	@JsonIgnore
 	private String userName;
 
 	/*
@@ -57,7 +57,7 @@ public class LeoUserInfoModel {
 	/*
 	 * 部门编号
 	 */
-	@JsonProperty("oid_department") // TODO
+	@JsonProperty("oid_department")
 	private String orgOuCode;
 
 	/*
@@ -97,10 +97,16 @@ public class LeoUserInfoModel {
 	private Date expireDate;
 
 	/*
-	 * 组织状态
+	 * 人员状态
 	 */
-	@JsonProperty("is_delete") // TODO
+	@JsonProperty("status")
 	private String status;
+
+	/*
+	 * 人员删除状态
+	 */
+	@JsonProperty("is_delete")
+	private String deleteStatus;
 
 	/*
 	 * 扩展字段 1~10
@@ -324,6 +330,14 @@ public class LeoUserInfoModel {
 
 	public void setSpare10(String spare10) {
 		this.spare10 = spare10;
+	}
+
+	public String getDeleteStatus() {
+		return deleteStatus;
+	}
+
+	public void setDeleteStatus(String deleteStatus) {
+		this.deleteStatus = deleteStatus;
 	}
 
 }

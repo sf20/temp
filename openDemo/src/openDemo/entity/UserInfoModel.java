@@ -79,9 +79,14 @@ public class UserInfoModel {
 	private String expireDate;
 
 	/**
-	 * 组织状态
+	 * 用户状态
 	 */
 	private String status;
+
+	/**
+	 * 用户删除状态
+	 */
+	private String deleteStatus;
 
 	/**
 	 * 扩展字段 1~10
@@ -224,6 +229,14 @@ public class UserInfoModel {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getDeleteStatus() {
+		return deleteStatus;
+	}
+
+	public void setDeleteStatus(String deleteStatus) {
+		this.deleteStatus = deleteStatus;
 	}
 
 	public String getSpare1() {
