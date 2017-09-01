@@ -46,12 +46,14 @@ public class LeoSyncService implements LeoConfig {
 	private static final String REQUEST_ORG_URL = "https://open.leo.cn/v1/hr/origizations/last-updated";
 	private static final String REQUEST_POS_URL = "https://open.leo.cn/v1/hr/job-positions/last-updated";
 	private static final String REQUEST_PARAM_FROM = "from";
+	private static final String REQUEST_PARAM_PAGE = "p";
 	private static final String MODE_FULL = "1";
 	private static final String MODE_UPDATE = "2";
 	private static final String FROM_DATE = "2017-08-01";
 	private static final String ENABLE_STATUS = "1";
 	private static final String DELETED_STATUS = "1";
 	private static final String USER_DISABLE_STATUS = "8";
+	private static final int DEFAULT_PAGE_SIZE = 50;
 	// 自定义map的key
 	private static final String MAPKEY_USER_SYNC_ADD = "userSyncAdd";
 	private static final String MAPKEY_USER_SYNC_UPDATE = "userSyncUpdate";
@@ -935,14 +937,21 @@ public class LeoSyncService implements LeoConfig {
 		Map<String, Object> paramMap = new HashMap<>();
 		paramMap.put(REQUEST_PARAM_FROM, getTimestamp(mode));// TODO from参数
 
-		String jsonString = HttpClientUtil4Sync.doGet(REQUEST_EMP_URL, paramMap, getAuthHeader());
+		List<LeoUserInfoModel> tempList = new ArrayList<>();
+		// 首次请求
+		LeoResJsonModel<LeoResEmpData> dataModel = requestGetUserData(REQUEST_EMP_URL, paramMap);
+		LeoResEmpData data = dataModel.getData();
+		tempList.addAll(data.getDataList());
 
-		// 将json字符串转为用户json对象数据模型
-		LeoResJsonModel<LeoResEmpData> modle = mapper.readValue(jsonString,
-				new TypeReference<LeoResJsonModel<LeoResEmpData>>() {
-				});
+		// 获取total值后请求全部数据
+		int total = Integer.valueOf(data.getTotal());
+		for (int i = 0; i < calcRequestTimes(total, DEFAULT_PAGE_SIZE); i++) {
+			// 请求页码从2开始
+			paramMap.put(REQUEST_PARAM_PAGE, i + 2);
+			tempList.addAll(requestGetUserData(REQUEST_EMP_URL, paramMap).getData().getDataList());
+		}
 
-		return modle.getData().getDataList();
+		return tempList;
 	}
 
 	/**
@@ -956,14 +965,21 @@ public class LeoSyncService implements LeoConfig {
 		Map<String, Object> paramMap = new HashMap<>();
 		paramMap.put(REQUEST_PARAM_FROM, getTimestamp(mode));// TODO from参数
 
-		String jsonString = HttpClientUtil4Sync.doGet(REQUEST_ORG_URL, paramMap, getAuthHeader());
+		List<LeoOuInfoModel> tempList = new ArrayList<>();
+		// 首次请求
+		LeoResJsonModel<LeoResOrgData> dataModel = requestGetOrgData(REQUEST_ORG_URL, paramMap);
+		LeoResOrgData data = dataModel.getData();
+		tempList.addAll(data.getDataList());
 
-		// 将json字符串转为用户json对象数据模型
-		LeoResJsonModel<LeoResOrgData> modle = mapper.readValue(jsonString,
-				new TypeReference<LeoResJsonModel<LeoResOrgData>>() {
-				});
+		// 获取total值后请求全部数据
+		int total = Integer.valueOf(data.getTotal());
+		for (int i = 0; i < calcRequestTimes(total, DEFAULT_PAGE_SIZE); i++) {
+			// 请求页码从2开始
+			paramMap.put(REQUEST_PARAM_PAGE, i + 2);
+			tempList.addAll(requestGetOrgData(REQUEST_ORG_URL, paramMap).getData().getDataList());
+		}
 
-		return modle.getData().getDataList();
+		return tempList;
 	}
 
 	/**
@@ -977,14 +993,73 @@ public class LeoSyncService implements LeoConfig {
 		Map<String, Object> paramMap = new HashMap<>();
 		paramMap.put(REQUEST_PARAM_FROM, getTimestamp(mode));// TODO from参数
 
-		String jsonString = HttpClientUtil4Sync.doGet(REQUEST_POS_URL, paramMap, getAuthHeader());
+		List<LeoPositionModel> tempList = new ArrayList<>();
+		// 首次请求
+		LeoResJsonModel<LeoResPosData> dataModel = requestGetPosData(REQUEST_POS_URL, paramMap);
+		LeoResPosData data = dataModel.getData();
+		tempList.addAll(data.getDataList());
 
+		// 获取total值后请求全部数据
+		int total = Integer.valueOf(data.getTotal());
+		for (int i = 0; i < calcRequestTimes(total, DEFAULT_PAGE_SIZE); i++) {
+			// 请求页码从2开始
+			paramMap.put(REQUEST_PARAM_PAGE, i + 2);
+			tempList.addAll(requestGetPosData(REQUEST_POS_URL, paramMap).getData().getDataList());
+		}
+
+		return tempList;
+	}
+
+	private LeoResJsonModel<LeoResEmpData> requestGetUserData(String requestUrl, Map<String, Object> paramMap)
+			throws IOException {
+		String jsonString = HttpClientUtil4Sync.doGet(requestUrl, paramMap, getAuthHeader());
+		logger.info(jsonString);// TODO todelete
 		// 将json字符串转为用户json对象数据模型
-		LeoResJsonModel<LeoResPosData> modle = mapper.readValue(jsonString,
+		LeoResJsonModel<LeoResEmpData> model = mapper.readValue(jsonString,
+				new TypeReference<LeoResJsonModel<LeoResEmpData>>() {
+				});
+
+		return model;
+	}
+
+	private LeoResJsonModel<LeoResOrgData> requestGetOrgData(String requestUrl, Map<String, Object> paramMap)
+			throws IOException {
+		String jsonString = HttpClientUtil4Sync.doGet(requestUrl, paramMap, getAuthHeader());
+		logger.info(jsonString);// TODO todelete
+		// 将json字符串转为用户json对象数据模型
+		LeoResJsonModel<LeoResOrgData> model = mapper.readValue(jsonString,
+				new TypeReference<LeoResJsonModel<LeoResOrgData>>() {
+				});
+
+		return model;
+	}
+
+	private LeoResJsonModel<LeoResPosData> requestGetPosData(String requestUrl, Map<String, Object> paramMap)
+			throws IOException {
+		String jsonString = HttpClientUtil4Sync.doGet(requestUrl, paramMap, getAuthHeader());
+		logger.info(jsonString);// TODO todelete
+		// 将json字符串转为用户json对象数据模型
+		LeoResJsonModel<LeoResPosData> model = mapper.readValue(jsonString,
 				new TypeReference<LeoResJsonModel<LeoResPosData>>() {
 				});
 
-		return modle.getData().getDataList();
+		return model;
+	}
+
+	/**
+	 * 根据数据总量和每页数量计算应当请求的次数
+	 * 
+	 * @param totalCount
+	 * @param pageSize
+	 * @return
+	 */
+	private int calcRequestTimes(int totalCount, int pageSize) {
+		int reqTimes = totalCount / pageSize;
+		if (totalCount % pageSize > 0) {
+			reqTimes = reqTimes + 1;
+		}
+
+		return reqTimes;
 	}
 
 	/**
