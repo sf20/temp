@@ -49,6 +49,9 @@ public class LeoSyncService implements LeoConfig {
 	private static final String MODE_FULL = "1";
 	private static final String MODE_UPDATE = "2";
 	private static final String FROM_DATE = "2017-08-01";
+	private static final String ENABLE_STATUS = "1";
+	private static final String DELETED_STATUS = "1";
+	private static final String USER_DISABLE_STATUS = "8";
 	// 自定义map的key
 	private static final String MAPKEY_USER_SYNC_ADD = "userSyncAdd";
 	private static final String MAPKEY_USER_SYNC_UPDATE = "userSyncUpdate";
@@ -146,6 +149,7 @@ public class LeoSyncService implements LeoConfig {
 		List<LeoPositionModel> userModelList = getPosModelList(mode);
 		List<PositionModel> newList = copyCreateEntityList(userModelList, PositionModel.class);
 
+		removeExpiredPos(newList);
 		setFullPosNames(newList);
 
 		logger.info("岗位同步Total Size: " + newList.size());
@@ -167,6 +171,38 @@ public class LeoSyncService implements LeoConfig {
 			if (posToSyncUpdate.size() > 0) {
 				syncUpdatePosOneByOne(posToSyncUpdate);
 			}
+		}
+	}
+
+	/**
+	 * 去除过期岗位
+	 * 
+	 * @param list
+	 */
+	private void removeExpiredPos(List<PositionModel> list) {
+		for (Iterator<PositionModel> iterator = list.iterator(); iterator.hasNext();) {
+			PositionModel pos = iterator.next();
+			if (isPosExpired(pos)) {
+				iterator.remove();
+				logger.info("删除了过期岗位：" + pos.getpNames());
+			}
+		}
+	}
+
+	/**
+	 * 判断岗位是否过期
+	 * 
+	 * @param pos
+	 * @return
+	 */
+	private boolean isPosExpired(PositionModel pos) {
+		String status = pos.getStatus();
+		String deleteStatus = pos.getDeleteStatus();
+		// 是否启用为0或者是否删除为1的场合 岗位过期
+		if (!ENABLE_STATUS.equals(status) || DELETED_STATUS.equals(deleteStatus)) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -204,7 +240,7 @@ public class LeoSyncService implements LeoConfig {
 	}
 
 	/**
-	 * 数据库岗位表数据集合与最新获取岗位数据集合进行比较
+	 * 岗位全量数据集合与最新获取岗位数据集合进行比较
 	 * 
 	 * @param fullList
 	 *            数据库岗位表数据集合
@@ -552,8 +588,7 @@ public class LeoSyncService implements LeoConfig {
 	private List<UserInfoModel> getExpiredUsers(List<UserInfoModel> list) {
 		List<UserInfoModel> expiredUsers = new ArrayList<UserInfoModel>();
 		for (UserInfoModel user : list) {
-			// TODO
-			if ("1".equals(user.getStatus())) {
+			if (isUserExpired(user)) {
 				expiredUsers.add(user);
 			}
 		}
@@ -742,7 +777,7 @@ public class LeoSyncService implements LeoConfig {
 	}
 
 	/**
-	 * 数据库组织表数据集合与最新获取组织数据集合进行比较
+	 * 组织全量数据集合与最新获取组织数据集合进行比较
 	 * 
 	 * @param fullList
 	 *            数据库组织表数据集合
@@ -758,34 +793,23 @@ public class LeoSyncService implements LeoConfig {
 		List<OuInfoModel> orgsToSyncDelete = new ArrayList<OuInfoModel>();
 
 		for (OuInfoModel newOrg : newList) {
-			String newOrgName = newOrg.getOuName();
-
-			for (OuInfoModel fullOrg : fullList) {
-				// 已经存在的组织比较
-				if (fullOrg.equals(newOrg)) {
-					// 组织过期待删除
-					if (isOrgExpired(newOrg)) {
-						orgsToSyncDelete.add(newOrg);
-					} else {
-						String fullOrgName = fullOrg.getOuName();
-						// 组织名有变更
-						if (fullOrgName != null && newOrgName != null && !newOrgName.equals(fullOrgName)) {
-							orgsToSyncUpdate.add(newOrg);
-						}
-					}
-					break;
+			// 待新增组织
+			if (!fullList.contains(newOrg)) {
+				// 非过期组织
+				if (!isOrgExpired(newOrg)) {
+					orgsToSyncAdd.add(newOrg);
+				} else {
+					logger.info("包含过期组织：" + newOrg.getOuName());
 				}
 			}
-		}
-
-		// 待新增组织
-		for (OuInfoModel org : newList) {
-			if (!fullList.contains(org)) {
-				// 非过期组织
-				if (!isOrgExpired(org)) {
-					orgsToSyncAdd.add(org);
+			// 已经存在的组织比较
+			else {
+				// 组织过期待删除
+				if (isOrgExpired(newOrg)) {
+					orgsToSyncDelete.add(newOrg);
 				} else {
-					logger.info("包含过期组织：" + org.getOuName());
+					// 组织更新
+					orgsToSyncUpdate.add(newOrg);
 				}
 			}
 		}
@@ -807,19 +831,19 @@ public class LeoSyncService implements LeoConfig {
 	 * @param org
 	 * @return
 	 */
-	// TODO
 	private boolean isOrgExpired(OuInfoModel org) {
 		String status = org.getStatus();
-		if (status == null) {
+		String deleteStatus = org.getDeleteStatus();
+		// 是否启用为0或者是否删除为1的场合 组织过期
+		if (!ENABLE_STATUS.equals(status) || DELETED_STATUS.equals(deleteStatus)) {
 			return true;
+		} else {
+			return false;
 		}
-
-		// TODO
-		return "1".equals(status) ? true : false;
 	}
 
 	/**
-	 * 数据库用户表数据集合与最新获取用户数据集合进行比较
+	 * 用户全量数据集合与最新获取用户数据集合进行比较
 	 * 
 	 * @param fullList
 	 *            数据库用户表数据集合
@@ -841,8 +865,8 @@ public class LeoSyncService implements LeoConfig {
 			for (UserInfoModel fullUser : fullList) {
 				// 已经存在的用户比较
 				if (fullUser.equals(newUser)) {
-					if (fullUser.getExpireDate() == null) {
-						if (newUser.getExpireDate() != null) {
+					if (!isUserExpired(fullUser)) {
+						if (isUserExpired(newUser)) {
 							// 用户过期禁用
 							usersToDisable.add(newUser);
 						} else {
@@ -850,7 +874,7 @@ public class LeoSyncService implements LeoConfig {
 							usersToSyncUpdate.add(newUser);
 						}
 					} else {
-						if (newUser.getExpireDate() == null) {
+						if (!isUserExpired(newUser)) {
 							// 用户重新启用
 							usersToEnable.add(newUser);
 						} else {
@@ -881,6 +905,23 @@ public class LeoSyncService implements LeoConfig {
 		logger.info("用户同步禁用Size: " + usersToDisable.size());
 
 		return map;
+	}
+
+	/**
+	 * 判断用户是否过期
+	 * 
+	 * @param user
+	 * @return
+	 */
+	private boolean isUserExpired(UserInfoModel user) {
+		String status = user.getStatus();
+		String deleteStatus = user.getDeleteStatus();
+		// 用户状态为8:离职 或者是否删除为1的场合下过期
+		if (USER_DISABLE_STATUS.equals(status) || DELETED_STATUS.equals(deleteStatus)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
