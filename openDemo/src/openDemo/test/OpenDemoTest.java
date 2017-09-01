@@ -6,7 +6,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import openDemo.config.OppleConfig;
+import openDemo.config.LeoConfig;
 import openDemo.entity.GroupInfoEntity;
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
@@ -18,7 +18,7 @@ import openDemo.service.RoleService;
 import openDemo.service.SsoService;
 import openDemo.service.SyncUserService;
 
-public class OpenDemoTest implements OppleConfig {
+public class OpenDemoTest implements LeoConfig {
 
 	public static void main(String[] args) throws IOException {
 		new OpenDemoTest();
@@ -26,13 +26,13 @@ public class OpenDemoTest implements OppleConfig {
 
 	public OpenDemoTest() throws IOException {
 		// 岗位同步
-		// posTest();
+		posTest();
 
 		// //1.单点登录:el/sso
 		// ssoTest();
 
 		// 2.同步用户: el/sync/users
-		userSyncTest();
+		// userSyncTest();
 
 		// //3.同步禁用用户: el/sync/disabledusers
 		// disabledusersTest();
@@ -69,10 +69,12 @@ public class OpenDemoTest implements OppleConfig {
 		SyncPositionService posService = new SyncPositionService();
 		List<PositionModel> positionInfos = new ArrayList<>();
 		PositionModel p = new PositionModel();
-		p.setpNames("未分类;岗位修改");
-		p.setpNo("201707241745489031");
+		p.setpNames("未分类;岗位测试x");
+		p.setpNo(null);
 		positionInfos.add(p);
 		ResultEntity resultEntity = posService.syncPos(positionInfos, apikey, secretkey, baseUrl);
+		// ResultEntity resultEntity = posService.changePosName("20170901","岗位测试",
+		// apikey, secretkey, baseUrl);
 		print("岗位同步", resultEntity);
 	}
 
