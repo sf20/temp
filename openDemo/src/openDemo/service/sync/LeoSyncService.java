@@ -48,7 +48,7 @@ public class LeoSyncService implements LeoConfig {
 	private static final String REQUEST_PARAM_FROM = "from";
 	private static final String MODE_FULL = "1";
 	private static final String MODE_UPDATE = "2";
-	private static final String FROM_DATE = "2017-08-28";
+	private static final String FROM_DATE = "2017-08-01";
 	// 自定义map的key
 	private static final String MAPKEY_USER_SYNC_ADD = "userSyncAdd";
 	private static final String MAPKEY_USER_SYNC_UPDATE = "userSyncUpdate";
@@ -252,15 +252,16 @@ public class LeoSyncService implements LeoConfig {
 		List<OuInfoModel> newList = copyCreateEntityList(modelList, OuInfoModel.class);
 
 		removeExpiredOrgs(newList, mode);
+		setRootOrgParentId(newList);
 
 		logger.info("组织同步Total Size: " + newList.size());
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
 			logger.info("组织同步新增Size: " + newList.size());
 			// 进行多次同步
-			// for (int i = 0; i < 5; i++) {
-			syncAddOrgOneByOne(newList, isBaseInfo);
-			// }
+			for (int i = 0; i < 5; i++) {
+				syncAddOrgOneByOne(newList, isBaseInfo);
+			}
 		}
 		// 增量模式
 		else {
@@ -299,6 +300,20 @@ public class LeoSyncService implements LeoConfig {
 				}
 			}
 
+		}
+	}
+
+	/**
+	 * 设置根组织的父节点id为null
+	 * 
+	 * @param newList
+	 */
+	private void setRootOrgParentId(List<OuInfoModel> newList) {
+		for (OuInfoModel org : newList) {
+			if ("-2".equals(org.getParentID())) {
+				org.setParentID(null);
+				break;
+			}
 		}
 	}
 
