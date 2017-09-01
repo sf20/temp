@@ -58,6 +58,7 @@ public class LeoSyncService implements LeoConfig {
 	private static final String MAPKEY_ORG_SYNC_UPDATE = "orgSyncUpdate";
 	private static final String MAPKEY_ORG_SYNC_DELETE = "orgSyncDelete";
 	private static final String MAPKEY_POS_SYNC_ADD = "posSyncAdd";
+	private static final String MAPKEY_POS_SYNC_UPDATE = "posSynccUpdate";
 	// 请求同步接口成功返回码
 	private static final String SYNC_CODE_SUCCESS = "0";
 	// 岗位类别的默认值
@@ -145,6 +146,8 @@ public class LeoSyncService implements LeoConfig {
 		List<LeoPositionModel> userModelList = getPosModelList(mode);
 		List<PositionModel> newList = copyCreateEntityList(userModelList, PositionModel.class);
 
+		setFullPosNames(newList);
+
 		logger.info("岗位同步Total Size: " + newList.size());
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
@@ -155,18 +158,49 @@ public class LeoSyncService implements LeoConfig {
 		else {
 			Map<String, List<PositionModel>> map = comparePosList(positionList, newList);
 
-			syncAddPosOneByOne(map.get(MAPKEY_POS_SYNC_ADD));
+			List<PositionModel> posToSyncAdd = map.get(MAPKEY_POS_SYNC_ADD);
+			if (posToSyncAdd.size() > 0) {
+				syncAddPosOneByOne(posToSyncAdd);
+			}
+
+			List<PositionModel> posToSyncUpdate = map.get(MAPKEY_POS_SYNC_UPDATE);
+			if (posToSyncUpdate.size() > 0) {
+				syncUpdatePosOneByOne(posToSyncUpdate);
+			}
 		}
 	}
 
 	/**
-	 * 返回带类别岗位名
+	 * 设置岗位名为带类别岗位名
 	 * 
-	 * @param posName
+	 * @param newList
+	 */
+	private void setFullPosNames(List<PositionModel> newList) {
+		String prefix = POSITION_CLASS_DEFAULT + POSITION_CLASS_SEPARATOR;
+		for (PositionModel pos : newList) {
+			pos.setpNames(prefix + pos.getpNames());
+		}
+	}
+
+	/**
+	 * 从pNames中得到岗位名(pNames格式: 一级类别;二级类别;岗位名)
+	 * 
+	 * @param pNames
 	 * @return
 	 */
-	private String getFullPosNames(String posName) {
-		return POSITION_CLASS_DEFAULT + POSITION_CLASS_SEPARATOR + posName;
+	private String getPositionName(String pNames) {
+		if (pNames == null) {
+			return null;
+		}
+
+		String[] arr = pNames.split(POSITION_CLASS_SEPARATOR);
+		int len = arr.length;
+		if (len == 0) {
+			return null;
+		}
+
+		// 最后是岗位名
+		return arr[len - 1];
 	}
 
 	/**
@@ -181,31 +215,33 @@ public class LeoSyncService implements LeoConfig {
 	private Map<String, List<PositionModel>> comparePosList(List<PositionModel> fullList, List<PositionModel> newList) {
 		Map<String, List<PositionModel>> map = new HashMap<String, List<PositionModel>>();
 		List<PositionModel> posToSyncAdd = new ArrayList<PositionModel>();
+		List<PositionModel> posToSyncUpdate = new ArrayList<PositionModel>();
 
-		// TODO
-		// 待新增岗位
 		for (PositionModel newPos : newList) {
-			String newPosName = newPos.getpNames();
-
-			if (newPosName != null) {
-				boolean isPosNameExist = false;
-
-				for (PositionModel fullPos : fullList) {
-					if (newPosName.equals(fullPos.getpNames())) {
-						isPosNameExist = true;
-						break;
+			// 岗位不存在新增
+			if (!fullList.contains(newPos)) {
+				posToSyncAdd.add(newPos);
+			} else {
+				String newPosNo = newPos.getpNo();
+				if (newPosNo != null) {
+					for (PositionModel fullPos : fullList) {
+						if (newPosNo.equals(fullPos.getpNo())) {
+							String newPosName = newPos.getpNames();
+							// 岗位名发生更新
+							if (newPosName != null && !newPosName.equals(fullPos.getpNames())) {
+								posToSyncUpdate.add(newPos);
+							}
+							break;
+						}
 					}
-				}
-
-				// 岗位名不存在
-				if (!isPosNameExist) {
-					posToSyncAdd.add(newPos);
 				}
 			}
 		}
 
 		map.put(MAPKEY_POS_SYNC_ADD, posToSyncAdd);
+		map.put(MAPKEY_POS_SYNC_UPDATE, posToSyncUpdate);
 		logger.info("岗位同步新增Size: " + posToSyncAdd.size());
+		logger.info("岗位同步更新Size: " + posToSyncUpdate.size());
 
 		return map;
 	}
@@ -219,8 +255,6 @@ public class LeoSyncService implements LeoConfig {
 		List<PositionModel> tempList = new ArrayList<PositionModel>();
 		ResultEntity resultEntity = null;
 		for (PositionModel pos : posToSync) {
-			// 同步pNames需带类别
-			pos.setpNames(getFullPosNames(pos.getpNames()));
 			tempList.add(pos);
 
 			try {
@@ -236,6 +270,32 @@ public class LeoSyncService implements LeoConfig {
 			}
 
 			tempList.clear();
+		}
+	}
+
+	/**
+	 * 逐个岗位同步更新
+	 * 
+	 * @param posToSync
+	 */
+	private void syncUpdatePosOneByOne(List<PositionModel> posToSync) {
+		ResultEntity resultEntity = null;
+		for (PositionModel pos : posToSync) {
+			try {
+				// 同步岗位名不需要带分级类别
+				resultEntity = positionService.changePosName(pos.getpNo(), getPositionName(pos.getpNames()), apikey,
+						secretkey, baseUrl);
+
+				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+					positionList.remove(pos);
+					positionList.add(pos);
+				} else {
+					printLog("岗位同步更新失败 ", resultEntity);
+				}
+			} catch (IOException e) {
+				logger.error("岗位同步更新失败 " + pos.getpNames(), e);
+			}
+
 		}
 	}
 
