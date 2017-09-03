@@ -1023,7 +1023,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 	private <T> LeoResJsonModel<T> requestGetData(String requestUrl, Map<String, Object> paramMap, Class<T> classType)
 			throws IOException {
 		String jsonString = HttpClientUtil4Sync.doGet(requestUrl, paramMap, getAuthHeader());
-		logger.info(jsonString);// TODO todelete
+		// logger.info(jsonString);
 
 		// 将json字符串转为用户json对象数据模型
 		LeoResJsonModel<T> model = null;
