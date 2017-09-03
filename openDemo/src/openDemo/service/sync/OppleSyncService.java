@@ -53,7 +53,7 @@ import openDemo.service.SyncOrgService;
 import openDemo.service.SyncPositionService;
 import openDemo.service.SyncUserService;
 
-public class OppleSyncService implements OppleConfig {
+public class OppleSyncService extends AbstractSyncService implements OppleConfig {
 	// 用户接口请求参数名
 	private static final String REQUESTID = "RequestId";
 	private static final String SERVICENAME = "ServiceName";
@@ -124,6 +124,7 @@ public class OppleSyncService implements OppleConfig {
 	 * @throws IOException
 	 * @throws ReflectiveOperationException
 	 */
+	@Override
 	public void sync() throws IOException, ReflectiveOperationException {
 		int posCount = positionList.size();
 		if (posCount > 0) {

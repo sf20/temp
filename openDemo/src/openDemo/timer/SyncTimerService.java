@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import openDemo.service.sync.AbstractSyncService;
+import openDemo.service.sync.LeoSyncService;
 import openDemo.service.sync.OppleSyncService;
 
 /**
@@ -21,11 +23,11 @@ import openDemo.service.sync.OppleSyncService;
  */
 public class SyncTimerService {
 	// 定时器间隔执行时间 单位毫秒
-	private static final long PERIOD = 60 * 60 * 1000;
+	private static final long PERIOD = 5 * 60 * 1000;// 60 * 60 * 1000
 	// 每次定时器执行时间参数
-	private static final int TIMER_EXEC_TIME_HOUR = 9;
-	private static final int TIMER_EXEC_TIME_MINUTE = 10;
-	private static final int TIMER_EXEC_TIME_SECOND = 00;
+	private int timerExecHour = 23;
+	private int timerExecMinute = 00;
+	private int timerExecSecond = 00;
 	// 线程池数量
 	private static final int CORE_POOL_SIZE = 1;
 
@@ -37,12 +39,15 @@ public class SyncTimerService {
 	// 定时器间隔执行计算基准日
 	private Date baseDate;
 
-	public SyncTimerService() {
+	public SyncTimerService(int execHour, int execMinute) {
+		this.timerExecHour = execHour;
+		this.timerExecMinute = execMinute;
+
 		Calendar calendar = Calendar.getInstance();
 		// 设置定时器首次执行时间
-		calendar.set(Calendar.HOUR_OF_DAY, TIMER_EXEC_TIME_HOUR);
-		calendar.set(Calendar.MINUTE, TIMER_EXEC_TIME_MINUTE);
-		calendar.set(Calendar.SECOND, TIMER_EXEC_TIME_SECOND);
+		calendar.set(Calendar.HOUR_OF_DAY, timerExecHour);
+		calendar.set(Calendar.MINUTE, timerExecMinute);
+		calendar.set(Calendar.SECOND, timerExecSecond);
 
 		// 间隔执行基于首次执行时间
 		baseDate = calendar.getTime();
@@ -50,12 +55,15 @@ public class SyncTimerService {
 
 	public static void main(String[] args) {
 
-		SyncTimerService syncTimerService = new SyncTimerService();
+		SyncTimerService syncTimerService = new SyncTimerService(22, 5);
+		SyncTimerService syncTimerService2 = new SyncTimerService(22, 8);
 
 		logger.info("程序初始化::定时器启动...");
 		syncTimerService.singleAddTimingService(new OppleSyncService());
 		syncTimerService.singleAddTimingService(new OppleSyncService());
 
+		syncTimerService2.singleAddTimingService(new LeoSyncService());
+		syncTimerService2.singleAddTimingService(new LeoSyncService());
 		logger.info("====测试优先执行====");
 	}
 
@@ -64,14 +72,14 @@ public class SyncTimerService {
 	 * 
 	 * @param syncService
 	 */
-	public void singleAddTimingService(OppleSyncService syncService) {
+	public void singleAddTimingService(AbstractSyncService syncService) {
 		// 保证只有一个定时器在运行
 		if (executor == null) {
 			addTimingService(syncService);
 		}
 	}
 
-	private void addTimingService(final OppleSyncService syncService) {
+	private void addTimingService(final AbstractSyncService syncService) {
 		executor = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 
 		TimerTask task = new TimerTask() {
@@ -93,7 +101,7 @@ public class SyncTimerService {
 					// 继续设置下一个定时任务
 					executor.schedule(this, delay, TimeUnit.MILLISECONDS);
 				} catch (Exception e) {
-					shutdowmAndPrintLog(executor, e);
+					shutdowmAndPrintLog(executor, e, syncService.getClass().getSimpleName());
 				}
 			}
 		};
@@ -200,10 +208,11 @@ public class SyncTimerService {
 	 * @param executor
 	 *            定时器执行器
 	 * @param e
+	 * @param className
 	 */
-	private void shutdowmAndPrintLog(ScheduledExecutorService executor, Exception e) {
+	private void shutdowmAndPrintLog(ScheduledExecutorService executor, Exception e, String className) {
 		executor.shutdown();
-		logger.info("发生异常::定时器已停止");
-		logger.error("定时同步[OpSyncService]出现异常", e);
+		logger.info("发生异常::定时器[" + className + "]已停止");
+		logger.error("定时同步[" + className + "]出现异常", e);
 	}
 }

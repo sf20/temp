@@ -40,7 +40,7 @@ import openDemo.service.SyncPositionService;
 import openDemo.service.SyncUserService;
 import openDemo.utils.HttpClientUtil4Sync;
 
-public class LeoSyncService implements LeoConfig {
+public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 	// 用户接口请求参数值
 	private static final String REQUEST_EMP_URL = "https://open.leo.cn/v1/hr/employees/last-updated";
 	private static final String REQUEST_ORG_URL = "https://open.leo.cn/v1/hr/origizations/last-updated";
@@ -99,6 +99,7 @@ public class LeoSyncService implements LeoConfig {
 	 * @throws IOException
 	 * @throws ReflectiveOperationException
 	 */
+	@Override
 	public void sync() throws IOException, ReflectiveOperationException {
 		int posCount = positionList.size();
 		if (posCount > 0) {
