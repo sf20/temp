@@ -945,7 +945,7 @@ public class LeoSyncService implements LeoConfig {
 
 		// 获取total值后请求全部数据
 		int total = Integer.valueOf(data.getTotal());
-		for (int i = 0; i < calcRequestTimes(total, DEFAULT_PAGE_SIZE); i++) {
+		for (int i = 0; i < calcRequestTimes(total, DEFAULT_PAGE_SIZE) - 1; i++) {
 			// 请求页码从2开始
 			paramMap.put(REQUEST_PARAM_PAGE, i + 2);
 			tempList.addAll(requestGetUserData(REQUEST_EMP_URL, paramMap).getData().getDataList());
@@ -973,7 +973,7 @@ public class LeoSyncService implements LeoConfig {
 
 		// 获取total值后请求全部数据
 		int total = Integer.valueOf(data.getTotal());
-		for (int i = 0; i < calcRequestTimes(total, DEFAULT_PAGE_SIZE); i++) {
+		for (int i = 0; i < calcRequestTimes(total, DEFAULT_PAGE_SIZE) - 1; i++) {
 			// 请求页码从2开始
 			paramMap.put(REQUEST_PARAM_PAGE, i + 2);
 			tempList.addAll(requestGetOrgData(REQUEST_ORG_URL, paramMap).getData().getDataList());
@@ -1001,7 +1001,7 @@ public class LeoSyncService implements LeoConfig {
 
 		// 获取total值后请求全部数据
 		int total = Integer.valueOf(data.getTotal());
-		for (int i = 0; i < calcRequestTimes(total, DEFAULT_PAGE_SIZE); i++) {
+		for (int i = 0; i < calcRequestTimes(total, DEFAULT_PAGE_SIZE) - 1; i++) {
 			// 请求页码从2开始
 			paramMap.put(REQUEST_PARAM_PAGE, i + 2);
 			tempList.addAll(requestGetPosData(REQUEST_POS_URL, paramMap).getData().getDataList());
