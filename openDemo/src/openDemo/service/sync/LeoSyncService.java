@@ -934,10 +934,10 @@ public class LeoSyncService implements LeoConfig {
 	 * @throws IOException
 	 */
 	private List<LeoUserInfoModel> getUserModelList(String mode) throws IOException {
-		Map<String, Object> paramMap = new HashMap<>();
+		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put(REQUEST_PARAM_FROM, getTimestamp(mode));
 
-		List<LeoUserInfoModel> tempList = new ArrayList<>();
+		List<LeoUserInfoModel> tempList = new ArrayList<LeoUserInfoModel>();
 		// 首次请求
 		LeoResJsonModel<LeoResEmpData> dataModel = requestGetData(REQUEST_EMP_URL, paramMap, LeoResEmpData.class);
 		LeoResEmpData data = dataModel.getData();
@@ -962,10 +962,10 @@ public class LeoSyncService implements LeoConfig {
 	 * @throws IOException
 	 */
 	private List<LeoOuInfoModel> getOrgModelList(String mode) throws IOException {
-		Map<String, Object> paramMap = new HashMap<>();
+		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put(REQUEST_PARAM_FROM, getTimestamp(mode));
 
-		List<LeoOuInfoModel> tempList = new ArrayList<>();
+		List<LeoOuInfoModel> tempList = new ArrayList<LeoOuInfoModel>();
 		// 首次请求
 		LeoResJsonModel<LeoResOrgData> dataModel = requestGetData(REQUEST_ORG_URL, paramMap, LeoResOrgData.class);
 		LeoResOrgData data = dataModel.getData();
@@ -990,10 +990,10 @@ public class LeoSyncService implements LeoConfig {
 	 * @throws IOException
 	 */
 	private List<LeoPositionModel> getPosModelList(String mode) throws IOException {
-		Map<String, Object> paramMap = new HashMap<>();
+		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put(REQUEST_PARAM_FROM, getTimestamp(mode));
 
-		List<LeoPositionModel> tempList = new ArrayList<>();
+		List<LeoPositionModel> tempList = new ArrayList<LeoPositionModel>();
 		// 首次请求
 		LeoResJsonModel<LeoResPosData> dataModel = requestGetData(REQUEST_POS_URL, paramMap, LeoResPosData.class);
 		LeoResPosData data = dataModel.getData();
@@ -1090,7 +1090,7 @@ public class LeoSyncService implements LeoConfig {
 	 * @throws IOException
 	 */
 	private List<Header> getAuthHeader() throws IOException {
-		List<Header> headers = new ArrayList<>();
+		List<Header> headers = new ArrayList<Header>();
 		headers.add(new BasicHeader("Authorization", "Bearer " + getToken()));
 		return headers;
 	}
@@ -1104,7 +1104,7 @@ public class LeoSyncService implements LeoConfig {
 	private String getToken() throws IOException {
 		String url = "https://open.leo.cn/v1/authentication/oauth2/get-token";
 
-		Map<String, Object> paramMap = new HashMap<>();
+		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("access_key", "oleo_42db6ee396eb8765435e44446befad8e");
 		paramMap.put("secret_key", "5f81f9a50e7c4043efece652b7a82be2d0d90839b9b550b66c1fb865480a6aad");
 
