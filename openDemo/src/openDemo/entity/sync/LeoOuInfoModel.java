@@ -1,6 +1,5 @@
 package openDemo.entity.sync;
 
-import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -54,12 +53,6 @@ public class LeoOuInfoModel {
 	 */
 	@JsonIgnore
 	private int orderIndex;
-
-	/*
-	 * 组织废止日期
-	 */
-	@JsonIgnore
-	private Date endDate;
 
 	/*
 	 * 组织状态
@@ -127,14 +120,6 @@ public class LeoOuInfoModel {
 
 	public void setOrderIndex(int orderIndex) {
 		this.orderIndex = orderIndex;
-	}
-
-	public Date getEndDate() {
-		return endDate;
-	}
-
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
 	}
 
 	public String getStatus() {
