@@ -80,6 +80,7 @@ public class SyncTimerService {
 	}
 
 	private void addTimingService(final AbstractSyncService syncService) {
+		final String className = syncService.getClass().getSimpleName();
 		executor = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 
 		TimerTask task = new TimerTask() {
@@ -90,7 +91,9 @@ public class SyncTimerService {
 					Date nextTime = getNextTime(new Date());
 
 					// 执行同步方法
+					logger.info("定时同步[" + className + "]开始");
 					syncService.sync();
+					logger.info("定时同步[" + className + "]结束");
 
 					// 实际任务结束时间
 					Date taskEndTime = new Date();
@@ -101,7 +104,7 @@ public class SyncTimerService {
 					// 继续设置下一个定时任务
 					executor.schedule(this, delay, TimeUnit.MILLISECONDS);
 				} catch (Exception e) {
-					shutdowmAndPrintLog(executor, e, syncService.getClass().getSimpleName());
+					shutdowmAndPrintLog(executor, e, className);
 				}
 			}
 		};
