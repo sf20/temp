@@ -665,16 +665,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					userInfoList.add(user);
 				} else {
-					// 忽略邮箱再同步一次
-					user.setMail(null);
-					tempList.set(0, user);
-					resultEntity = userService.userSync(islink, tempList, apikey, secretkey, baseUrl);
-					if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-						userInfoList.add(user);
-						logger.warn("该用户邮箱异常未同步：" + user.getID());
-					} else {
-						printLog("用户同步新增失败 ", resultEntity);
-					}
+					printLog("用户同步新增失败 ", resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("用户同步新增失败 " + user.getID(), e);
@@ -703,17 +694,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 					userInfoList.remove(user);
 					userInfoList.add(user);
 				} else {
-					// 忽略邮箱再同步一次
-					user.setMail(null);
-					tempList.set(0, user);
-					resultEntity = userService.userSync(islink, tempList, apikey, secretkey, baseUrl);
-					if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-						userInfoList.remove(user);
-						userInfoList.add(user);
-						logger.warn("该用户邮箱异常未同步：" + user.getID());
-					} else {
-						printLog("用户同步更新失败 ", resultEntity);
-					}
+					printLog("用户同步更新失败 ", resultEntity);
 				}
 			} catch (Exception e) {
 				logger.error("用户同步更新失败 " + user.getID(), e);
