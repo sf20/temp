@@ -59,8 +59,6 @@ public class HttpClientUtil4Sync {
 	private static List<Header> headers;
 	// 默认响应处理器
 	private static ResponseHandler<String> responseHandler;
-	// SSL连接配置
-	private static SSLConnectionSocketFactory sslConnSocketFactory;
 
 	static {
 		// 设置超时时间
@@ -447,10 +445,7 @@ public class HttpClientUtil4Sync {
 	 */
 	private static SSLConnectionSocketFactory getSSLConnSocketFactory(String protocol)
 			throws NoSuchAlgorithmException, KeyManagementException {
-		if (sslConnSocketFactory != null) {
-			return sslConnSocketFactory;
-		}
-
+		// SSL连接配置
 		SSLContext sslContext = SSLContext.getInstance(protocol == null ? TLS : protocol);
 		// 实现一个X509TrustManager接口
 		X509TrustManager trustManager = new X509TrustManager() {
@@ -468,9 +463,8 @@ public class HttpClientUtil4Sync {
 			}
 		};
 		sslContext.init(null, new TrustManager[] { trustManager }, null);
-		sslConnSocketFactory = new SSLConnectionSocketFactory(sslContext);
 
-		return sslConnSocketFactory;
+		return new SSLConnectionSocketFactory(sslContext);
 	}
 
 	public static void main(String[] args) {
