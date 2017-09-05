@@ -31,6 +31,7 @@ import openDemo.utils.HttpClientUtil4Sync;
 
 public class LeoSyncServiceTest {
 	private static final SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
+	private static final int FROM_TIMESTAMP = 1501516800;
 	private static ObjectMapper mapper;
 
 	static {
@@ -100,7 +101,7 @@ public class LeoSyncServiceTest {
 		String url = "https://open.leo.cn/v1/hr/employees/last-updated";
 
 		Map<String, Object> map = new HashMap<>();
-		map.put("from", "1501571786");
+		map.put("from", FROM_TIMESTAMP);
 		System.out.println(HttpClientUtil4Sync.doGet(url, map, getAuthHeader()));
 	}
 
@@ -108,7 +109,7 @@ public class LeoSyncServiceTest {
 		String url = "https://open.leo.cn/v1/hr/origizations/last-updated";
 
 		Map<String, Object> map = new HashMap<>();
-		map.put("from", "1501571786");
+		map.put("from", FROM_TIMESTAMP);
 		System.out.println(HttpClientUtil4Sync.doGet(url, map, getAuthHeader()));
 	}
 
@@ -116,7 +117,7 @@ public class LeoSyncServiceTest {
 		String url = "https://open.leo.cn/v1/hr/job-positions/last-updated";
 
 		Map<String, Object> map = new HashMap<>();
-		map.put("from", "1501571786");
+		map.put("from", FROM_TIMESTAMP);
 		System.out.println(HttpClientUtil4Sync.doGet(url, map, getAuthHeader()));
 	}
 
