@@ -130,12 +130,12 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 		if (posCount > 0) {
 			// 岗位增量同步
 			logger.info("[岗位增量]同步开始...");
-			opPosSync(SERVICEOPERATION_EMP, MODE_UPDATE);
+			opPosSync(SERVICEOPERATION_EMP, MODE_UPDATE, null);
 			logger.info("[岗位增量]同步结束");
 		} else {
 			// 岗位全量同步
 			logger.info("[岗位全量]同步开始...");
-			// opPosSync(SERVICEOPERATION_EMP, MODE_FULL);
+			opPosSync(SERVICEOPERATION_EMP, MODE_FULL, null);
 			logger.info("[岗位全量]同步结束");
 		}
 
@@ -148,7 +148,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 		} else {
 			// 组织全量同步
 			logger.info("[组织全量]同步开始...");
-			// opOrgSync(SERVICEOPERATION_ORG, MODE_FULL, false);
+			opOrgSync(SERVICEOPERATION_ORG, MODE_FULL, false);
 			logger.info("[组织全量]同步结束");
 		}
 
@@ -171,11 +171,13 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 	 * 
 	 * @param serviceOperation
 	 * @param mode
+	 * @param paramAdded
 	 * @throws ReflectiveOperationException
 	 * @throws IOException
 	 */
-	public void opPosSync(String serviceOperation, String mode) throws IOException, ReflectiveOperationException {
-		List<OpUserInfoModel> userModelList = getUserModelList(serviceOperation, mode, null);
+	public void opPosSync(String serviceOperation, String mode, Map<String, String> paramAdded)
+			throws IOException, ReflectiveOperationException {
+		List<OpUserInfoModel> userModelList = getUserModelList(serviceOperation, mode, paramAdded);
 		List<PositionModel> newList = getPosListFromUsers(userModelList);
 
 		logger.info("岗位同步Total Size: " + newList.size());
@@ -228,7 +230,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 	}
 
 	/**
-	 * 数据库岗位表数据集合与最新获取岗位数据集合进行比较
+	 * 岗位全量数据集合与最新获取岗位数据集合进行比较
 	 * 
 	 * @param fullList
 	 *            数据库岗位表数据集合
@@ -415,8 +417,10 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 		Map<String, Object> reqDataMap = new HashMap<String, Object>();
 		reqDataMap.put(MODE, mode);
 		if (MODE_3.equals(mode) || MODE_4.equals(mode)) {
-			for (String key : paramAdded.keySet()) {
-				reqDataMap.put(key, paramAdded.get(key));
+			if (paramAdded != null && paramAdded.size() > 0) {
+				for (String key : paramAdded.keySet()) {
+					reqDataMap.put(key, paramAdded.get(key));
+				}
 			}
 		}
 		map.put(ESBREQDATA, reqDataMap);
@@ -937,7 +941,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 	}
 
 	/**
-	 * 数据库组织表数据集合与最新获取组织数据集合进行比较
+	 * 组织全量数据集合与最新获取组织数据集合进行比较
 	 * 
 	 * @param fullList
 	 *            数据库组织表数据集合
@@ -953,34 +957,23 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 		List<OuInfoModel> orgsToSyncDelete = new ArrayList<OuInfoModel>();
 
 		for (OuInfoModel newOrg : newList) {
-			String newOrgName = newOrg.getOuName();
-
-			for (OuInfoModel fullOrg : fullList) {
-				// 已经存在的组织比较
-				if (fullOrg.equals(newOrg)) {
-					// 组织过期待删除
-					if (isOrgExpired(newOrg)) {
-						orgsToSyncDelete.add(newOrg);
-					} else {
-						String fullOrgName = fullOrg.getOuName();
-						// 组织名有变更
-						if (fullOrgName != null && newOrgName != null && !newOrgName.equals(fullOrgName)) {
-							orgsToSyncUpdate.add(newOrg);
-						}
-					}
-					break;
+			// 待新增组织
+			if (!fullList.contains(newOrg)) {
+				// 非过期组织
+				if (!isOrgExpired(newOrg)) {
+					orgsToSyncAdd.add(newOrg);
+				} else {
+					logger.info("包含过期组织：" + newOrg.getOuName());
 				}
 			}
-		}
-
-		// 待新增组织
-		for (OuInfoModel org : newList) {
-			if (!fullList.contains(org)) {
-				// 非过期组织
-				if (!isOrgExpired(org)) {
-					orgsToSyncAdd.add(org);
+			// 已经存在的组织比较
+			else {
+				// 组织过期待删除
+				if (isOrgExpired(newOrg)) {
+					orgsToSyncDelete.add(newOrg);
 				} else {
-					logger.info("包含过期组织：" + org.getOuName());
+					// 组织更新
+					orgsToSyncUpdate.add(newOrg);
 				}
 			}
 		}
@@ -1012,7 +1005,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 	}
 
 	/**
-	 * 数据库用户表数据集合与最新获取用户数据集合进行比较
+	 * 用户全量数据集合与最新获取用户数据集合进行比较
 	 * 
 	 * @param fullList
 	 *            数据库用户表数据集合
