@@ -53,12 +53,16 @@ public class OppleSyncServiceTest {
 
 		OppleSyncService opSyncService = new OppleSyncService();
 		// String serviceOperation = "QueryEmpInfo";
-		// String mode = "3";
+		// String serviceOperationOrg = "QueryOrgInfo";
+		// String mode1 = "1";
+		// String mode3 = "3";
 		// Map<String, String> paramAdded = new HashMap<>();
-		// paramAdded.put("FromDate", "20170820");
+		// paramAdded.put("FromDate", "20170905");
 		try {
 			opSyncService.sync();
-			// opSyncService.opUserSync(serviceOperation, mode, true, paramAdded);
+			// opSyncService.opPosSync(serviceOperation, mode1, paramAdded);
+			// opSyncService.opOrgSync(serviceOperationOrg, mode1, true);
+			// opSyncService.opUserSync(serviceOperation, mode3, true, paramAdded);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
