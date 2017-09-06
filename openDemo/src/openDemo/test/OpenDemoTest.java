@@ -6,19 +6,19 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import openDemo.config.LeoConfig;
+import openDemo.config.OppleConfig;
 import openDemo.entity.GroupInfoEntity;
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
 import openDemo.entity.ResultEntity;
 import openDemo.entity.UserInfoModel;
-import openDemo.service.SyncOrgService;
-import openDemo.service.SyncPositionService;
 import openDemo.service.RoleService;
 import openDemo.service.SsoService;
+import openDemo.service.SyncOrgService;
+import openDemo.service.SyncPositionService;
 import openDemo.service.SyncUserService;
 
-public class OpenDemoTest implements LeoConfig {
+public class OpenDemoTest implements OppleConfig {
 
 	public static void main(String[] args) throws IOException {
 		new OpenDemoTest();
@@ -70,7 +70,7 @@ public class OpenDemoTest implements LeoConfig {
 		List<PositionModel> positionInfos = new ArrayList<>();
 		PositionModel p = new PositionModel();
 		p.setpNames("未分类;岗位测试x");
-		p.setpNo(null);
+		p.setpNo("13579");
 		positionInfos.add(p);
 		ResultEntity resultEntity = posService.syncPos(positionInfos, apikey, secretkey, baseUrl);
 		// ResultEntity resultEntity = posService.changePosName("20170901","岗位测试",
