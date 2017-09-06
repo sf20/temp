@@ -26,16 +26,19 @@ import openDemo.service.sync.OppleSyncService;
 public class OppleSyncServiceTest {
 
 	public static void main(String[] args) throws Exception {
-		opSyncServiceTest();
+		// opSyncServiceTest();
 
-		// postGetJsonTest();
+		postGetJsonTest();
 	}
 
 	static void postGetJsonTest() throws Exception {
 		String serviceOperation = "QueryEmpInfo";// QueryOrgInfo
-		String mode = "4";
+		String mode = "3";
 		Map<String, String> paramAdded = new HashMap<>();
-		paramAdded.put("OpUserId", "OP050279");
+		paramAdded.put("FromDate", "20170906");
+		// String mode = "4";
+		// Map<String, String> paramAdded = new HashMap<>();
+		// paramAdded.put("OpUserId", "OP050279");
 		OppleSyncService syncService = new OppleSyncService();
 		String jsonString = syncService.getJsonPost(syncService.buildReqJson(serviceOperation, mode, paramAdded));
 		System.out.println(jsonString);
