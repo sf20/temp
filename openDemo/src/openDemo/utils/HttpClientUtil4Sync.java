@@ -62,7 +62,7 @@ public class HttpClientUtil4Sync {
 
 	static {
 		// 设置超时时间
-		requestConfig = RequestConfig.custom().setConnectTimeout(5000).setConnectionRequestTimeout(5000)
+		requestConfig = RequestConfig.custom().setConnectTimeout(10000).setConnectionRequestTimeout(10000)
 				.setSocketTimeout(10000).build();
 
 		// 重试次数，默认是3次，没有开启。已有默认值无需设置！！！
