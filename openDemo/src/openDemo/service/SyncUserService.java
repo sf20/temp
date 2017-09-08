@@ -10,6 +10,7 @@ import openDemo.common.HttpResultUtil;
 import openDemo.common.JsonUtil;
 import openDemo.entity.ResultEntity;
 import openDemo.entity.UserInfoModel;
+import openDemo.utils.HttpClientUtil4Sync;
 
 
 /**
@@ -36,7 +37,7 @@ public class SyncUserService {
 		params.put("islink", islink);
 		params.put("users", array.toString());
 		String url = baseUrl + "el/sync/users";
-		String result = HttpResultUtil.getResult(params, url);
+		String result = HttpClientUtil4Sync.doPostUsePool(url, params);// HttpResultUtil.getResult(params, url);
 		return HttpResultUtil.getResult(result);
 	}
 	
@@ -99,7 +100,7 @@ public class SyncUserService {
 		Map<String, Object> params = HttpResultUtil.getParamsMap(apikey, secretkey);
 		JSONArray userNameArray = JSONArray.fromObject(userNames);
 		params.put("userNames", userNameArray.toString());
-		String result = HttpResultUtil.getResult(params, url);
+		String result = HttpClientUtil4Sync.doPostUsePool(url, params);// HttpResultUtil.getResult(params, url);
 		return HttpResultUtil.getResult(result);
 	}
 	

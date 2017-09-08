@@ -10,6 +10,7 @@ import openDemo.common.HttpResultUtil;
 import openDemo.common.JsonUtil;
 import openDemo.entity.PositionModel;
 import openDemo.entity.ResultEntity;
+import openDemo.utils.HttpClientUtil4Sync;
 
 /**
  * 岗位同步
@@ -36,7 +37,7 @@ public class SyncPositionService {
 		Map<String, Object> params = HttpResultUtil.getParamsMap(apikey, secretkey);
 		params.put("positionInfo", array.toString());
 		String url = baseUrl + "el/sync/position";
-		String result = HttpResultUtil.getResult(params, url);
+		String result = HttpClientUtil4Sync.doPostUsePool(url, params);// HttpResultUtil.getResult(params, url);
 		return HttpResultUtil.getResult(result);
 	}
 
@@ -57,7 +58,7 @@ public class SyncPositionService {
 		Map<String, Object> params = HttpResultUtil.getParamsMap(apikey, secretkey);
 		params.put("positionInfo", array.toString());
 		String url = baseUrl + "el/sync/syncpositionfornopno";
-		String result = HttpResultUtil.getResult(params, url);
+		String result = HttpClientUtil4Sync.doPostUsePool(url, params);// HttpResultUtil.getResult(params, url);
 		return HttpResultUtil.getResult(result);
 	}
 
@@ -79,7 +80,7 @@ public class SyncPositionService {
 		params.put("positionNo", positionNo);
 		params.put("positionName", positionName);
 		String url = baseUrl + "el/sync/updatepositioninfo";
-		String result = HttpResultUtil.getResult(params, url);
+		String result = HttpClientUtil4Sync.doPostUsePool(url, params);// HttpResultUtil.getResult(params, url);
 		return HttpResultUtil.getResult(result);
 	}
 
