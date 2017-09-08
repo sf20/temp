@@ -10,7 +10,6 @@ import openDemo.common.HttpResultUtil;
 import openDemo.common.JsonUtil;
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.ResultEntity;
-import openDemo.utils.HttpClientUtil4Sync;
 
 /**
  * 组织单位同步
@@ -36,7 +35,7 @@ public class SyncOrgService {
 		params.put("isBaseInfo", isBaseInfo);
 		params.put("ouInfo", array.toString());
 		String url = baseUrl + "el/sync/ous";
-		String result = HttpClientUtil4Sync.doPostUsePool(url, params);// HttpResultUtil.getResult(params, url);
+		String result = HttpResultUtil.getResult(params, url);
 		return HttpResultUtil.getResult(result);
 	}
 	
@@ -54,7 +53,7 @@ public class SyncOrgService {
 		JSONArray ouCodeOrThirdSystemIDArray = JSONArray.fromObject(ouCodeOrThirdSystemIDs);
 		params.put("OuCodeOrThirdSystemID", ouCodeOrThirdSystemIDArray.toString());
 		String url = baseUrl + "el/sync/deleteous";
-		String result = HttpClientUtil4Sync.doPostUsePool(url, params);// HttpResultUtil.getResult(params, url);
+		String result = HttpResultUtil.getResult(params, url);
 		return HttpResultUtil.getResult(result);
 	}
 	
@@ -72,7 +71,7 @@ public class SyncOrgService {
 		JSONArray userNamesArray = JSONArray.fromObject(userNames);
 		params.put("userNames", userNamesArray.toString());
 		String url = baseUrl + "el/sync/removeusersfromou";
-		String result = HttpClientUtil4Sync.doPostUsePool(url, params);// HttpResultUtil.getResult(params, url);
+		String result = HttpResultUtil.getResult(params, url);
 		return HttpResultUtil.getResult(result);
 	}
 	
@@ -92,7 +91,7 @@ public class SyncOrgService {
 		params.put("userNames", userNamesArray.toString());
 		params.put("newOuID", newOuID);
 		String url = baseUrl + "el/sync/batchchangeorgou";
-		String result = HttpClientUtil4Sync.doPostUsePool(url, params);// HttpResultUtil.getResult(params, url);
+		String result = HttpResultUtil.getResult(params, url);
 		return HttpResultUtil.getResult(result);
 	}
 
@@ -111,7 +110,7 @@ public class SyncOrgService {
 		Map<String, Object> params = HttpResultUtil.getParamsMap(apikey, secretkey);
 		params.put("ouname", ouname);
 		String url = baseUrl + "el/sync/getoucodebyouname";
-		String result = HttpClientUtil4Sync.doPostUsePool(url, params);// HttpResultUtil.getResult(params, url);
+		String result = HttpResultUtil.getResult(params, url);
 		return HttpResultUtil.getResult(result);
 	}
 }
