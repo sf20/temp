@@ -24,8 +24,8 @@ public class PositionDaoTest {
 		// deleteByIdTest();
 		// deleteByIdsTest();
 
-		getByIdTest();
-		getAllCountTest();
+		// getByIdTest();
+		// getAllCountTest();
 
 		getAllTest();
 	}
@@ -95,6 +95,7 @@ public class PositionDaoTest {
 
 	public void getAllTest() throws SQLException {
 		List<PositionModel> list = dao.getAll();
+		System.out.println(list.size());
 		for (PositionModel position : list) {
 			System.out.println(position.getpNo() + "==" + position.getpNames());
 		}
