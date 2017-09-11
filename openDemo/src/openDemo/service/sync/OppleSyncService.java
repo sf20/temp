@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,6 +43,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import openDemo.config.OppleConfig;
+import openDemo.dao.PositionDao;
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
 import openDemo.entity.ResultEntity;
@@ -123,9 +125,10 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 	 * 
 	 * @throws IOException
 	 * @throws ReflectiveOperationException
+	 * @throws SQLException
 	 */
 	@Override
-	public void sync() throws IOException, ReflectiveOperationException {
+	public void sync() throws IOException, ReflectiveOperationException, SQLException {
 		int posCount = positionList.size();
 		if (posCount > 0) {
 			// 岗位增量同步
@@ -174,11 +177,14 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 	 * @param paramAdded
 	 * @throws ReflectiveOperationException
 	 * @throws IOException
+	 * @throws SQLException
 	 */
 	public void opPosSync(String serviceOperation, String mode, Map<String, String> paramAdded)
-			throws IOException, ReflectiveOperationException {
+			throws IOException, ReflectiveOperationException, SQLException {
 		List<OpUserInfoModel> userModelList = getUserModelList(serviceOperation, mode, paramAdded);
 		List<PositionModel> newList = getPosListFromUsers(userModelList);
+
+		compareDataWithDB(newList);
 
 		logger.info("岗位同步Total Size: " + newList.size());
 		// 全量模式
@@ -191,6 +197,42 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 			Map<String, List<PositionModel>> map = comparePosList(positionList, newList);
 
 			syncAddPosOneByOne(map.get(MAPKEY_POS_SYNC_ADD));
+		}
+	}
+
+	/**
+	 * 将要同步的岗位数据和数据库中的岗位数据进行比较后替换岗位编号+岗位名补充类别
+	 * 
+	 * @param newList
+	 * @throws SQLException
+	 */
+	private void compareDataWithDB(List<PositionModel> newList) throws SQLException {
+		List<PositionModel> positionListDB = new ArrayList<PositionModel>();
+		// 获取数据库岗位数据
+		PositionDao dao = new PositionDao();
+		positionListDB = dao.getAll();
+
+		for (PositionModel newPos : newList) {
+			String newPosName = newPos.getpNames();
+
+			if (newPosName != null) {
+				boolean isPosNameExist = false;
+				String posNo = null;
+
+				for (PositionModel fullPos : positionListDB) {
+					if (newPosName.equals(fullPos.getpNames())) {
+						isPosNameExist = true;
+						posNo = fullPos.getpNo();
+						break;
+					}
+				}
+
+				// 岗位名存在时将岗位编号用数据库中岗位编号替换+岗位名补充类别
+				if (isPosNameExist) {
+					newPos.setpNo(posNo);
+					newPos.setpNames(getFullPosNames(newPos.getpNames()));
+				}
+			}
 		}
 	}
 
@@ -212,7 +254,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 		for (String posName : posNames) {
 			temp = new PositionModel();
 			temp.setpNo(UUID.randomUUID().toString());
-			temp.setpNames(getFullPosNames(posName));
+			temp.setpNames(posName);
 			list.add(temp);
 		}
 
