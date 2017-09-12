@@ -213,27 +213,21 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 		positionListDB = dao.getAll();
 
 		for (PositionModel newPos : newList) {
-			String newPosName = newPos.getpNames();
+			String newPosNames = getFullPosNames(newPos.getpNames());
 
-			if (newPosName != null) {
-				boolean isPosNameExist = false;
-				String posNo = null;
-
-				for (PositionModel fullPos : positionListDB) {
-					if (newPosName.equals(fullPos.getpNames())) {
-						isPosNameExist = true;
-						posNo = fullPos.getpNo();
-						break;
-					}
-				}
-
-				// 岗位名存在时将岗位编号用数据库中岗位编号替换+岗位名补充类别
-				if (isPosNameExist) {
-					newPos.setpNo(posNo);
-					newPos.setpNames(getFullPosNames(newPos.getpNames()));
+			for (PositionModel fullPos : positionListDB) {
+				// 岗位名存在时将岗位编号用数据库中岗位编号替换
+				if (newPosNames.equals(getFullPosNames(fullPos.getpNames()))) {
+					newPos.setpNo(fullPos.getpNo());
+					break;
 				}
 			}
+
+			// 岗位名补充类别
+			newPos.setpNames(newPosNames);
 		}
+
+		positionListDB = null;
 	}
 
 	/**
@@ -286,22 +280,20 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 
 		// 待新增岗位
 		for (PositionModel newPos : newList) {
-			String newPosName = newPos.getpNames();
+			String newPosNames = newPos.getpNames();
+			boolean isPosNameExist = false;
 
-			if (newPosName != null) {
-				boolean isPosNameExist = false;
-
-				for (PositionModel fullPos : fullList) {
-					if (newPosName.equals(fullPos.getpNames())) {
-						isPosNameExist = true;
-						break;
-					}
+			for (PositionModel fullPos : fullList) {
+				// 带类别岗位名比较
+				if (newPosNames.equals(fullPos.getpNames())) {
+					isPosNameExist = true;
+					break;
 				}
+			}
 
-				// 岗位名不存在
-				if (!isPosNameExist) {
-					posToSyncAdd.add(newPos);
-				}
+			// 岗位名不存在
+			if (!isPosNameExist) {
+				posToSyncAdd.add(newPos);
 			}
 		}
 
@@ -328,7 +320,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					positionList.add(pos);
 				} else {
-					printLog("岗位同步新增失败 ", resultEntity);
+					printLog("岗位同步新增失败 ", pos.getpNames(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("岗位同步新增失败 " + pos.getpNames(), e);
@@ -565,7 +557,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					ouInfoList.remove(org);
 				} else {
-					printLog("组织同步删除失败 ", resultEntity);
+					printLog("组织同步删除失败 ", org.getOuName(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("组织同步删除失败 " + org.getOuName(), e);
@@ -594,7 +586,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 					ouInfoList.remove(org);
 					ouInfoList.add(org);
 				} else {
-					printLog("组织同步更新失败 ", resultEntity);
+					printLog("组织同步更新失败 ", org.getOuName(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("组织同步更新失败 " + org.getOuName(), e);
@@ -621,7 +613,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					ouInfoList.add(org);
 				} else {
-					printLog("组织同步新增失败 ", resultEntity);
+					printLog("组织同步新增失败 ", org.getOuName(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("组织同步新增失败 " + org.getOuName(), e);
@@ -731,36 +723,20 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 			String pNameInUser = user.getPostionName();
 
 			if (pNameInUser != null) {
+				String pNamesInUser = getFullPosNames(pNameInUser);
+
 				for (PositionModel pos : positionList) {
-					// 根据岗位名进行查找
-					if (pNameInUser.equals(getPositionName(pos.getpNames()))) {
+					// 根据带类别岗位名进行查找
+					if (pNamesInUser.equals(pos.getpNames())) {
 						user.setPostionNo(pos.getpNo());
 						break;
 					}
 				}
+			} else {
+				// 岗位名为null时岗位编号设置为null
+				user.setPostionNo(null);
 			}
 		}
-	}
-
-	/**
-	 * 从pNames中得到岗位名(pNames格式: 一级类别;二级类别;岗位名)
-	 * 
-	 * @param getpNames
-	 * @return
-	 */
-	private String getPositionName(String pNames) {
-		if (pNames == null) {
-			return null;
-		}
-
-		String[] arr = pNames.split(POSITION_CLASS_SEPARATOR);
-		int len = arr.length;
-		if (len == 0) {
-			return null;
-		}
-
-		// 最后是岗位名
-		return arr[len - 1];
 	}
 
 	/**
@@ -876,7 +852,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 						userInfoList.add(user);
 						logger.warn("该用户邮箱异常未同步：" + user.getID());
 					} else {
-						printLog("用户同步新增失败 ", resultEntity);
+						printLog("用户同步新增失败 ", user.getID(), resultEntity);
 					}
 				}
 			} catch (IOException e) {
@@ -915,7 +891,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 						userInfoList.add(user);
 						logger.warn("该用户邮箱异常未同步：" + user.getID());
 					} else {
-						printLog("用户同步更新失败 ", resultEntity);
+						printLog("用户同步更新失败 ", user.getID(), resultEntity);
 					}
 				}
 			} catch (Exception e) {
@@ -945,7 +921,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 					userInfoList.remove(user);
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步启用失败 ", resultEntity);
+					printLog("用户同步启用失败 ", user.getID(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("用户同步启用失败  " + user.getID(), e);
@@ -972,7 +948,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 					userInfoList.remove(user);
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步禁用失败 ", resultEntity);
+					printLog("用户同步禁用失败 ", user.getID(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("用户同步禁用失败 " + user.getID(), e);
@@ -1115,10 +1091,10 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 	 * 同步返回错误信息日志记录
 	 * 
 	 * @param type
+	 * @param errKey
 	 * @param resultEntity
 	 */
-	private void printLog(String type, ResultEntity resultEntity) {
-		// TODO
-		logger.error(type + "错误信息：" + resultEntity.getCode() + "-" + resultEntity.getMessage());
+	private void printLog(String type, String errKey, ResultEntity resultEntity) {
+		logger.error(type + "ID：" + errKey + " 错误信息：" + resultEntity.getCode() + "-" + resultEntity.getMessage());
 	}
 }
