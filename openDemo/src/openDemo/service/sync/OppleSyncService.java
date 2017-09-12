@@ -280,20 +280,23 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 
 		// 待新增岗位
 		for (PositionModel newPos : newList) {
-			String newPosNames = newPos.getpNames();
-			boolean isPosNameExist = false;
+			String newPosName = newPos.getpNames();
 
-			for (PositionModel fullPos : fullList) {
-				// 带类别岗位名比较
-				if (newPosNames.equals(fullPos.getpNames())) {
-					isPosNameExist = true;
-					break;
+			if (newPosName != null) {
+				boolean isPosNameExist = false;
+
+				for (PositionModel fullPos : fullList) {
+					// 带类别岗位名比较
+					if (newPosName.equals(fullPos.getpNames())) {
+						isPosNameExist = true;
+						break;
+					}
 				}
-			}
 
-			// 岗位名不存在
-			if (!isPosNameExist) {
-				posToSyncAdd.add(newPos);
+				// 岗位名不存在
+				if (!isPosNameExist) {
+					posToSyncAdd.add(newPos);
+				}
 			}
 		}
 
@@ -734,7 +737,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 				}
 			} else {
 				// 岗位名为null时岗位编号设置为null
-				user.setPostionNo(null);
+				// user.setPostionNo(null);
 			}
 		}
 	}
