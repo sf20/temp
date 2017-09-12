@@ -26,13 +26,13 @@ public class OpenDemoTest implements OppleConfig {
 
 	public OpenDemoTest() throws IOException {
 		// 岗位同步
-		posTest();
+		// posTest();
 
 		// //1.单点登录:el/sso
 		// ssoTest();
 
 		// 2.同步用户: el/sync/users
-		// userSyncTest();
+		userSyncTest();
 
 		// //3.同步禁用用户: el/sync/disabledusers
 		// disabledusersTest();
@@ -90,11 +90,11 @@ public class OpenDemoTest implements OppleConfig {
 		SyncUserService userService = new SyncUserService();
 		List<UserInfoModel> users = new ArrayList<UserInfoModel>();
 		UserInfoModel userEntity = new UserInfoModel();
-		// userEntity.setOrgOuCode("506799895");
-		userEntity.setID("testId");
-		userEntity.setUserName("testId");
-		userEntity.setCnName("testId");
-		userEntity.setOrgOuCode("10086");
+		userEntity.setID("op046298");
+		userEntity.setUserName("op046298");
+		userEntity.setCnName("李小红");
+		userEntity.setOrgOuCode(null);
+		userEntity.setPostionNo(null);
 		users.add(userEntity);
 		ResultEntity resultEntity = userService.userSync(true, users, apikey, secretkey, baseUrl);
 		print("同步用户", resultEntity);
