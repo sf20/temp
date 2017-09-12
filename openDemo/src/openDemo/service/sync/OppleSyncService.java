@@ -184,12 +184,11 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 		List<OpUserInfoModel> userModelList = getUserModelList(serviceOperation, mode, paramAdded);
 		List<PositionModel> newList = getPosListFromUsers(userModelList);
 
-		compareDataWithDB(newList);
-
 		logger.info("岗位同步Total Size: " + newList.size());
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
 			logger.info("岗位同步新增Size: " + newList.size());
+			compareDataWithDB(newList);
 			syncAddPosOneByOne(newList);
 		}
 		// 增量模式
