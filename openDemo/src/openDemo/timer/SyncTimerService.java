@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import openDemo.service.sync.AbstractSyncService;
+import openDemo.service.sync.CustomTimerTask;
 import openDemo.service.sync.LeoSyncService;
 import openDemo.service.sync.OppleSyncService;
 
@@ -72,15 +72,15 @@ public class SyncTimerService {
 	 * 
 	 * @param syncService
 	 */
-	public void singleAddTimingService(AbstractSyncService syncService) {
+	public void singleAddTimingService(CustomTimerTask timerTask) {
 		// 保证只有一个定时器在运行
 		if (executor == null) {
-			addTimingService(syncService);
+			addTimingService(timerTask);
 		}
 	}
 
-	private void addTimingService(final AbstractSyncService syncService) {
-		final String className = syncService.getClass().getSimpleName();
+	private void addTimingService(final CustomTimerTask timerTask) {
+		final String className = timerTask.getClass().getSimpleName();
 		executor = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 
 		TimerTask task = new TimerTask() {
@@ -92,7 +92,7 @@ public class SyncTimerService {
 
 					// 执行同步方法
 					logger.info("定时同步[" + className + "]开始");
-					syncService.sync();
+					timerTask.execute();
 					logger.info("定时同步[" + className + "]结束");
 
 					// 实际任务结束时间
