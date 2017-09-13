@@ -9,15 +9,15 @@ package openDemo.entity.sync;
  *            人员或组织或职位数据
  */
 public class LeoResJsonModel<T> {
-	private String code;
+	private int code;
 	private String message;
-	private T data;
+	private LeoResData<T> data;
 
-	public String getCode() {
+	public int getCode() {
 		return code;
 	}
 
-	public void setCode(String code) {
+	public void setCode(int code) {
 		this.code = code;
 	}
 
@@ -29,11 +29,11 @@ public class LeoResJsonModel<T> {
 		this.message = message;
 	}
 
-	public T getData() {
+	public LeoResData<T> getData() {
 		return data;
 	}
 
-	public void setData(T data) {
+	public void setData(LeoResData<T> data) {
 		this.data = data;
 	}
 

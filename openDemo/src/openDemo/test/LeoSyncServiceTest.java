@@ -21,10 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import openDemo.entity.sync.LeoOuInfoModel;
 import openDemo.entity.sync.LeoPositionModel;
-import openDemo.entity.sync.LeoResEmpData;
 import openDemo.entity.sync.LeoResJsonModel;
-import openDemo.entity.sync.LeoResOrgData;
-import openDemo.entity.sync.LeoResPosData;
 import openDemo.entity.sync.LeoUserInfoModel;
 import openDemo.service.sync.LeoSyncService;
 import openDemo.utils.HttpClientUtil4Sync;
@@ -68,30 +65,33 @@ public class LeoSyncServiceTest {
 
 	static void readJson() throws JsonParseException, JsonMappingException, IOException {
 
-		LeoResJsonModel<LeoResEmpData> empModel = mapper.readValue(
+		LeoResJsonModel<LeoUserInfoModel> empModel = mapper.readValue(
 				new File("D:\\Repository\\GitRemote\\temp\\openDemo\\src\\test1.json"),
-				new TypeReference<LeoResJsonModel<LeoResEmpData>>() {
+				new TypeReference<LeoResJsonModel<LeoUserInfoModel>>() {
 				});
-		List<LeoUserInfoModel> empList = empModel.getData().getDataList();
+		System.out.println(empModel.getData().getTotal());
+		List<LeoUserInfoModel> empList = empModel.getData().getEmployees();
 		for (LeoUserInfoModel user : empList) {
 			System.out.println(user.getID() + "=" + user.getUserName() + "=" + user.getCnName() + "=" + user.getSex()
 					+ "=" + user.getOrgOuCode() + "=" + user.getMail() + "=" + user.getBirthday());
 		}
 
-		LeoResJsonModel<LeoResOrgData> orgModel = mapper.readValue(
+		LeoResJsonModel<LeoOuInfoModel> orgModel = mapper.readValue(
 				new File("D:\\Repository\\GitRemote\\temp\\openDemo\\src\\test2.json"),
-				new TypeReference<LeoResJsonModel<LeoResOrgData>>() {
+				new TypeReference<LeoResJsonModel<LeoOuInfoModel>>() {
 				});
-		List<LeoOuInfoModel> orgList = orgModel.getData().getDataList();
+		System.out.println(empModel.getData().getTotal());
+		List<LeoOuInfoModel> orgList = orgModel.getData().getOrigizations();
 		for (LeoOuInfoModel org : orgList) {
 			System.out.println(org.getID() + "=" + org.getOuName() + "=" + org.getParentID());
 		}
 
-		LeoResJsonModel<LeoResPosData> posModel = mapper.readValue(
+		LeoResJsonModel<LeoPositionModel> posModel = mapper.readValue(
 				new File("D:\\Repository\\GitRemote\\temp\\openDemo\\src\\test3.json"),
-				new TypeReference<LeoResJsonModel<LeoResPosData>>() {
+				new TypeReference<LeoResJsonModel<LeoPositionModel>>() {
 				});
-		List<LeoPositionModel> posList = posModel.getData().getDataList();
+		System.out.println(empModel.getData().getTotal());
+		List<LeoPositionModel> posList = posModel.getData().getJobPositions();
 		for (LeoPositionModel pos : posList) {
 			System.out.println(pos.getpNo() + "=" + pos.getpNames());
 		}

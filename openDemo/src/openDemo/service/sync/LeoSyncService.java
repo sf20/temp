@@ -30,10 +30,8 @@ import openDemo.entity.ResultEntity;
 import openDemo.entity.UserInfoModel;
 import openDemo.entity.sync.LeoOuInfoModel;
 import openDemo.entity.sync.LeoPositionModel;
-import openDemo.entity.sync.LeoResEmpData;
+import openDemo.entity.sync.LeoResData;
 import openDemo.entity.sync.LeoResJsonModel;
-import openDemo.entity.sync.LeoResOrgData;
-import openDemo.entity.sync.LeoResPosData;
 import openDemo.entity.sync.LeoUserInfoModel;
 import openDemo.service.SyncOrgService;
 import openDemo.service.SyncPositionService;
@@ -54,6 +52,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 	private static final String DELETED_STATUS = "1";
 	private static final String USER_DISABLE_STATUS = "8";
 	private static final int DEFAULT_PAGE_SIZE = 50;
+	private static final int RESPONSE_STATUS_OK = 200;
 	// 自定义map的key
 	private static final String MAPKEY_USER_SYNC_ADD = "userSyncAdd";
 	private static final String MAPKEY_USER_SYNC_UPDATE = "userSyncUpdate";
@@ -149,7 +148,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 	 * @throws IOException
 	 */
 	public void opPosSync(String mode) throws IOException, ReflectiveOperationException {
-		List<LeoPositionModel> userModelList = getPosModelList(mode);
+		List<LeoPositionModel> userModelList = getDataModelList(mode, REQUEST_POS_URL, LeoPositionModel.class);
 		List<PositionModel> newList = copyCreateEntityList(userModelList, PositionModel.class);
 
 		removeExpiredPos(newList);
@@ -347,7 +346,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 	 * @throws ReflectiveOperationException
 	 */
 	public void opOrgSync(String mode, boolean isBaseInfo) throws IOException, ReflectiveOperationException {
-		List<LeoOuInfoModel> modelList = getOrgModelList(mode);
+		List<LeoOuInfoModel> modelList = getDataModelList(mode, REQUEST_ORG_URL, LeoOuInfoModel.class);
 		List<OuInfoModel> newList = copyCreateEntityList(modelList, OuInfoModel.class);
 
 		removeExpiredOrgs(newList, mode);
@@ -536,7 +535,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 	 * @throws ReflectiveOperationException
 	 */
 	public void opUserSync(String mode, boolean islink) throws IOException, ReflectiveOperationException {
-		List<LeoUserInfoModel> modelList = getUserModelList(mode);
+		List<LeoUserInfoModel> modelList = getDataModelList(mode, REQUEST_EMP_URL, LeoUserInfoModel.class);
 		List<UserInfoModel> newList = copyCreateEntityList(modelList, UserInfoModel.class);
 
 		copySetUserName(newList);
@@ -909,84 +908,32 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 	}
 
 	/**
-	 * 向客户接口发送请求并返回员工json数据模型集合
+	 * 向客户接口发送请求并返回json数据模型集合
+	 * 
+	 * @param <T>
 	 * 
 	 * @param mode
+	 * @param requestUrl
+	 * @param classType
 	 * @return
 	 * @throws IOException
 	 */
-	private List<LeoUserInfoModel> getUserModelList(String mode) throws IOException {
+	private <T> List<T> getDataModelList(String mode, String requestUrl, Class<T> classType) throws IOException {
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put(REQUEST_PARAM_FROM, getTimestamp(mode));
 
-		List<LeoUserInfoModel> tempList = new ArrayList<LeoUserInfoModel>();
+		List<T> tempList = new ArrayList<T>();
 		// 首次请求
-		LeoResJsonModel<LeoResEmpData> dataModel = requestGetData(REQUEST_EMP_URL, paramMap, LeoResEmpData.class);
-		LeoResEmpData data = dataModel.getData();
-		tempList.addAll(data.getDataList());
+		Map<Integer, List<T>> dataMap = requestGetData(requestUrl, paramMap, classType);
+		tempList.addAll(dataMap.values().iterator().next());
 
 		// 获取total值后请求全部数据
-		int total = Integer.valueOf(data.getTotal());
+		int total = dataMap.keySet().iterator().next();
 		for (int i = 0; i < calcRequestTimes(total, DEFAULT_PAGE_SIZE) - 1; i++) {
 			// 请求页码从2开始
 			paramMap.put(REQUEST_PARAM_PAGE, i + 2);
-			tempList.addAll(requestGetData(REQUEST_EMP_URL, paramMap, LeoResEmpData.class).getData().getDataList());
-		}
-
-		return tempList;
-	}
-
-	/**
-	 * 向客户接口发送请求并返回部门json数据模型集合
-	 * 
-	 * @param mode
-	 * @return
-	 * @throws IOException
-	 */
-	private List<LeoOuInfoModel> getOrgModelList(String mode) throws IOException {
-		Map<String, Object> paramMap = new HashMap<String, Object>();
-		paramMap.put(REQUEST_PARAM_FROM, getTimestamp(mode));
-
-		List<LeoOuInfoModel> tempList = new ArrayList<LeoOuInfoModel>();
-		// 首次请求
-		LeoResJsonModel<LeoResOrgData> dataModel = requestGetData(REQUEST_ORG_URL, paramMap, LeoResOrgData.class);
-		LeoResOrgData data = dataModel.getData();
-		tempList.addAll(data.getDataList());
-
-		// 获取total值后请求全部数据
-		int total = Integer.valueOf(data.getTotal());
-		for (int i = 0; i < calcRequestTimes(total, DEFAULT_PAGE_SIZE) - 1; i++) {
-			// 请求页码从2开始
-			paramMap.put(REQUEST_PARAM_PAGE, i + 2);
-			tempList.addAll(requestGetData(REQUEST_ORG_URL, paramMap, LeoResOrgData.class).getData().getDataList());
-		}
-
-		return tempList;
-	}
-
-	/**
-	 * 向客户接口发送请求并返回职位json数据模型集合
-	 * 
-	 * @param mode
-	 * @return
-	 * @throws IOException
-	 */
-	private List<LeoPositionModel> getPosModelList(String mode) throws IOException {
-		Map<String, Object> paramMap = new HashMap<String, Object>();
-		paramMap.put(REQUEST_PARAM_FROM, getTimestamp(mode));
-
-		List<LeoPositionModel> tempList = new ArrayList<LeoPositionModel>();
-		// 首次请求
-		LeoResJsonModel<LeoResPosData> dataModel = requestGetData(REQUEST_POS_URL, paramMap, LeoResPosData.class);
-		LeoResPosData data = dataModel.getData();
-		tempList.addAll(data.getDataList());
-
-		// 获取total值后请求全部数据
-		int total = Integer.valueOf(data.getTotal());
-		for (int i = 0; i < calcRequestTimes(total, DEFAULT_PAGE_SIZE) - 1; i++) {
-			// 请求页码从2开始
-			paramMap.put(REQUEST_PARAM_PAGE, i + 2);
-			tempList.addAll(requestGetData(REQUEST_POS_URL, paramMap, LeoResPosData.class).getData().getDataList());
+			dataMap = requestGetData(requestUrl, paramMap, classType);
+			tempList.addAll(dataMap.values().iterator().next());
 		}
 
 		return tempList;
@@ -998,29 +945,49 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 	 * @param requestUrl
 	 * @param paramMap
 	 * @param classType
-	 * @return
+	 * @return Map集合 key：返回数据total值 value：岗位或组织或人员数据集合
 	 * @throws IOException
 	 */
-	private <T> LeoResJsonModel<T> requestGetData(String requestUrl, Map<String, Object> paramMap, Class<T> classType)
-			throws IOException {
+	private <T> Map<Integer, List<T>> requestGetData(String requestUrl, Map<String, Object> paramMap,
+			Class<T> classType) throws IOException {
 		String jsonString = HttpClientUtil4Sync.doGet(requestUrl, paramMap, getAuthHeader());
 		// logger.info(jsonString);
 
 		// 将json字符串转为用户json对象数据模型
-		LeoResJsonModel<T> model = null;
+		LeoResJsonModel<T> resJsonModel = null;
+		// 将json字符串中的jobPositions, origizations, employees统一替换成dataList
+		String replacement = "dataList";
 		// 类型判断传入不同类型参数
-		if (classType.isAssignableFrom(LeoResPosData.class)) {
-			model = mapper.readValue(jsonString, new TypeReference<LeoResJsonModel<LeoResPosData>>() {
+		if (classType.isAssignableFrom(LeoPositionModel.class)) {
+			jsonString = jsonString.replaceFirst("jobPositions", replacement);
+			resJsonModel = mapper.readValue(jsonString, new TypeReference<LeoResJsonModel<LeoPositionModel>>() {
 			});
-		} else if (classType.isAssignableFrom(LeoResOrgData.class)) {
-			model = mapper.readValue(jsonString, new TypeReference<LeoResJsonModel<LeoResOrgData>>() {
+		} else if (classType.isAssignableFrom(LeoOuInfoModel.class)) {
+			jsonString = jsonString.replaceFirst("origizations", replacement);
+			resJsonModel = mapper.readValue(jsonString, new TypeReference<LeoResJsonModel<LeoOuInfoModel>>() {
 			});
-		} else if (classType.isAssignableFrom(LeoResEmpData.class)) {
-			model = mapper.readValue(jsonString, new TypeReference<LeoResJsonModel<LeoResEmpData>>() {
+		} else if (classType.isAssignableFrom(LeoUserInfoModel.class)) {
+			jsonString = jsonString.replaceFirst("employees", replacement);
+			resJsonModel = mapper.readValue(jsonString, new TypeReference<LeoResJsonModel<LeoUserInfoModel>>() {
 			});
 		}
 
-		return model;
+		Map<Integer, List<T>> dataMap = new HashMap<Integer, List<T>>();
+		List<T> dataList = new ArrayList<T>();
+		// 返回数据状态判断
+		if (RESPONSE_STATUS_OK == resJsonModel.getCode()) {
+			LeoResData<T> data = resJsonModel.getData();
+			if (data != null) {
+				dataList = data.getDataList();
+				dataMap.put(data.getTotal(), dataList);
+			} else {
+				throw new IOException("获取客户接口[" + classType.getSimpleName() + "]数据data为null");
+			}
+		} else {
+			throw new IOException("获取客户接口[" + classType.getSimpleName() + "]数据错误：" + resJsonModel.getMessage());
+		}
+
+		return dataMap;
 	}
 
 	/**
