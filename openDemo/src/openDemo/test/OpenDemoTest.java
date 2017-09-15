@@ -6,7 +6,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import openDemo.config.OppleConfig;
+import openDemo.config.AlignConfig;
 import openDemo.entity.GroupInfoEntity;
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
@@ -16,15 +16,19 @@ import openDemo.service.RoleService;
 import openDemo.service.SsoService;
 import openDemo.service.SyncOrgService;
 import openDemo.service.SyncPositionService;
+import openDemo.service.SyncStudyPlanService;
 import openDemo.service.SyncUserService;
 
-public class OpenDemoTest implements OppleConfig {
+public class OpenDemoTest implements AlignConfig {
 
 	public static void main(String[] args) throws IOException {
 		new OpenDemoTest();
 	}
 
 	public OpenDemoTest() throws IOException {
+		// 添加到指定的学习计划测试
+		addPersonToPlan();
+		
 		// 岗位同步
 		// posTest();
 
@@ -32,7 +36,7 @@ public class OpenDemoTest implements OppleConfig {
 		// ssoTest();
 
 		// 2.同步用户: el/sync/users
-		userSyncTest();
+		// userSyncTest();
 
 		// //3.同步禁用用户: el/sync/disabledusers
 		// disabledusersTest();
@@ -63,6 +67,12 @@ public class OpenDemoTest implements OppleConfig {
 		//
 		// //12.同步用户移除(角色)组: el/sync/removeusersfromrole
 		// removeusersfromroleTest();
+	}
+
+	void addPersonToPlan() throws IOException {
+		SyncStudyPlanService styService = new SyncStudyPlanService();
+		ResultEntity resultEntity = styService.addPersonToPlan("12345", "testStudyPlan;ttest;", apikey, secretkey, baseUrl);
+		print("添加到学习计划", resultEntity);
 	}
 
 	void posTest() throws IOException {

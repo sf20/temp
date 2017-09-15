@@ -4,10 +4,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import openDemo.config.TestConfig;
 import openDemo.dao.UserInfoDao;
+import openDemo.entity.StudyPlanDetail;
 import openDemo.entity.UserInfoModel;
 
-public class UserInfoDaoTest {
+public class UserInfoDaoTest implements TestConfig {
 	UserInfoDao dao = new UserInfoDao();
 
 	public static void main(String[] args) throws SQLException {
@@ -25,9 +27,16 @@ public class UserInfoDaoTest {
 		// deleteByIdsTest();
 
 		// getByIdTest();
-		getAllCountTest();
+		// getAllCountTest();
 
-		getAllTest();
+		// getAllTest();
+		getStudyPlanDetailByUserIdPlanID();
+	}
+
+	public void getStudyPlanDetailByUserIdPlanID() throws SQLException {
+		List<StudyPlanDetail> list = dao.getStudyPlanDetailByUserIdPlanID(apikey,
+				"cb1fbf1b-e9f1-43d3-b9eb-c7ffedec3b24", "liuhang2", "knowledge");
+		System.out.println(list.size());
 	}
 
 	public void insertTest() throws SQLException {
@@ -144,16 +153,15 @@ public class UserInfoDaoTest {
 
 	public void getAllTest() throws SQLException {
 		List<UserInfoModel> list = dao.getAll();
+		System.out.println(list.size());
 		for (UserInfoModel user : list) {
-			if (user.getEntryTime() != null) {
-				System.out.println(user.getID() + "==" + user.getUserName() + "==" + user.getCnName() + "=="
-						+ user.getPassword() + "==" + user.getSex() + "==" + user.getMobile() + "==" + user.getMail()
-						+ "==" + user.getOrgOuCode() + "==" + user.getEncryptionType() + "==" + user.getPostionNo()
-						+ "==" + user.getEntryTime() + "==" + user.getBirthday() + "==" + user.getExpireDate() + "=="
-						+ user.getSpare1() + "==" + user.getSpare2() + "==" + user.getSpare3() + "==" + user.getSpare4()
-						+ "==" + user.getSpare5() + "==" + user.getSpare6() + "==" + user.getSpare7() + "=="
-						+ user.getSpare8() + "==" + user.getSpare9() + "==" + user.getSpare10());
-			}
+			System.out.println(user.getID() + "==" + user.getUserName() + "==" + user.getCnName() + "=="
+					+ user.getPassword() + "==" + user.getSex() + "==" + user.getMobile() + "==" + user.getMail() + "=="
+					+ user.getOrgOuCode() + "==" + user.getEncryptionType() + "==" + user.getPostionNo() + "=="
+					+ user.getEntryTime() + "==" + user.getBirthday() + "==" + user.getExpireDate() + "=="
+					+ user.getSpare1() + "==" + user.getSpare2() + "==" + user.getSpare3() + "==" + user.getSpare4()
+					+ "==" + user.getSpare5() + "==" + user.getSpare6() + "==" + user.getSpare7() + "=="
+					+ user.getSpare8() + "==" + user.getSpare9() + "==" + user.getSpare10());
 		}
 	}
 

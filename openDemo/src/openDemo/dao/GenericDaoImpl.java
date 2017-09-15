@@ -21,7 +21,7 @@ public abstract class GenericDaoImpl<T> implements GenericDao<T> {
 	public static final String TABLENAME_SEPARATOR = "_";
 	public static final String TABLENAME_SUFFIX = Config.apikey;
 
-	private static DataSource dataSource;
+	protected static DataSource dataSource;
 	private Class<T> entityClass;
 
 	@SuppressWarnings("unchecked")
