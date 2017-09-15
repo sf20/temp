@@ -128,7 +128,7 @@ public class UserInfoDao extends GenericDaoImpl<UserInfoModel> {
 				.append("             splancontent.mastertitle, splancontent.filetype,rownum orderindex ")
 				.append("             FROM ( SELECT id, name, createusername  ");
 		sql.append("                      FROM sty_studyplan WHERE id = ?) splan ");
-		params.add(orgID);
+		params.add(planID);
 		sql.append("             JOIN ( SELECT * FROM sty_studyplanphase ")
 				.append("                     WHERE orgid= ? AND studyplanid = ? ORDER BY orderindex ) splanphase ");
 		params.add(orgID);

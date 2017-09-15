@@ -35,7 +35,7 @@ public class UserInfoDaoTest implements TestConfig {
 
 	public void getStudyPlanDetailByUserIdPlanID() throws SQLException {
 		List<StudyPlanDetail> list = dao.getStudyPlanDetailByUserIdPlanID(apikey,
-				"cb1fbf1b-e9f1-43d3-b9eb-c7ffedec3b24", "liuhang2", "knowledge");
+				"cb1fbf1b-e9f1-43d3-b9eb-c7ffedec3b24", "8d6b3361-59a5-4032-8a89-298cf9501b0b", "knowledge");
 		System.out.println(list.size());
 	}
 

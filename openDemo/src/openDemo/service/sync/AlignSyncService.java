@@ -18,6 +18,7 @@ public class AlignSyncService implements AlignConfig, CustomTimerTask {
 	// 阶段二组织id
 	private static final String STAGE2_OUID = "26fe4203-7ccb-4401-aa4f-ac88d80274a9";
 	private static final String MASTER_TYPE_EXAM = "exam";
+	private static final String MASTER_TYPE_KNOWLEDGE = "knowledge";
 
 	private SyncOrgService orgService = new SyncOrgService();
 	private SyncStudyPlanService studyPlanService = new SyncStudyPlanService();
