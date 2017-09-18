@@ -3,23 +3,29 @@ package openDemo.service.sync;
 import java.util.ArrayList;
 import java.util.List;
 
-import openDemo.config.AlignConfig;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import openDemo.config.TestConfig;
 import openDemo.dao.UserInfoDao;
+import openDemo.entity.ResultEntity;
 import openDemo.entity.StudyPlanDetail;
 import openDemo.entity.UserInfoModel;
 import openDemo.service.SyncOrgService;
 import openDemo.service.SyncStudyPlanService;
 
-public class AlignSyncService implements AlignConfig, CustomTimerTask {
+public class AlignSyncService implements TestConfig, CustomTimerTask {
 	// 学习计划
-	private static final String STUDYPLAN_ID = "cb1fbf1b-e9f1-43d3-b9eb-c7ffedec3b24";
+	private static final String STUDYPLAN_ID = "99b08000-1580-40e4-9a5b-7d76c4feded3";
 	private static final String STUDYPLAN_STATUS = "2";
 	private static final String STUDYPLAN_PASSED = "1";
 	// 阶段二组织id
-	private static final String STAGE2_OUID = "26fe4203-7ccb-4401-aa4f-ac88d80274a9";
-	// 学习计划类型
-	private static final String MASTER_TYPE_KNOWLEDGE = "knowledge";
+	private static final String STAGE2_OUID = "148580105";// 74123262-b227-4122-b996-65ad256a90ab
 	private static final String MASTER_TYPE_EXAM = "exam";
+	// 请求成功返回码
+	private static final String RESPONSE_OK = "0";
+	// 记录日志
+	private static final Logger logger = LogManager.getLogger(AlignSyncService.class);
 
 	private SyncOrgService orgService = new SyncOrgService();
 	private SyncStudyPlanService studyPlanService = new SyncStudyPlanService();
@@ -33,41 +39,19 @@ public class AlignSyncService implements AlignConfig, CustomTimerTask {
 		// 获取人员数据
 		List<UserInfoModel> userList = userDao.getAll();
 		for (UserInfoModel user : userList) {
-			List<StudyPlanDetail> studyKnowledgeList = userDao.getStudyPlanDetailByUserIdPlanID(apikey, STUDYPLAN_ID,
-					user.getID(), MASTER_TYPE_KNOWLEDGE);
 			List<StudyPlanDetail> studyExamList = userDao.getStudyPlanDetailByUserIdPlanID(apikey, STUDYPLAN_ID,
 					user.getID(), MASTER_TYPE_EXAM);
 
-			int studyKnowledgeCount = studyKnowledgeList.size();
-			int studyExamCount = studyExamList.size();
-
 			// 人员暂未关联学习计划
-			if (studyKnowledgeCount == 0 && studyExamCount == 0) {
+			if (studyExamList.size() < 1) {
 				stage1UserNames.add(user.getUserName());
 			}
 			// 人员已关联学习计划
 			else {
-				// 人员学习情况判断
-				// 学习计划中既有知识又有考试
-				if (studyKnowledgeCount > 0 && studyExamCount > 0) {
-					if (isKnowledgeStudied(studyKnowledgeList) && isExamPassed(studyExamList)) {
-						// 添加至stage2
-						stage2UserNames.add(user.getUserName());
-					}
-				}
-				// 学习计划中只有知识
-				else if (studyKnowledgeCount > 0) {
-					if (isKnowledgeStudied(studyKnowledgeList)) {
-						// 添加至stage2
-						stage2UserNames.add(user.getUserName());
-					}
-				}
-				// 学习计划中只有考试
-				else if (studyExamCount > 0) {
-					if (isExamPassed(studyExamList)) {
-						// 添加至stage2
-						stage2UserNames.add(user.getUserName());
-					}
+				// 人员考试情况判断
+				if (isExamPassed(studyExamList)) {
+					// 添加至stage2
+					stage2UserNames.add(user.getUserName());
 				}
 			}
 		}
@@ -79,35 +63,29 @@ public class AlignSyncService implements AlignConfig, CustomTimerTask {
 			int userMaxSize = 100;
 			int methodCallTimes = stage1UserCount / userMaxSize + (stage1UserCount % userMaxSize == 0 ? 0 : 1);
 			for (int i = 0; i < methodCallTimes; i++) {
-				studyPlanService.addPersonToPlan(STUDYPLAN_ID,
-						getStrUserNames(stage1UserNames.subList(i * userMaxSize,
-								(i + 1) * userMaxSize > stage1UserCount ? stage1UserCount : (i + 1) * userMaxSize)),
-						apikey, secretkey, baseUrl);
+				int fromIndex = i * userMaxSize;
+				int toIndex = (i + 1) * userMaxSize;
+				ResultEntity resultEntity = studyPlanService
+						.addPersonToPlan(STUDYPLAN_ID,
+								getStrUserNames(stage1UserNames.subList(fromIndex,
+										toIndex > stage1UserCount ? stage1UserCount : toIndex)),
+								apikey, secretkey, baseUrl);
+
+				if (!RESPONSE_OK.equals(resultEntity.getCode())) {
+					logger.error("添加到学习计划错误：" + resultEntity.getCode() + "=" + resultEntity.getMessage());
+				}
 			}
 		}
 
 		// 满足条件 跳转到阶段二
 		if (stage2UserNames.size() > 0) {
-			orgService.batchchangeorgou(stage2UserNames, STAGE2_OUID, apikey, secretkey, baseUrl);
-		}
-	}
+			ResultEntity resultEntity = orgService.batchchangeorgou(stage2UserNames, STAGE2_OUID, apikey, secretkey,
+					baseUrl);
 
-	/**
-	 * 已有学习计划人员的知识是否学完
-	 * 
-	 * @param studyPlanDetail
-	 * @return
-	 */
-	private boolean isKnowledgeStudied(List<StudyPlanDetail> studyKnowledgeList) {
-		boolean isStudied = true;
-		for (StudyPlanDetail study : studyKnowledgeList) {
-			// 只要有一个知识没学完就返回false
-			if (!STUDYPLAN_STATUS.equals(study.getStatus())) {
-				isStudied = false;
-				break;
+			if (!RESPONSE_OK.equals(resultEntity.getCode())) {
+				logger.error("同步用户更改组织单位错误：" + resultEntity.getCode() + "=" + resultEntity.getMessage());
 			}
 		}
-		return isStudied;
 	}
 
 	/**
@@ -141,6 +119,16 @@ public class AlignSyncService implements AlignConfig, CustomTimerTask {
 		}
 
 		return userNames.toString();
+	}
+
+	public static void main(String[] args) throws Exception {
+		// new AlignSyncService().execute();
+
+		// List<String> stage2UserNames = new ArrayList<>();
+		// stage2UserNames.add("aligntest1");
+		// ResultEntity resultEntity = orgService.batchchangeorgou(stage2UserNames,
+		// STAGE2_OUID, apikey, secretkey, baseUrl);
+		// System.out.println(resultEntity.getCode() + "=" + resultEntity.getMessage());
 	}
 
 }
