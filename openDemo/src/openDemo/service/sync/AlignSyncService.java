@@ -58,6 +58,7 @@ public class AlignSyncService implements TestConfig, CustomTimerTask {
 
 		// 新入系统人员自动同步到学习计划里面
 		int stage1UserCount = stage1UserNames.size();
+		System.out.println("添加到学习计划人数：" + stage1UserCount);
 		if (stage1UserCount > 0) {
 			// 处理一次最多添加100个账号
 			int userMaxSize = 100;
@@ -78,6 +79,7 @@ public class AlignSyncService implements TestConfig, CustomTimerTask {
 		}
 
 		// 满足条件 跳转到阶段二
+		System.out.println("跳转到阶段二人数：" + stage2UserNames.size());
 		if (stage2UserNames.size() > 0) {
 			ResultEntity resultEntity = orgService.batchchangeorgou(stage2UserNames, STAGE2_OUID, apikey, secretkey,
 					baseUrl);

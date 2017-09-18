@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import openDemo.service.sync.AlignSyncService;
 import openDemo.service.sync.CustomTimerTask;
 import openDemo.service.sync.LeoSyncService;
 import openDemo.service.sync.OppleSyncService;
@@ -57,6 +58,7 @@ public class SyncTimerService {
 
 		SyncTimerService syncTimerService = new SyncTimerService(22, 5);
 		SyncTimerService syncTimerService2 = new SyncTimerService(22, 8);
+		SyncTimerService syncTimerService3 = new SyncTimerService(12, 0);
 
 		logger.info("程序初始化::定时器启动...");
 		syncTimerService.singleAddTimingService(new OppleSyncService());
@@ -64,6 +66,8 @@ public class SyncTimerService {
 
 		syncTimerService2.singleAddTimingService(new LeoSyncService());
 		syncTimerService2.singleAddTimingService(new LeoSyncService());
+
+		syncTimerService3.singleAddTimingService(new AlignSyncService());
 		logger.info("====测试优先执行====");
 	}
 
