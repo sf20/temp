@@ -168,11 +168,17 @@ public class HttpClientUtil4Sync {
 		return paramStr.toString();
 	}
 
-	private static String post(String url, HttpEntity httpEntity) throws IOException {
+	private static String post(String url, HttpEntity httpEntity, List<Header> headers) throws IOException {
 		CloseableHttpClient httpClient = getHttpClient();
 		HttpPost httpPost = new HttpPost(url);
 		if (httpEntity != null) {
 			httpPost.setEntity(httpEntity);
+		}
+
+		if (headers != null && headers.size() > 0) {
+			for (Header header : headers) {
+				httpPost.addHeader(header);
+			}
 		}
 
 		CloseableHttpResponse response = null;
@@ -195,15 +201,23 @@ public class HttpClientUtil4Sync {
 	}
 
 	public static String doPost(String url) throws IOException {
-		return post(url, null);
+		return post(url, null, null);
 	}
 
 	public static String doPost(String url, String jsonParams) throws IOException {
-		return post(url, getHttpEntity(jsonParams));
+		return post(url, getHttpEntity(jsonParams), null);
 	}
 
 	public static String doPost(String url, Map<String, Object> params) throws IOException {
-		return post(url, getHttpEntity(params));
+		return post(url, getHttpEntity(params), null);
+	}
+
+	public static String doPost(String url, String jsonParams, List<Header> headers) throws IOException {
+		return post(url, getHttpEntity(jsonParams), headers);
+	}
+
+	public static String doPost(String url, Map<String, Object> params, List<Header> headers) throws IOException {
+		return post(url, getHttpEntity(params), headers);
 	}
 
 	/**
