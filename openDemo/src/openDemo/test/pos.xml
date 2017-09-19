@@ -1,0 +1,13 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+	xmlns:el="http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INTERFACE.EL_INT_COMMON_FULLSYNC_REQ.V1">
+	<soapenv:Header />
+	<soapenv:Body>
+		<el:EL_INT_COMMON_FULLSYNC_REQ>
+			<!--Optional: -->
+			<el:Param1></el:Param1>
+			<!--Optional: -->
+			<el:Param2></el:Param2>
+			<el:ReqSystemID>99</el:ReqSystemID>
+		</el:EL_INT_COMMON_FULLSYNC_REQ>
+	</soapenv:Body>
+</soapenv:Envelope>
