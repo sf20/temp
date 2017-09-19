@@ -200,7 +200,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 	}
 
 	/**
-	 * 将要同步的岗位数据和数据库中的岗位数据进行比较后替换岗位编号+岗位名补充类别
+	 * 将要同步的岗位数据和数据库中的岗位数据进行比较后替换岗位编号
 	 * 
 	 * @param newList
 	 * @throws SQLException
@@ -212,18 +212,18 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 		positionListDB = dao.getAll();
 
 		for (PositionModel newPos : newList) {
-			String newPosNames = getFullPosNames(newPos.getpNames());
+			String newPosNames = newPos.getpNames();
 
-			for (PositionModel fullPos : positionListDB) {
-				// 岗位名存在时将岗位编号用数据库中岗位编号替换
-				if (newPosNames.equals(getFullPosNames(fullPos.getpNames()))) {
-					newPos.setpNo(fullPos.getpNo());
-					break;
+			if (newPosNames != null) {
+				for (PositionModel fullPos : positionListDB) {
+					// 岗位名存在时将岗位编号用数据库中岗位编号替换
+					if (newPosNames.equals(fullPos.getpNames())) {
+						newPos.setpNo(fullPos.getpNo());
+						break;
+					}
 				}
 			}
 
-			// 岗位名补充类别
-			newPos.setpNames(newPosNames);
 		}
 
 		positionListDB = null;
@@ -268,7 +268,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 	 * 岗位全量数据集合与最新获取岗位数据集合进行比较
 	 * 
 	 * @param fullList
-	 *            数据库岗位表数据集合
+	 *            全量岗位数据集合
 	 * @param newList
 	 *            最新获取岗位数据集合
 	 * @return
@@ -285,7 +285,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 				boolean isPosNameExist = false;
 
 				for (PositionModel fullPos : fullList) {
-					// 带类别岗位名比较
+					// 岗位名比较
 					if (newPosName.equals(fullPos.getpNames())) {
 						isPosNameExist = true;
 						break;
@@ -314,18 +314,23 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 		List<PositionModel> tempList = new ArrayList<PositionModel>();
 		ResultEntity resultEntity = null;
 		for (PositionModel pos : posToSync) {
+			String tempPosName = pos.getpNames();
+			// 调用同步接口时需要带类别岗位名
+			pos.setpNames(getFullPosNames(tempPosName));
 			tempList.add(pos);
 
 			try {
 				resultEntity = positionService.syncPos(tempList, apikey, secretkey, baseUrl);
 
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+					// 全量集合中保存不带类别的岗位名
+					pos.setpNames(tempPosName);
 					positionList.add(pos);
 				} else {
-					printLog("岗位同步新增失败 ", pos.getpNames(), resultEntity);
+					printLog("岗位同步新增失败 ", tempPosName, resultEntity);
 				}
 			} catch (IOException e) {
-				logger.error("岗位同步新增失败 " + pos.getpNames(), e);
+				logger.error("岗位同步新增失败 " + tempPosName, e);
 			}
 
 			tempList.clear();
@@ -725,11 +730,9 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 			String pNameInUser = user.getPostionName();
 
 			if (pNameInUser != null) {
-				String pNamesInUser = getFullPosNames(pNameInUser);
-
 				for (PositionModel pos : positionList) {
-					// 根据带类别岗位名进行查找
-					if (pNamesInUser.equals(pos.getpNames())) {
+					// 根据岗位名进行查找
+					if (pNameInUser.equals(pos.getpNames())) {
 						user.setPostionNo(pos.getpNo());
 						break;
 					}
@@ -964,7 +967,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 	 * 组织全量数据集合与最新获取组织数据集合进行比较
 	 * 
 	 * @param fullList
-	 *            数据库组织表数据集合
+	 *            全量组织数据集合
 	 * @param newList
 	 *            最新获取组织数据集合
 	 * @return 包含 同步新增、更新、 删除等组织集合的Map对象
@@ -1028,7 +1031,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 	 * 用户全量数据集合与最新获取用户数据集合进行比较
 	 * 
 	 * @param fullList
-	 *            数据库用户表数据集合
+	 *            全量用户数据集合
 	 * @param newList
 	 *            最新获取用户数据集合
 	 * @return 包含 同步新增、更新、启用、禁用等用户集合的Map对象
