@@ -215,17 +215,18 @@ public class EL_INT_JOBCD_FULLSYNC_SVC_BindingStub extends org.apache.axis.clien
 			wsSecHeaderElm.addChildElement(userNameTokenElm);           
 			soapHeaderElement = new SOAPHeaderElement(wsSecHeaderElm);  
 			soapHeaderElement.setMustUnderstand(true);
+			// 该属性一定要设置！！！
+			soapHeaderElement.setActor(null);
 		} catch (DOMException e) {
 			e.printStackTrace();
 		} catch (SOAPException e) {
 			e.printStackTrace();
 		}  
+		_call.addHeader(soapHeaderElement);
         
         setRequestHeaders(_call);
         setAttachments(_call);
  try {        
-	 _call.addHeader(soapHeaderElement);
-	 
 	 java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameter});
 
         if (_resp instanceof java.rmi.RemoteException) {
