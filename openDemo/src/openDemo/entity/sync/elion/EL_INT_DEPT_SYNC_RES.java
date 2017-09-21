@@ -1,30 +1,30 @@
 /**
- * EL_INT_JOBCD_FULLSYNC_RES.java
+ * EL_INT_DEPT_SYNC_RES.java
  *
  * This file was auto-generated from WSDL
  * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
  */
 
-package com.wsdl;
+package openDemo.entity.sync.elion;
 
-public class EL_INT_JOBCD_FULLSYNC_RES  implements java.io.Serializable {
+public class EL_INT_DEPT_SYNC_RES  implements java.io.Serializable {
     private java.lang.String operation_Name;
 
-    private com.wsdl.EL_INT_JOBCD_FULLSYNC_RESLine[] line;
+    private EL_INT_DEPT_SYNC_RESLine[] line;
 
-    public EL_INT_JOBCD_FULLSYNC_RES() {
+    public EL_INT_DEPT_SYNC_RES() {
     }
 
-    public EL_INT_JOBCD_FULLSYNC_RES(
+    public EL_INT_DEPT_SYNC_RES(
            java.lang.String operation_Name,
-           com.wsdl.EL_INT_JOBCD_FULLSYNC_RESLine[] line) {
+           EL_INT_DEPT_SYNC_RESLine[] line) {
            this.operation_Name = operation_Name;
            this.line = line;
     }
 
 
     /**
-     * Gets the operation_Name value for this EL_INT_JOBCD_FULLSYNC_RES.
+     * Gets the operation_Name value for this EL_INT_DEPT_SYNC_RES.
      * 
      * @return operation_Name
      */
@@ -34,7 +34,7 @@ public class EL_INT_JOBCD_FULLSYNC_RES  implements java.io.Serializable {
 
 
     /**
-     * Sets the operation_Name value for this EL_INT_JOBCD_FULLSYNC_RES.
+     * Sets the operation_Name value for this EL_INT_DEPT_SYNC_RES.
      * 
      * @param operation_Name
      */
@@ -44,36 +44,36 @@ public class EL_INT_JOBCD_FULLSYNC_RES  implements java.io.Serializable {
 
 
     /**
-     * Gets the line value for this EL_INT_JOBCD_FULLSYNC_RES.
+     * Gets the line value for this EL_INT_DEPT_SYNC_RES.
      * 
      * @return line
      */
-    public com.wsdl.EL_INT_JOBCD_FULLSYNC_RESLine[] getLine() {
+    public EL_INT_DEPT_SYNC_RESLine[] getLine() {
         return line;
     }
 
 
     /**
-     * Sets the line value for this EL_INT_JOBCD_FULLSYNC_RES.
+     * Sets the line value for this EL_INT_DEPT_SYNC_RES.
      * 
      * @param line
      */
-    public void setLine(com.wsdl.EL_INT_JOBCD_FULLSYNC_RESLine[] line) {
+    public void setLine(EL_INT_DEPT_SYNC_RESLine[] line) {
         this.line = line;
     }
 
-    public com.wsdl.EL_INT_JOBCD_FULLSYNC_RESLine getLine(int i) {
+    public EL_INT_DEPT_SYNC_RESLine getLine(int i) {
         return this.line[i];
     }
 
-    public void setLine(int i, com.wsdl.EL_INT_JOBCD_FULLSYNC_RESLine _value) {
+    public void setLine(int i, EL_INT_DEPT_SYNC_RESLine _value) {
         this.line[i] = _value;
     }
 
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
-        if (!(obj instanceof EL_INT_JOBCD_FULLSYNC_RES)) return false;
-        EL_INT_JOBCD_FULLSYNC_RES other = (EL_INT_JOBCD_FULLSYNC_RES) obj;
+        if (!(obj instanceof EL_INT_DEPT_SYNC_RES)) return false;
+        EL_INT_DEPT_SYNC_RES other = (EL_INT_DEPT_SYNC_RES) obj;
         if (obj == null) return false;
         if (this == obj) return true;
         if (__equalsCalc != null) {
@@ -119,10 +119,10 @@ public class EL_INT_JOBCD_FULLSYNC_RES  implements java.io.Serializable {
 
     // Type metadata
     private static org.apache.axis.description.TypeDesc typeDesc =
-        new org.apache.axis.description.TypeDesc(EL_INT_JOBCD_FULLSYNC_RES.class, true);
+        new org.apache.axis.description.TypeDesc(EL_INT_DEPT_SYNC_RES.class, true);
 
     static {
-        typeDesc.setXmlType(new javax.xml.namespace.QName("http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INT_JOBCD_FULLSYNC_RES.V1", ">EL_INT_JOBCD_FULLSYNC_RES"));
+        typeDesc.setXmlType(new javax.xml.namespace.QName("http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INT_DEPT_SYNC_RES.V1", ">EL_INT_DEPT_SYNC_RES"));
         org.apache.axis.description.ElementDesc elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("operation_Name");
         elemField.setXmlName(new javax.xml.namespace.QName("", "Operation_Name"));
@@ -132,7 +132,7 @@ public class EL_INT_JOBCD_FULLSYNC_RES  implements java.io.Serializable {
         elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("line");
         elemField.setXmlName(new javax.xml.namespace.QName("", "Line"));
-        elemField.setXmlType(new javax.xml.namespace.QName("http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INT_JOBCD_FULLSYNC_RES.V1", ">>EL_INT_JOBCD_FULLSYNC_RES>Line"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INT_DEPT_SYNC_RES.V1", ">>EL_INT_DEPT_SYNC_RES>Line"));
         elemField.setNillable(false);
         elemField.setMaxOccursUnbounded(true);
         typeDesc.addFieldDesc(elemField);

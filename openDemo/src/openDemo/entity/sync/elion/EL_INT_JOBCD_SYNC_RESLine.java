@@ -1,13 +1,13 @@
 /**
- * EL_INT_JOBCD_FULLSYNC_RESLine.java
+ * EL_INT_JOBCD_SYNC_RESLine.java
  *
  * This file was auto-generated from WSDL
  * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
  */
 
-package com.wsdl;
+package openDemo.entity.sync.elion;
 
-public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
+public class EL_INT_JOBCD_SYNC_RESLine  implements java.io.Serializable {
     private java.lang.String setID;
 
     private java.lang.String jobCode;
@@ -28,10 +28,10 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
     private java.lang.String longDescription;
 
-    public EL_INT_JOBCD_FULLSYNC_RESLine() {
+    public EL_INT_JOBCD_SYNC_RESLine() {
     }
 
-    public EL_INT_JOBCD_FULLSYNC_RESLine(
+    public EL_INT_JOBCD_SYNC_RESLine(
            java.lang.String setID,
            java.lang.String jobCode,
            java.lang.String effectiveDate,
@@ -56,7 +56,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the setID value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Gets the setID value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @return setID
      */
@@ -66,7 +66,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the setID value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Sets the setID value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @param setID
      */
@@ -76,7 +76,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the jobCode value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Gets the jobCode value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @return jobCode
      */
@@ -86,7 +86,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the jobCode value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Sets the jobCode value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @param jobCode
      */
@@ -96,7 +96,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the effectiveDate value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Gets the effectiveDate value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @return effectiveDate
      */
@@ -106,7 +106,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the effectiveDate value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Sets the effectiveDate value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @param effectiveDate
      */
@@ -116,7 +116,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the effectiveStatus value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Gets the effectiveStatus value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @return effectiveStatus
      */
@@ -126,7 +126,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the effectiveStatus value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Sets the effectiveStatus value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @param effectiveStatus
      */
@@ -136,7 +136,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the description value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Gets the description value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @return description
      */
@@ -146,7 +146,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the description value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Sets the description value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @param description
      */
@@ -156,7 +156,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the jobFunctionCode value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Gets the jobFunctionCode value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @return jobFunctionCode
      */
@@ -166,7 +166,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the jobFunctionCode value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Sets the jobFunctionCode value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @param jobFunctionCode
      */
@@ -176,7 +176,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the jobFunctionDescription value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Gets the jobFunctionDescription value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @return jobFunctionDescription
      */
@@ -186,7 +186,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the jobFunctionDescription value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Sets the jobFunctionDescription value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @param jobFunctionDescription
      */
@@ -196,7 +196,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the typeOfBusinessCode value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Gets the typeOfBusinessCode value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @return typeOfBusinessCode
      */
@@ -206,7 +206,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the typeOfBusinessCode value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Sets the typeOfBusinessCode value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @param typeOfBusinessCode
      */
@@ -216,7 +216,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the typeOfBusinessDescription value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Gets the typeOfBusinessDescription value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @return typeOfBusinessDescription
      */
@@ -226,7 +226,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the typeOfBusinessDescription value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Sets the typeOfBusinessDescription value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @param typeOfBusinessDescription
      */
@@ -236,7 +236,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the longDescription value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Gets the longDescription value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @return longDescription
      */
@@ -246,7 +246,7 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the longDescription value for this EL_INT_JOBCD_FULLSYNC_RESLine.
+     * Sets the longDescription value for this EL_INT_JOBCD_SYNC_RESLine.
      * 
      * @param longDescription
      */
@@ -256,8 +256,8 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
-        if (!(obj instanceof EL_INT_JOBCD_FULLSYNC_RESLine)) return false;
-        EL_INT_JOBCD_FULLSYNC_RESLine other = (EL_INT_JOBCD_FULLSYNC_RESLine) obj;
+        if (!(obj instanceof EL_INT_JOBCD_SYNC_RESLine)) return false;
+        EL_INT_JOBCD_SYNC_RESLine other = (EL_INT_JOBCD_SYNC_RESLine) obj;
         if (obj == null) return false;
         if (this == obj) return true;
         if (__equalsCalc != null) {
@@ -343,10 +343,10 @@ public class EL_INT_JOBCD_FULLSYNC_RESLine  implements java.io.Serializable {
 
     // Type metadata
     private static org.apache.axis.description.TypeDesc typeDesc =
-        new org.apache.axis.description.TypeDesc(EL_INT_JOBCD_FULLSYNC_RESLine.class, true);
+        new org.apache.axis.description.TypeDesc(EL_INT_JOBCD_SYNC_RESLine.class, true);
 
     static {
-        typeDesc.setXmlType(new javax.xml.namespace.QName("http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INT_JOBCD_FULLSYNC_RES.V1", ">>EL_INT_JOBCD_FULLSYNC_RES>Line"));
+        typeDesc.setXmlType(new javax.xml.namespace.QName("http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INT_JOBCD_SYNC_RES.V1", ">>EL_INT_JOBCD_SYNC_RES>Line"));
         org.apache.axis.description.ElementDesc elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("setID");
         elemField.setXmlName(new javax.xml.namespace.QName("", "SetID"));
