@@ -13,11 +13,14 @@ import org.apache.axis.client.Service;
 import org.apache.axis.description.OperationDesc;
 import org.apache.axis.description.ParameterDesc;
 import org.apache.axis.message.SOAPHeaderElement;
+import org.apache.commons.beanutils.BeanUtils;
 import org.w3c.dom.DOMException;
 
+import openDemo.entity.PositionModel;
 import openDemo.entity.sync.elion.EL_INT_COMMON_SYNC_REQ_TypeShape;
 import openDemo.entity.sync.elion.EL_INT_DEPT_SYNC_RES;
 import openDemo.entity.sync.elion.EL_INT_JOBCD_SYNC_RES;
+import openDemo.entity.sync.elion.EL_INT_JOBCD_SYNC_RESLine;
 import openDemo.entity.sync.elion.EL_INT_PER_SYNC_RES;
 
 public class ElionSyncService {
@@ -57,7 +60,7 @@ public class ElionSyncService {
 	private static final String MODE_FULL = "1";
 	private static final String MODE_UPDATE = "2";
 
-	public static void main(String[] args) throws ServiceException, RemoteException {
+	public static void main(String[] args) throws ServiceException, RemoteException, ReflectiveOperationException {
 		Service service = new Service();
 		Call call = (Call) service.createCall();
 		call.setTargetEndpointAddress(ENDPOINT_ADDRESS);
@@ -133,7 +136,7 @@ public class ElionSyncService {
 		System.out.println(res.getOperation_Name());
 	}
 
-	private static void jobFullSyncTest(Call call) throws RemoteException {
+	private static void jobFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException {
 		setPropsBeforeCall(MODE_FULL, call, JOB_FULLSYNC_SOAP_ACTION, JOB_FULLSYNC_OPERATION_NAME,
 				JOB_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
 				EL_INT_JOBCD_SYNC_RES.class);
@@ -143,7 +146,14 @@ public class ElionSyncService {
 		req.setReqSystemID("99");
 		EL_INT_JOBCD_SYNC_RES res = (EL_INT_JOBCD_SYNC_RES) call.invoke(new java.lang.Object[] { req });
 
-		System.out.println(res.getLine().length);
+		EL_INT_JOBCD_SYNC_RESLine job = res.getLine(1);
+		System.out.println(job.getJobCode());
+		System.out.println(job.getDescription());
+		PositionModel pos = new PositionModel();
+		BeanUtils.copyProperties(pos, job);
+		System.out.println(pos.getpNo());
+		System.out.println(pos.getpNames());
+		System.out.println(pos.getStatus());
 	}
 
 	private static <E, T> void setPropsBeforeCall(String mode, Call call, String soapAction, String operationName,

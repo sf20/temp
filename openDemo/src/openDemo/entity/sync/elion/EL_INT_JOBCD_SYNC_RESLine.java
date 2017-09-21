@@ -53,7 +53,14 @@ public class EL_INT_JOBCD_SYNC_RESLine  implements java.io.Serializable {
            this.typeOfBusinessDescription = typeOfBusinessDescription;
            this.longDescription = longDescription;
     }
+    
+	public String getpNo() {
+		return jobCode;
+	}
 
+	public String getpNames() {
+		return description;
+	}
 
     /**
      * Gets the setID value for this EL_INT_JOBCD_SYNC_RESLine.
