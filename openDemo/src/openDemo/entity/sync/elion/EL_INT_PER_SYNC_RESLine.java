@@ -186,6 +186,14 @@ public class EL_INT_PER_SYNC_RESLine  implements java.io.Serializable {
 	public String getPostionNo() {
 		return departmentID;
 	}
+	
+	public String getEntryTime() {
+		return hireDate;
+	}
+
+	public String getBirthday() {
+		return birthDate;
+	}
 
 	public String getExpireDate() {
 		return termDate;

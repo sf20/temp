@@ -62,6 +62,10 @@ public class EL_INT_JOBCD_SYNC_RESLine  implements java.io.Serializable {
 	public String getpNames() {
 		return description;
 	}
+	
+	public String getStatus() {
+		return effectiveStatus;
+	}
 	// =====BeanUtils复制属性用=====
 
     /**
