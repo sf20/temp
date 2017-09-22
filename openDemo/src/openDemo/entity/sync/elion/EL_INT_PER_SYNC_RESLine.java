@@ -154,6 +154,47 @@ public class EL_INT_PER_SYNC_RESLine  implements java.io.Serializable {
            this.departmentLv2Descr = departmentLv2Descr;
     }
 
+    // =====BeanUtils复制属性用=====
+    public String getID() {
+		return employeeID;
+	}
+
+	public String getUserName() {
+		return companyEmail;
+	}
+
+	public String getCnName() {
+		return employeeName;
+	}
+
+	public String getSex() {
+		return gender;
+	}
+
+	public String getMobile() {
+		return cellPhone;
+	}
+
+	public String getMail() {
+		return companyEmail;
+	}
+
+	public String getOrgOuCode() {
+		return jobCode;
+	}
+
+	public String getPostionNo() {
+		return departmentID;
+	}
+
+	public String getExpireDate() {
+		return termDate;
+	}
+	
+	public String getStatus() {
+		return HRStatus;
+	}
+	// =====BeanUtils复制属性用=====
 
     /**
      * Gets the employeeID value for this EL_INT_PER_SYNC_RESLine.

@@ -54,6 +54,7 @@ public class EL_INT_JOBCD_SYNC_RESLine  implements java.io.Serializable {
            this.longDescription = longDescription;
     }
     
+    // =====BeanUtils复制属性用=====
 	public String getpNo() {
 		return jobCode;
 	}
@@ -61,6 +62,7 @@ public class EL_INT_JOBCD_SYNC_RESLine  implements java.io.Serializable {
 	public String getpNames() {
 		return description;
 	}
+	// =====BeanUtils复制属性用=====
 
     /**
      * Gets the setID value for this EL_INT_JOBCD_SYNC_RESLine.

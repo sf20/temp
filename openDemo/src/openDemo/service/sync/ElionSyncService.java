@@ -16,12 +16,16 @@ import org.apache.axis.message.SOAPHeaderElement;
 import org.apache.commons.beanutils.BeanUtils;
 import org.w3c.dom.DOMException;
 
+import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
+import openDemo.entity.UserInfoModel;
 import openDemo.entity.sync.elion.EL_INT_COMMON_SYNC_REQ_TypeShape;
 import openDemo.entity.sync.elion.EL_INT_DEPT_SYNC_RES;
+import openDemo.entity.sync.elion.EL_INT_DEPT_SYNC_RESLine;
 import openDemo.entity.sync.elion.EL_INT_JOBCD_SYNC_RES;
 import openDemo.entity.sync.elion.EL_INT_JOBCD_SYNC_RESLine;
 import openDemo.entity.sync.elion.EL_INT_PER_SYNC_RES;
+import openDemo.entity.sync.elion.EL_INT_PER_SYNC_RESLine;
 
 public class ElionSyncService {
 	// 请求webservice的TargetEndpointAddress参数
@@ -67,9 +71,9 @@ public class ElionSyncService {
 
 		jobFullSyncTest(call);
 		// jobSyncTest(call);
-		// deptFullSyncTest(call);
+		deptFullSyncTest(call);
 		// deptSyncTest(call);
-		// empFullSyncTest(call);
+		empFullSyncTest(call);
 		// empSyncTest(call);
 	}
 
@@ -85,18 +89,24 @@ public class ElionSyncService {
 		System.out.println(res.getOperation_Name());
 	}
 
-	private static void empFullSyncTest(Call call) throws RemoteException {
+	private static void empFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException {
 		setPropsBeforeCall(MODE_FULL, call, EMP_FULLSYNC_SOAP_ACTION, EMP_FULLSYNC_OPERATION_NAME,
 				EMP_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, EL_INT_PER_SYNC_RES.class);
 		addSecurityAuth(call);
 
 		EL_INT_COMMON_SYNC_REQ_TypeShape req = new EL_INT_COMMON_SYNC_REQ_TypeShape();
-		req.setParam1("8001");
-		req.setParam2("8023");
+		req.setParam1("1");
+		req.setParam2("23");
 		req.setReqSystemID("99");
 		EL_INT_PER_SYNC_RES res = (EL_INT_PER_SYNC_RES) call.invoke(new java.lang.Object[] { req });
 
-		System.out.println(res.getLine().length);
+		EL_INT_PER_SYNC_RESLine emp = res.getLine(0);
+		UserInfoModel userInfo = new UserInfoModel();
+		BeanUtils.copyProperties(userInfo, emp);
+		System.out.println(
+				userInfo.getID() + "=" + userInfo.getUserName() + "=" + userInfo.getCnName() + "=" + userInfo.getSex()
+						+ "=" + userInfo.getMail() + "=" + userInfo.getMobile() + "=" + userInfo.getOrgOuCode() + "="
+						+ userInfo.getPostionNo() + "=" + userInfo.getExpireDate() + "=" + userInfo.getStatus());
 	}
 
 	private static void deptSyncTest(Call call) throws RemoteException {
@@ -111,7 +121,7 @@ public class ElionSyncService {
 		System.out.println(res.getOperation_Name());
 	}
 
-	private static void deptFullSyncTest(Call call) throws RemoteException {
+	private static void deptFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException {
 		setPropsBeforeCall(MODE_FULL, call, DEPT_FULLSYNC_SOAP_ACTION, DEPT_FULLSYNC_OPERATION_NAME,
 				DEPT_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
 				EL_INT_DEPT_SYNC_RES.class);
@@ -121,7 +131,11 @@ public class ElionSyncService {
 		req.setReqSystemID("99");
 		EL_INT_DEPT_SYNC_RES res = (EL_INT_DEPT_SYNC_RES) call.invoke(new java.lang.Object[] { req });
 
-		System.out.println(res.getLine().length);
+		EL_INT_DEPT_SYNC_RESLine dept = res.getLine(0);
+		OuInfoModel ouInfo = new OuInfoModel();
+		BeanUtils.copyProperties(ouInfo, dept);
+		System.out.println(
+				ouInfo.getID() + "=" + ouInfo.getOuName() + "=" + ouInfo.getParentID() + "=" + ouInfo.getStatus());
 	}
 
 	private static void jobSyncTest(Call call) throws RemoteException {
@@ -146,14 +160,10 @@ public class ElionSyncService {
 		req.setReqSystemID("99");
 		EL_INT_JOBCD_SYNC_RES res = (EL_INT_JOBCD_SYNC_RES) call.invoke(new java.lang.Object[] { req });
 
-		EL_INT_JOBCD_SYNC_RESLine job = res.getLine(1);
-		System.out.println(job.getJobCode());
-		System.out.println(job.getDescription());
+		EL_INT_JOBCD_SYNC_RESLine job = res.getLine(0);
 		PositionModel pos = new PositionModel();
 		BeanUtils.copyProperties(pos, job);
-		System.out.println(pos.getpNo());
-		System.out.println(pos.getpNames());
-		System.out.println(pos.getStatus());
+		System.out.println(pos.getpNo() + "=" + pos.getpNames() + "=" + pos.getStatus());
 	}
 
 	private static <E, T> void setPropsBeforeCall(String mode, Call call, String soapAction, String operationName,

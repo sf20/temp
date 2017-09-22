@@ -78,6 +78,23 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
            this.sequenceNbr = sequenceNbr;
     }
 
+    // =====BeanUtils复制属性用=====
+    public String getID() {
+		return deptId;
+	}
+
+	public String getOuName() {
+		return deptDescr;
+	}
+
+	public String getParentID() {
+		return parentDeptId;
+	}
+
+	public String getStatus() {
+		return effectiveStatus;
+	}
+	// =====BeanUtils复制属性用=====
 
     /**
      * Gets the setID value for this EL_INT_DEPT_SYNC_RESLine.
