@@ -1,86 +1,233 @@
 package openDemo.test;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.rmi.RemoteException;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
-import org.apache.http.Header;
-import org.apache.http.message.BasicHeader;
-import org.dom4j.DocumentException;
+import javax.xml.namespace.QName;
+import javax.xml.rpc.ServiceException;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFactory;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.axis.client.Call;
+import org.apache.axis.client.Service;
+import org.apache.axis.description.OperationDesc;
+import org.apache.axis.description.ParameterDesc;
+import org.apache.axis.message.SOAPHeaderElement;
+import org.apache.commons.beanutils.BeanUtils;
+import org.w3c.dom.DOMException;
 
-import openDemo.service.sync.LeoSyncService;
-import openDemo.utils.HttpClientUtil4Sync;
+import openDemo.entity.OuInfoModel;
+import openDemo.entity.PositionModel;
+import openDemo.entity.UserInfoModel;
+import openDemo.entity.sync.elion.EL_INT_COMMON_SYNC_REQ_TypeShape;
+import openDemo.entity.sync.elion.EL_INT_DEPT_SYNC_RES;
+import openDemo.entity.sync.elion.EL_INT_DEPT_SYNC_RESLine;
+import openDemo.entity.sync.elion.EL_INT_JOBCD_SYNC_RES;
+import openDemo.entity.sync.elion.EL_INT_JOBCD_SYNC_RESLine;
+import openDemo.entity.sync.elion.EL_INT_PER_SYNC_RES;
+import openDemo.entity.sync.elion.EL_INT_PER_SYNC_RESLine;
 
 public class ElionSyncServiceTest {
-	private static final String REQUEST_URL = "http://119.61.11.215:8080/PSIGW/PeopleSoftServiceListeningConnector/PSFT_HR/EL_INT_JOBCD_FULLSYNC_SVC.1.wsdl";
-	private static final String CHARSET_UTF8 = "UTF-8";
-	private static final SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
-	private static ObjectMapper mapper;
+	// 请求webservice的TargetEndpointAddress参数
+	private static String ENDPOINT_ADDRESS = "http://119.61.11.215:8080/PSIGW/PeopleSoftServiceListeningConnector/PSFT_HR";
+	// 全量同步共通参数
+	private static String FULLSYNC_REQ_ELEMENT_NAME = "EL_INT_COMMON_FULLSYNC_REQ";
+	private static String FULLSYNC_REQ_ELEMENT_NAMASPACE = "http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INTERFACE.EL_INT_COMMON_FULLSYNC_REQ.V1";
+	// 增量同步共通参数
+	private static String SYNC_REQ_ELEMENT_NAME = "EL_INT_COMMON_SYNC_REQ";
+	private static String SYNC_REQ_ELEMENT_NAMASPACE = "http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INTERFACE.EL_INT_COMMON_SYNC_REQ.V1";
+	// 岗位全量同步参数
+	private static String JOB_FULLSYNC_OPERATION_NAME = "EL_INT_JOBCD_FULLSYNC_OP";
+	private static String JOB_FULLSYNC_SOAP_ACTION = "EL_INT_JOBCD_FULLSYNC_OP.v1";
+	private static String JOB_FULLSYNC_RES_ELEMENT_NAMASPACE = "http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INT_JOBCD_FULLSYNC_RES.V1";
+	// 岗位增量同步参数
+	private static String JOB_SYNC_OPERATION_NAME = "EL_INT_JOBCD_SYNC_OP";
+	private static String JOB_SYNC_SOAP_ACTION = "EL_INT_JOBCD_SYNC_OP.v1";
+	private static String JOB_SYNC_RES_ELEMENT_NAMASPACE = "http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INT_JOBCD_SYNC_RES.V1";
+	// 部门全量同步参数
+	private static String DEPT_FULLSYNC_OPERATION_NAME = "EL_INT_DEPT_FULLSYNC_OP";
+	private static String DEPT_FULLSYNC_SOAP_ACTION = "EL_INT_DEPT_FULLSYNC_OP.v1";
+	private static String DEPT_FULLSYNC_RES_ELEMENT_NAMASPACE = "http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INT_DEPT_FULLSYNC_RES.V1";
+	// 部门增量同步参数
+	private static String DEPT_SYNC_OPERATION_NAME = "EL_INT_DEPT_SYNC_OP";
+	private static String DEPT_SYNC_SOAP_ACTION = "EL_INT_DEPT_SYNC_OP.v1";
+	private static String DEPT_SYNC_RES_ELEMENT_NAMASPACE = "http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INT_DEPT_SYNC_RES.V1";
+	// 人员全量同步参数
+	private static String EMP_FULLSYNC_OPERATION_NAME = "EL_INT_PER_FULLSYNC_OP";
+	private static String EMP_FULLSYNC_SOAP_ACTION = "EL_INT_PER_FULLSYNC_OP.v1";
+	private static String EMP_FULLSYNC_RES_ELEMENT_NAMASPACE = "http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INT_PER_FULLSYNC_RES.V1";
+	// 人员增量同步参数
+	private static String EMP_SYNC_OPERATION_NAME = "EL_INT_PER_SYNC_OP";
+	private static String EMP_SYNC_SOAP_ACTION = "EL_INT_PER_SYNC_OP.v1";
+	private static String EMP_SYNC_RES_ELEMENT_NAMASPACE = "http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INT_PER_SYNC_RES.V1";
 
-	static {
-		mapper = new ObjectMapper();
-		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		mapper.setDateFormat(JSON_DATE_FORMAT);
+	private static final String MODE_FULL = "1";
+	private static final String MODE_UPDATE = "2";
+
+	public static void main(String[] args) throws ServiceException, RemoteException, ReflectiveOperationException {
+		Service service = new Service();
+		Call call = (Call) service.createCall();
+		call.setTargetEndpointAddress(ENDPOINT_ADDRESS);
+
+		jobFullSyncTest(call);
+		// jobSyncTest(call);
+		deptFullSyncTest(call);
+		// deptSyncTest(call);
+		empFullSyncTest(call);
+		// empSyncTest(call);
 	}
 
-	public static void main(String[] args) throws UnsupportedOperationException, IOException, DocumentException {
-		// leoSyncServiceTest();
-		// ElionSyncServiceTest.class.getResource("");
+	private static void empSyncTest(Call call) throws RemoteException {
+		setPropsBeforeCall(MODE_UPDATE, call, EMP_SYNC_SOAP_ACTION, EMP_SYNC_OPERATION_NAME,
+				EMP_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, EL_INT_PER_SYNC_RES.class);
+		addSecurityAuth(call);
 
-		getPoss();
+		EL_INT_COMMON_SYNC_REQ_TypeShape req = new EL_INT_COMMON_SYNC_REQ_TypeShape();
+		req.setReqSystemID("99");
+		EL_INT_PER_SYNC_RES res = (EL_INT_PER_SYNC_RES) call.invoke(new java.lang.Object[] { req });
+
+		System.out.println(res.getOperation_Name());
 	}
 
-	static void leoSyncServiceTest() {
-		Date startDate = new Date();
-		System.out.println("同步中......");
+	private static void empFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException {
+		setPropsBeforeCall(MODE_FULL, call, EMP_FULLSYNC_SOAP_ACTION, EMP_FULLSYNC_OPERATION_NAME,
+				EMP_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, EL_INT_PER_SYNC_RES.class);
+		addSecurityAuth(call);
 
-		LeoSyncService leoSyncService = new LeoSyncService();
+		EL_INT_COMMON_SYNC_REQ_TypeShape req = new EL_INT_COMMON_SYNC_REQ_TypeShape();
+		req.setParam1("1");
+		req.setParam2("23");
+		req.setReqSystemID("99");
+		EL_INT_PER_SYNC_RES res = (EL_INT_PER_SYNC_RES) call.invoke(new java.lang.Object[] { req });
+
+		EL_INT_PER_SYNC_RESLine emp = res.getLine(0);
+		UserInfoModel userInfo = new UserInfoModel();
+		BeanUtils.copyProperties(userInfo, emp);
+		System.out.println(
+				userInfo.getID() + "=" + userInfo.getUserName() + "=" + userInfo.getCnName() + "=" + userInfo.getSex()
+						+ "=" + userInfo.getMail() + "=" + userInfo.getMobile() + "=" + userInfo.getOrgOuCode() + "="
+						+ userInfo.getPostionNo() + "=" + userInfo.getExpireDate() + "=" + userInfo.getStatus());
+	}
+
+	private static void deptSyncTest(Call call) throws RemoteException {
+		setPropsBeforeCall(MODE_UPDATE, call, DEPT_SYNC_SOAP_ACTION, DEPT_SYNC_OPERATION_NAME,
+				DEPT_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, EL_INT_DEPT_SYNC_RES.class);
+		addSecurityAuth(call);
+
+		EL_INT_COMMON_SYNC_REQ_TypeShape req = new EL_INT_COMMON_SYNC_REQ_TypeShape();
+		req.setReqSystemID("99");
+		EL_INT_DEPT_SYNC_RES res = (EL_INT_DEPT_SYNC_RES) call.invoke(new java.lang.Object[] { req });
+
+		System.out.println(res.getOperation_Name());
+	}
+
+	private static void deptFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException {
+		setPropsBeforeCall(MODE_FULL, call, DEPT_FULLSYNC_SOAP_ACTION, DEPT_FULLSYNC_OPERATION_NAME,
+				DEPT_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
+				EL_INT_DEPT_SYNC_RES.class);
+		addSecurityAuth(call);
+
+		EL_INT_COMMON_SYNC_REQ_TypeShape req = new EL_INT_COMMON_SYNC_REQ_TypeShape();
+		req.setReqSystemID("99");
+		EL_INT_DEPT_SYNC_RES res = (EL_INT_DEPT_SYNC_RES) call.invoke(new java.lang.Object[] { req });
+
+		EL_INT_DEPT_SYNC_RESLine dept = res.getLine(0);
+		OuInfoModel ouInfo = new OuInfoModel();
+		BeanUtils.copyProperties(ouInfo, dept);
+		System.out.println(
+				ouInfo.getID() + "=" + ouInfo.getOuName() + "=" + ouInfo.getParentID() + "=" + ouInfo.getStatus());
+	}
+
+	private static void jobSyncTest(Call call) throws RemoteException {
+		setPropsBeforeCall(MODE_UPDATE, call, JOB_SYNC_SOAP_ACTION, JOB_SYNC_OPERATION_NAME,
+				JOB_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, EL_INT_JOBCD_SYNC_RES.class);
+		addSecurityAuth(call);
+
+		EL_INT_COMMON_SYNC_REQ_TypeShape req = new EL_INT_COMMON_SYNC_REQ_TypeShape();
+		req.setReqSystemID("99");
+		EL_INT_JOBCD_SYNC_RES res = (EL_INT_JOBCD_SYNC_RES) call.invoke(new java.lang.Object[] { req });
+
+		System.out.println(res.getOperation_Name());
+	}
+
+	private static void jobFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException {
+		setPropsBeforeCall(MODE_FULL, call, JOB_FULLSYNC_SOAP_ACTION, JOB_FULLSYNC_OPERATION_NAME,
+				JOB_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
+				EL_INT_JOBCD_SYNC_RES.class);
+		addSecurityAuth(call);
+
+		EL_INT_COMMON_SYNC_REQ_TypeShape req = new EL_INT_COMMON_SYNC_REQ_TypeShape();
+		req.setReqSystemID("99");
+		EL_INT_JOBCD_SYNC_RES res = (EL_INT_JOBCD_SYNC_RES) call.invoke(new java.lang.Object[] { req });
+
+		EL_INT_JOBCD_SYNC_RESLine job = res.getLine(0);
+		PositionModel pos = new PositionModel();
+		BeanUtils.copyProperties(pos, job);
+		System.out.println(pos.getpNo() + "=" + pos.getpNames() + "=" + pos.getStatus());
+	}
+
+	private static <E, T> void setPropsBeforeCall(String mode, Call call, String soapAction, String operationName,
+			String resElementNamaspace, Class<E> reqClassType, Class<T> resClassType) {
+		// 设置共通参数
+		String reqElementNamaspace = null;
+		String reqElement = null;
+		if (MODE_FULL.equals(mode)) {
+			reqElement = FULLSYNC_REQ_ELEMENT_NAME;
+			reqElementNamaspace = FULLSYNC_REQ_ELEMENT_NAMASPACE;
+		} else {
+			reqElement = SYNC_REQ_ELEMENT_NAME;
+			reqElementNamaspace = SYNC_REQ_ELEMENT_NAMASPACE;
+		}
+		// 设置OperationDesc
+		OperationDesc oper = new OperationDesc();
+		oper.setName(operationName);
+		ParameterDesc param = new ParameterDesc(new QName(reqElementNamaspace, reqElement), ParameterDesc.IN,
+				new QName(reqElementNamaspace, reqClassType.getSimpleName()), reqClassType, false, false);
+		oper.addParameter(param);
+		oper.setReturnType(new QName(resElementNamaspace, resClassType.getSimpleName()));
+		oper.setReturnClass(resClassType);
+		oper.setReturnQName(new QName(resElementNamaspace, resClassType.getSimpleName()));
+		oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+		oper.setUse(org.apache.axis.constants.Use.LITERAL);
+		// 设置call参数值
+		call.setOperation(oper);
+		call.setUseSOAPAction(true);
+		call.setSOAPActionURI(soapAction);
+		call.setEncodingStyle(null);
+		call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+		call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+		call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+		call.setOperationName(new QName("", operationName));
+	}
+
+	private static void addSecurityAuth(Call call) {
+		String AUTH_PREFIX = "wsse";
+		String AUTH_NS = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
+		SOAPHeaderElement soapHeaderElement = null;
 		try {
-			leoSyncService.sync();
-		} catch (Exception e) {
+			SOAPFactory soapFactory = SOAPFactory.newInstance();
+			SOAPElement wsSecHeaderElm = soapFactory.createElement("Security", AUTH_PREFIX, AUTH_NS);
+			SOAPElement userNameTokenElm = soapFactory.createElement("UsernameToken", AUTH_PREFIX, AUTH_NS);
+			SOAPElement userNameElm = soapFactory.createElement("Username", AUTH_PREFIX, AUTH_NS);
+			SOAPElement passwdElm = soapFactory.createElement("Password", AUTH_PREFIX, AUTH_NS);
+			passwdElm.setAttribute("Type",
+					"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText");
+
+			userNameElm.addTextNode("EL_INTERFACE");
+			passwdElm.addTextNode("interface");
+
+			userNameTokenElm.addChildElement(userNameElm);
+			userNameTokenElm.addChildElement(passwdElm);
+			wsSecHeaderElm.addChildElement(userNameTokenElm);
+			soapHeaderElement = new SOAPHeaderElement(wsSecHeaderElm);
+			soapHeaderElement.setMustUnderstand(true);
+			soapHeaderElement.setActor(null);
+		} catch (DOMException e) {
+			e.printStackTrace();
+		} catch (SOAPException e) {
 			e.printStackTrace();
 		}
-
-		System.out.println("同步时间：" + calcMinutesBetween(startDate, new Date()));
+		call.addHeader(soapHeaderElement);
 	}
 
-	private static long calcMinutesBetween(Date d1, Date d2) {
-		return Math.abs((d2.getTime() - d1.getTime())) / 1000;
-	}
-
-	static void getPoss() throws IOException, DocumentException {
-		String requestEntity = FileUtils.readFileToString(
-				new File("D:\\Repository\\GitRemote\\temp\\openDemo\\src\\openDemo\\test\\pos.xml"), "utf-8");
-
-		List<Header> headers = new ArrayList<>();
-		headers.add(new BasicHeader("SOAPAction", "EL_INT_JOBCD_FULLSYNC_OP.v1"));
-		// headers.add(new BasicHeader("Authorization",
-		// getBasicAuthHeader("EL_INTERFACE", "interface")));
-
-		String response = HttpClientUtil4Sync.doPost(REQUEST_URL, requestEntity, headers);
-		System.out.println(response);
-		// Document document = DocumentHelper.parseText(response);
-		// Element rootElement = document.getRootElement();
-		// System.out.println(rootElement.getName());
-		// Node node = document
-		// .selectSingleNode("//soapenv:Envelope/soapenv:Body/EL_INT_JOBCD_FULLSYNC_RES/Operation_Name");
-		// System.out.println(node.getText());
-	}
-
-	static String getBasicAuthHeader(String username, String password) throws UnsupportedEncodingException {
-		String auth = username + ":" + password;
-		byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(CHARSET_UTF8));
-		String authHeader = "Basic " + new String(encodedAuth, CHARSET_UTF8);
-
-		return authHeader;
-	}
 }
