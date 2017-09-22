@@ -80,7 +80,6 @@ public class ElionSyncServiceTest {
 	private static void empSyncTest(Call call) throws RemoteException {
 		setPropsBeforeCall(MODE_UPDATE, call, EMP_SYNC_SOAP_ACTION, EMP_SYNC_OPERATION_NAME,
 				EMP_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, EL_INT_PER_SYNC_RES.class);
-		addSecurityAuth(call);
 
 		EL_INT_COMMON_SYNC_REQ_TypeShape req = new EL_INT_COMMON_SYNC_REQ_TypeShape();
 		req.setReqSystemID("99");
@@ -92,7 +91,6 @@ public class ElionSyncServiceTest {
 	private static void empFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException {
 		setPropsBeforeCall(MODE_FULL, call, EMP_FULLSYNC_SOAP_ACTION, EMP_FULLSYNC_OPERATION_NAME,
 				EMP_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, EL_INT_PER_SYNC_RES.class);
-		addSecurityAuth(call);
 
 		EL_INT_COMMON_SYNC_REQ_TypeShape req = new EL_INT_COMMON_SYNC_REQ_TypeShape();
 		req.setParam1("1");
@@ -112,7 +110,6 @@ public class ElionSyncServiceTest {
 	private static void deptSyncTest(Call call) throws RemoteException {
 		setPropsBeforeCall(MODE_UPDATE, call, DEPT_SYNC_SOAP_ACTION, DEPT_SYNC_OPERATION_NAME,
 				DEPT_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, EL_INT_DEPT_SYNC_RES.class);
-		addSecurityAuth(call);
 
 		EL_INT_COMMON_SYNC_REQ_TypeShape req = new EL_INT_COMMON_SYNC_REQ_TypeShape();
 		req.setReqSystemID("99");
@@ -125,7 +122,6 @@ public class ElionSyncServiceTest {
 		setPropsBeforeCall(MODE_FULL, call, DEPT_FULLSYNC_SOAP_ACTION, DEPT_FULLSYNC_OPERATION_NAME,
 				DEPT_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
 				EL_INT_DEPT_SYNC_RES.class);
-		addSecurityAuth(call);
 
 		EL_INT_COMMON_SYNC_REQ_TypeShape req = new EL_INT_COMMON_SYNC_REQ_TypeShape();
 		req.setReqSystemID("99");
@@ -141,7 +137,6 @@ public class ElionSyncServiceTest {
 	private static void jobSyncTest(Call call) throws RemoteException {
 		setPropsBeforeCall(MODE_UPDATE, call, JOB_SYNC_SOAP_ACTION, JOB_SYNC_OPERATION_NAME,
 				JOB_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, EL_INT_JOBCD_SYNC_RES.class);
-		addSecurityAuth(call);
 
 		EL_INT_COMMON_SYNC_REQ_TypeShape req = new EL_INT_COMMON_SYNC_REQ_TypeShape();
 		req.setReqSystemID("99");
@@ -154,7 +149,6 @@ public class ElionSyncServiceTest {
 		setPropsBeforeCall(MODE_FULL, call, JOB_FULLSYNC_SOAP_ACTION, JOB_FULLSYNC_OPERATION_NAME,
 				JOB_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
 				EL_INT_JOBCD_SYNC_RES.class);
-		addSecurityAuth(call);
 
 		EL_INT_COMMON_SYNC_REQ_TypeShape req = new EL_INT_COMMON_SYNC_REQ_TypeShape();
 		req.setReqSystemID("99");
@@ -198,6 +192,8 @@ public class ElionSyncServiceTest {
 		call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
 		call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
 		call.setOperationName(new QName("", operationName));
+
+		addSecurityAuth(call);
 	}
 
 	private static void addSecurityAuth(Call call) {
