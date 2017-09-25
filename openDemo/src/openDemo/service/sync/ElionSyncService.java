@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -906,8 +907,11 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 	 * @return
 	 * @throws IOException
 	 * @throws ServiceException
+	 * @throws SOAPException
+	 * @throws DOMException
 	 */
-	private <T> List<T> getDataModelList(String mode, Class<T> classType) throws IOException, ServiceException {
+	private <T> List<T> getDataModelList(String mode, Class<T> classType)
+			throws IOException, ServiceException, DOMException, SOAPException {
 		Service service = new Service();
 		Call call = (Call) service.createCall();
 		call.setTargetEndpointAddress(ENDPOINT_ADDRESS);
@@ -925,6 +929,7 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 		}
 
 		Object[] lines = null;
+		// 请求岗位数据
 		if (classType.isAssignableFrom(EL_INT_JOBCD_SYNC_RESLine.class)) {
 			if (MODE_FULL.equals(mode)) {
 				setPropsBeforeCall(mode, call, JOB_FULLSYNC_SOAP_ACTION, JOB_FULLSYNC_OPERATION_NAME,
@@ -935,7 +940,9 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 			}
 			EL_INT_JOBCD_SYNC_RES res = (EL_INT_JOBCD_SYNC_RES) call.invoke(new java.lang.Object[] { req });
 			lines = res.getLine();
-		} else if (classType.isAssignableFrom(EL_INT_DEPT_SYNC_RESLine.class)) {
+		}
+		// 请求部门数据
+		else if (classType.isAssignableFrom(EL_INT_DEPT_SYNC_RESLine.class)) {
 			if (MODE_FULL.equals(mode)) {
 				setPropsBeforeCall(mode, call, DEPT_FULLSYNC_SOAP_ACTION, DEPT_FULLSYNC_OPERATION_NAME,
 						DEPT_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, classType);
@@ -946,7 +953,9 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 
 			EL_INT_DEPT_SYNC_RES res = (EL_INT_DEPT_SYNC_RES) call.invoke(new java.lang.Object[] { req });
 			lines = res.getLine();
-		} else if (classType.isAssignableFrom(EL_INT_PER_SYNC_RESLine.class)) {
+		}
+		// 请求人员数据
+		else if (classType.isAssignableFrom(EL_INT_PER_SYNC_RESLine.class)) {
 			if (MODE_FULL.equals(mode)) {
 				setPropsBeforeCall(mode, call, EMP_FULLSYNC_SOAP_ACTION, EMP_FULLSYNC_OPERATION_NAME,
 						EMP_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, classType);
@@ -970,12 +979,35 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 	}
 
 	private Date getYesterdayDate(Date date) {
-		// TODO Auto-generated method stub
-		return null;
+		Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		c.add(Calendar.DAY_OF_MONTH, -1);
+		return c.getTime();
 	}
 
+	/**
+	 * 请求客户接口前设置请求属性
+	 * 
+	 * @param mode
+	 *            全量/增量类型
+	 * @param call
+	 *            axis中call对象
+	 * @param soapAction
+	 *            请求属性SOAPAction属性值
+	 * @param operationName
+	 *            请求webservice的操作名
+	 * @param resElementNamaspace
+	 *            返回xml中对象命名空间属性值
+	 * @param reqClassType
+	 *            请求xml对应java类
+	 * @param resClassType
+	 *            返回xml对应java类
+	 * @throws SOAPException
+	 * @throws DOMException
+	 */
 	private <E, T> void setPropsBeforeCall(String mode, Call call, String soapAction, String operationName,
-			String resElementNamaspace, Class<E> reqClassType, Class<T> resClassType) {
+			String resElementNamaspace, Class<E> reqClassType, Class<T> resClassType)
+			throws DOMException, SOAPException {
 		// 设置共通参数
 		String reqElementNamaspace = null;
 		String reqElement = null;
@@ -1011,33 +1043,36 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 		addSecurityAuth(call);
 	}
 
-	private void addSecurityAuth(Call call) {
+	/**
+	 * 请求xml的header标签中增加安全认证信息
+	 * 
+	 * @param call
+	 * @throws DOMException
+	 * @throws SOAPException
+	 */
+	private void addSecurityAuth(Call call) throws DOMException, SOAPException {
 		String AUTH_PREFIX = "wsse";
 		String AUTH_NS = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
 		SOAPHeaderElement soapHeaderElement = null;
-		try {
-			SOAPFactory soapFactory = SOAPFactory.newInstance();
-			SOAPElement wsSecHeaderElm = soapFactory.createElement("Security", AUTH_PREFIX, AUTH_NS);
-			SOAPElement userNameTokenElm = soapFactory.createElement("UsernameToken", AUTH_PREFIX, AUTH_NS);
-			SOAPElement userNameElm = soapFactory.createElement("Username", AUTH_PREFIX, AUTH_NS);
-			SOAPElement passwdElm = soapFactory.createElement("Password", AUTH_PREFIX, AUTH_NS);
-			passwdElm.setAttribute("Type",
-					"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText");
 
-			userNameElm.addTextNode("EL_INTERFACE");
-			passwdElm.addTextNode("interface");
+		SOAPFactory soapFactory = SOAPFactory.newInstance();
+		SOAPElement wsSecHeaderElm = soapFactory.createElement("Security", AUTH_PREFIX, AUTH_NS);
+		SOAPElement userNameTokenElm = soapFactory.createElement("UsernameToken", AUTH_PREFIX, AUTH_NS);
+		SOAPElement userNameElm = soapFactory.createElement("Username", AUTH_PREFIX, AUTH_NS);
+		SOAPElement passwdElm = soapFactory.createElement("Password", AUTH_PREFIX, AUTH_NS);
+		passwdElm.setAttribute("Type",
+				"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText");
 
-			userNameTokenElm.addChildElement(userNameElm);
-			userNameTokenElm.addChildElement(passwdElm);
-			wsSecHeaderElm.addChildElement(userNameTokenElm);
-			soapHeaderElement = new SOAPHeaderElement(wsSecHeaderElm);
-			soapHeaderElement.setMustUnderstand(true);
-			soapHeaderElement.setActor(null);
-		} catch (DOMException e) {
-			e.printStackTrace();
-		} catch (SOAPException e) {
-			e.printStackTrace();
-		}
+		userNameElm.addTextNode("EL_INTERFACE");
+		passwdElm.addTextNode("interface");
+
+		userNameTokenElm.addChildElement(userNameElm);
+		userNameTokenElm.addChildElement(passwdElm);
+		wsSecHeaderElm.addChildElement(userNameTokenElm);
+		soapHeaderElement = new SOAPHeaderElement(wsSecHeaderElm);
+		soapHeaderElement.setMustUnderstand(true);
+		soapHeaderElement.setActor(null);
+
 		call.addHeader(soapHeaderElement);
 	}
 
