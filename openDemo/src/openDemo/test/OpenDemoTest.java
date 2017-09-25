@@ -6,7 +6,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import openDemo.config.AlignConfig;
+import openDemo.config.ElionConfig;
 import openDemo.entity.GroupInfoEntity;
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
@@ -19,7 +19,7 @@ import openDemo.service.SyncPositionService;
 import openDemo.service.SyncStudyPlanService;
 import openDemo.service.SyncUserService;
 
-public class OpenDemoTest implements AlignConfig {
+public class OpenDemoTest implements ElionConfig {
 
 	public static void main(String[] args) throws IOException {
 		new OpenDemoTest();
@@ -27,10 +27,10 @@ public class OpenDemoTest implements AlignConfig {
 
 	public OpenDemoTest() throws IOException {
 		// 添加到指定的学习计划测试
-		addPersonToPlan();
+		// addPersonToPlan();
 		
 		// 岗位同步
-		// posTest();
+		posTest();
 
 		// //1.单点登录:el/sso
 		// ssoTest();

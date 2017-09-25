@@ -29,7 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.DOMException;
 
-import openDemo.config.TestConfig;
+import openDemo.config.ElionConfig;
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
 import openDemo.entity.ResultEntity;
@@ -45,7 +45,7 @@ import openDemo.service.SyncOrgService;
 import openDemo.service.SyncPositionService;
 import openDemo.service.SyncUserService;
 
-public class ElionSyncService extends AbstractSyncService implements TestConfig {
+public class ElionSyncService extends AbstractSyncService implements ElionConfig {
 	// 用户接口请求参数值
 	// 请求webservice的TargetEndpointAddress参数
 	private static String ENDPOINT_ADDRESS = "http://119.61.11.215:8080/PSIGW/PeopleSoftServiceListeningConnector/PSFT_HR";
@@ -152,7 +152,7 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 			opUserSync(MODE_UPDATE, true);
 		} else {
 			// 用户全量同步
-			opUserSync(MODE_FULL, true);
+			// opUserSync(MODE_FULL, true);
 		}
 	}
 

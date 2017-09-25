@@ -1,6 +1,7 @@
 package openDemo.test;
 
 import java.rmi.RemoteException;
+import java.util.Date;
 
 import javax.xml.namespace.QName;
 import javax.xml.rpc.ServiceException;
@@ -9,7 +10,6 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
 
 import org.apache.axis.client.Call;
-import org.apache.axis.client.Service;
 import org.apache.axis.description.OperationDesc;
 import org.apache.axis.description.ParameterDesc;
 import org.apache.axis.message.SOAPHeaderElement;
@@ -26,10 +26,11 @@ import openDemo.entity.sync.elion.EL_INT_JOBCD_SYNC_RES;
 import openDemo.entity.sync.elion.EL_INT_JOBCD_SYNC_RESLine;
 import openDemo.entity.sync.elion.EL_INT_PER_SYNC_RES;
 import openDemo.entity.sync.elion.EL_INT_PER_SYNC_RESLine;
+import openDemo.service.sync.ElionSyncService;
 
 public class ElionSyncServiceTest {
 	// 请求webservice的TargetEndpointAddress参数
-	private static String ENDPOINT_ADDRESS = "http://119.61.11.215:8080/PSIGW/PeopleSoftServiceListeningConnector/PSFT_HR";
+	static String ENDPOINT_ADDRESS = "http://119.61.11.215:8080/PSIGW/PeopleSoftServiceListeningConnector/PSFT_HR";
 	// 全量同步共通参数
 	private static String FULLSYNC_REQ_ELEMENT_NAME = "EL_INT_COMMON_FULLSYNC_REQ";
 	private static String FULLSYNC_REQ_ELEMENT_NAMASPACE = "http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INTERFACE.EL_INT_COMMON_FULLSYNC_REQ.V1";
@@ -65,19 +66,38 @@ public class ElionSyncServiceTest {
 	private static final String MODE_UPDATE = "2";
 
 	public static void main(String[] args) throws ServiceException, RemoteException, ReflectiveOperationException {
-		Service service = new Service();
-		Call call = (Call) service.createCall();
-		call.setTargetEndpointAddress(ENDPOINT_ADDRESS);
-
-		jobFullSyncTest(call);
+		// Service service = new Service();
+		// Call call = (Call) service.createCall();
+		// call.setTargetEndpointAddress(ENDPOINT_ADDRESS);
+		// jobFullSyncTest(call);
 		// jobSyncTest(call);
-		deptFullSyncTest(call);
+		// deptFullSyncTest(call);
 		// deptSyncTest(call);
-		empFullSyncTest(call);
+		// empFullSyncTest(call);
 		// empSyncTest(call);
+
+		elionSyncServiceTest();
 	}
 
-	private static void empSyncTest(Call call) throws RemoteException {
+	static void elionSyncServiceTest() {
+		Date startDate = new Date();
+		System.out.println("同步中......");
+
+		ElionSyncService elionSyncService = new ElionSyncService();
+		try {
+			elionSyncService.sync();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("同步时间：" + calcMinutesBetween(startDate, new Date()));
+	}
+
+	private static long calcMinutesBetween(Date d1, Date d2) {
+		return Math.abs((d2.getTime() - d1.getTime())) / 1000;
+	}
+
+	static void empSyncTest(Call call) throws RemoteException {
 		setPropsBeforeCall(MODE_UPDATE, call, EMP_SYNC_SOAP_ACTION, EMP_SYNC_OPERATION_NAME,
 				EMP_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, EL_INT_PER_SYNC_RES.class);
 
@@ -88,7 +108,7 @@ public class ElionSyncServiceTest {
 		System.out.println(res.getOperation_Name());
 	}
 
-	private static void empFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException {
+	static void empFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException {
 		setPropsBeforeCall(MODE_FULL, call, EMP_FULLSYNC_SOAP_ACTION, EMP_FULLSYNC_OPERATION_NAME,
 				EMP_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, EL_INT_PER_SYNC_RES.class);
 
@@ -107,7 +127,7 @@ public class ElionSyncServiceTest {
 						+ userInfo.getPostionNo() + "=" + userInfo.getExpireDate() + "=" + userInfo.getStatus());
 	}
 
-	private static void deptSyncTest(Call call) throws RemoteException {
+	static void deptSyncTest(Call call) throws RemoteException {
 		setPropsBeforeCall(MODE_UPDATE, call, DEPT_SYNC_SOAP_ACTION, DEPT_SYNC_OPERATION_NAME,
 				DEPT_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, EL_INT_DEPT_SYNC_RES.class);
 
@@ -118,7 +138,7 @@ public class ElionSyncServiceTest {
 		System.out.println(res.getOperation_Name());
 	}
 
-	private static void deptFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException {
+	static void deptFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException {
 		setPropsBeforeCall(MODE_FULL, call, DEPT_FULLSYNC_SOAP_ACTION, DEPT_FULLSYNC_OPERATION_NAME,
 				DEPT_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
 				EL_INT_DEPT_SYNC_RES.class);
@@ -134,7 +154,7 @@ public class ElionSyncServiceTest {
 				ouInfo.getID() + "=" + ouInfo.getOuName() + "=" + ouInfo.getParentID() + "=" + ouInfo.getStatus());
 	}
 
-	private static void jobSyncTest(Call call) throws RemoteException {
+	static void jobSyncTest(Call call) throws RemoteException {
 		setPropsBeforeCall(MODE_UPDATE, call, JOB_SYNC_SOAP_ACTION, JOB_SYNC_OPERATION_NAME,
 				JOB_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, EL_INT_JOBCD_SYNC_RES.class);
 
@@ -145,7 +165,7 @@ public class ElionSyncServiceTest {
 		System.out.println(res.getOperation_Name());
 	}
 
-	private static void jobFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException {
+	static void jobFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException {
 		setPropsBeforeCall(MODE_FULL, call, JOB_FULLSYNC_SOAP_ACTION, JOB_FULLSYNC_OPERATION_NAME,
 				JOB_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
 				EL_INT_JOBCD_SYNC_RES.class);
@@ -160,7 +180,7 @@ public class ElionSyncServiceTest {
 		System.out.println(pos.getpNo() + "=" + pos.getpNames() + "=" + pos.getStatus());
 	}
 
-	private static <E, T> void setPropsBeforeCall(String mode, Call call, String soapAction, String operationName,
+	static <E, T> void setPropsBeforeCall(String mode, Call call, String soapAction, String operationName,
 			String resElementNamaspace, Class<E> reqClassType, Class<T> resClassType) {
 		// 设置共通参数
 		String reqElementNamaspace = null;
@@ -196,7 +216,7 @@ public class ElionSyncServiceTest {
 		addSecurityAuth(call);
 	}
 
-	private static void addSecurityAuth(Call call) {
+	static void addSecurityAuth(Call call) {
 		String AUTH_PREFIX = "wsse";
 		String AUTH_NS = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
 		SOAPHeaderElement soapHeaderElement = null;
