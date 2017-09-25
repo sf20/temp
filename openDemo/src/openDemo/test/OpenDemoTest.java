@@ -2,7 +2,6 @@
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +47,7 @@ public class OpenDemoTest implements ElionConfig {
 		// deletedusersTest();
 		//
 		// 6.同步组织单位: el/sync/ous
-		// ousTest();
+		ousTest();
 
 		// //7.同步删除组织单位: el/sync/deleteous 返回信息msg在data中
 		// deleteousTest();
@@ -143,16 +142,15 @@ public class OpenDemoTest implements ElionConfig {
 
 		List<OuInfoModel> ouInfos = new ArrayList<OuInfoModel>();
 		OuInfoModel ouInfoEntity = new OuInfoModel();
-		ouInfoEntity.setID("10086");
-		ouInfoEntity.setOuName("a&b");
-		// ouInfoEntity.setParentID("1");
-		ouInfoEntity.setIsSub("false");
+		ouInfoEntity.setID("100000");
+		ouInfoEntity.setOuName("亿利资源集团有限公司");
+		ouInfoEntity.setParentID(null);
+		// ouInfoEntity.setIsSub("false");
 		ouInfos.add(ouInfoEntity);
 		ResultEntity resultEntity = null;
 		try {
-			resultEntity = orgService.getOucodeByName(URLEncoder.encode("a&b", "utf-8"), apikey, secretkey, baseUrl);
+			resultEntity = orgService.ous(false, ouInfos, apikey, secretkey, baseUrl);
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} // ous(false, ouInfos);//
 		print("同步组织单位", resultEntity);

@@ -25,6 +25,7 @@ import org.apache.axis.description.OperationDesc;
 import org.apache.axis.description.ParameterDesc;
 import org.apache.axis.message.SOAPHeaderElement;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.DOMException;
@@ -346,6 +347,7 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 		List<OuInfoModel> newList = copyCreateEntityList(modelList, OuInfoModel.class);
 
 		removeExpiredOrgs(newList, mode);
+		setRootOrgParentId(newList);
 
 		logger.info("组织同步Total Size: " + newList.size());
 		// 全量模式
@@ -393,6 +395,21 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 				}
 			}
 
+		}
+	}
+
+	/**
+	 * 设置根组织的父节点id为null
+	 * 
+	 * @param newList
+	 */
+	private void setRootOrgParentId(List<OuInfoModel> newList) {
+		for (OuInfoModel org : newList) {
+			// 客户数据中根组织的上级部门id为""
+			if ("".equals(org.getParentID())) {
+				org.setParentID(null);
+				break;
+			}
 		}
 	}
 
@@ -873,7 +890,7 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 		String status = user.getStatus();
 		String expireDate = user.getExpireDate();
 		// 用户状态为非生效或者已经离职的场合下过期
-		if (!EFFECTIVE_STATUS.equals(status) || expireDate != null) {
+		if (!EFFECTIVE_STATUS.equals(status) || StringUtils.isNotEmpty(expireDate)) {
 			return true;
 		} else {
 			return false;
@@ -916,10 +933,12 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 		if (classType.isAssignableFrom(EL_INT_JOBCD_SYNC_RESLine.class)) {
 			if (MODE_FULL.equals(mode)) {
 				setPropsBeforeCall(mode, call, JOB_FULLSYNC_SOAP_ACTION, JOB_FULLSYNC_OPERATION_NAME,
-						JOB_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, classType);
+						JOB_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
+						EL_INT_JOBCD_SYNC_RES.class);
 			} else {
 				setPropsBeforeCall(mode, call, JOB_SYNC_SOAP_ACTION, JOB_SYNC_OPERATION_NAME,
-						JOB_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, classType);
+						JOB_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
+						EL_INT_JOBCD_SYNC_RES.class);
 			}
 			EL_INT_JOBCD_SYNC_RES res = (EL_INT_JOBCD_SYNC_RES) call.invoke(new java.lang.Object[] { req });
 			lines = res.getLine();
@@ -928,10 +947,12 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 		else if (classType.isAssignableFrom(EL_INT_DEPT_SYNC_RESLine.class)) {
 			if (MODE_FULL.equals(mode)) {
 				setPropsBeforeCall(mode, call, DEPT_FULLSYNC_SOAP_ACTION, DEPT_FULLSYNC_OPERATION_NAME,
-						DEPT_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, classType);
+						DEPT_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
+						EL_INT_DEPT_SYNC_RES.class);
 			} else {
 				setPropsBeforeCall(mode, call, DEPT_SYNC_SOAP_ACTION, DEPT_SYNC_OPERATION_NAME,
-						DEPT_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, classType);
+						DEPT_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
+						EL_INT_DEPT_SYNC_RES.class);
 			}
 
 			EL_INT_DEPT_SYNC_RES res = (EL_INT_DEPT_SYNC_RES) call.invoke(new java.lang.Object[] { req });
@@ -941,10 +962,12 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 		else if (classType.isAssignableFrom(EL_INT_PER_SYNC_RESLine.class)) {
 			if (MODE_FULL.equals(mode)) {
 				setPropsBeforeCall(mode, call, EMP_FULLSYNC_SOAP_ACTION, EMP_FULLSYNC_OPERATION_NAME,
-						EMP_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, classType);
+						EMP_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
+						EL_INT_PER_SYNC_RES.class);
 			} else {
 				setPropsBeforeCall(mode, call, EMP_SYNC_SOAP_ACTION, EMP_SYNC_OPERATION_NAME,
-						EMP_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, classType);
+						EMP_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
+						EL_INT_PER_SYNC_RES.class);
 			}
 
 			EL_INT_PER_SYNC_RES res = (EL_INT_PER_SYNC_RES) call.invoke(new java.lang.Object[] { req });
