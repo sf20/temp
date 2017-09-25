@@ -235,7 +235,7 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 	 * 岗位全量数据集合与最新获取岗位数据集合进行比较
 	 * 
 	 * @param fullList
-	 *            数据库岗位表数据集合
+	 *            全量岗位数据集合
 	 * @param newList
 	 *            最新获取岗位数据集合
 	 * @return
@@ -299,10 +299,10 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 					pos.setpNames(tempPosName);
 					positionList.add(pos);
 				} else {
-					printLog("岗位同步新增失败 ", resultEntity);
+					printLog("岗位同步新增失败 ", tempPosName, resultEntity);
 				}
 			} catch (IOException e) {
-				logger.error("岗位同步新增失败 " + pos.getpNames(), e);
+				logger.error("岗位同步新增失败 " + tempPosName, e);
 			}
 
 			tempList.clear();
@@ -325,7 +325,7 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 					positionList.remove(pos);
 					positionList.add(pos);
 				} else {
-					printLog("岗位同步更新失败 ", resultEntity);
+					printLog("岗位同步更新失败 ", pos.getpNames(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("岗位同步更新失败 " + pos.getpNames(), e);
@@ -413,7 +413,7 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					ouInfoList.remove(org);
 				} else {
-					printLog("组织同步删除失败 ", resultEntity);
+					printLog("组织同步删除失败 ", org.getOuName(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("组织同步删除失败 " + org.getOuName(), e);
@@ -442,7 +442,7 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 					ouInfoList.remove(org);
 					ouInfoList.add(org);
 				} else {
-					printLog("组织同步更新失败 ", resultEntity);
+					printLog("组织同步更新失败 ", org.getOuName(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("组织同步更新失败 " + org.getOuName(), e);
@@ -469,7 +469,7 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					ouInfoList.add(org);
 				} else {
-					printLog("组织同步新增失败 ", resultEntity);
+					printLog("组织同步新增失败 ", org.getOuName(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("组织同步新增失败 " + org.getOuName(), e);
@@ -638,7 +638,7 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步新增失败 ", resultEntity);
+					printLog("用户同步新增失败 ", user.getID(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("用户同步新增失败 " + user.getID(), e);
@@ -667,7 +667,7 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 					userInfoList.remove(user);
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步更新失败 ", resultEntity);
+					printLog("用户同步更新失败 ", user.getID(), resultEntity);
 				}
 			} catch (Exception e) {
 				logger.error("用户同步更新失败 " + user.getID(), e);
@@ -696,7 +696,7 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 					userInfoList.remove(user);
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步启用失败 ", resultEntity);
+					printLog("用户同步启用失败 ", user.getID(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("用户同步启用失败  " + user.getID(), e);
@@ -723,7 +723,7 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 					userInfoList.remove(user);
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步禁用失败 ", resultEntity);
+					printLog("用户同步禁用失败 ", user.getID(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("用户同步禁用失败 " + user.getID(), e);
@@ -737,7 +737,7 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 	 * 组织全量数据集合与最新获取组织数据集合进行比较
 	 * 
 	 * @param fullList
-	 *            数据库组织表数据集合
+	 *            全量组织数据集合
 	 * @param newList
 	 *            最新获取组织数据集合
 	 * @return 包含 同步新增、更新、 删除等组织集合的Map对象
@@ -802,7 +802,7 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 	 * 用户全量数据集合与最新获取用户数据集合进行比较
 	 * 
 	 * @param fullList
-	 *            数据库用户表数据集合
+	 *            全量用户数据集合
 	 * @param newList
 	 *            最新获取用户数据集合
 	 * @return 包含 同步新增、更新、启用、禁用等用户集合的Map对象
@@ -1063,10 +1063,10 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 	 * 同步返回错误信息日志记录
 	 * 
 	 * @param type
+	 * @param errKey
 	 * @param resultEntity
 	 */
-	private void printLog(String type, ResultEntity resultEntity) {
-		// TODO
-		logger.error(type + "错误信息：" + resultEntity.getCode() + "-" + resultEntity.getMessage());
+	private void printLog(String type, String errKey, ResultEntity resultEntity) {
+		logger.error(type + "ID：" + errKey + " 错误信息：" + resultEntity.getCode() + "-" + resultEntity.getMessage());
 	}
 }
