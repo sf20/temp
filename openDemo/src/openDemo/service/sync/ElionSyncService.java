@@ -167,7 +167,6 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 		List<PositionModel> newList = copyCreateEntityList(modelList, PositionModel.class);
 
 		removeExpiredPos(newList);
-		setFullPosNames(newList);
 
 		logger.info("岗位同步Total Size: " + newList.size());
 		// 全量模式
@@ -223,36 +222,13 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 	}
 
 	/**
-	 * 设置岗位名为带类别岗位名
+	 * 返回带类别岗位名
 	 * 
-	 * @param newList
-	 */
-	private void setFullPosNames(List<PositionModel> newList) {
-		String prefix = POSITION_CLASS_DEFAULT + POSITION_CLASS_SEPARATOR;
-		for (PositionModel pos : newList) {
-			pos.setpNames(prefix + pos.getpNames());
-		}
-	}
-
-	/**
-	 * 从pNames中得到岗位名(pNames格式: 一级类别;二级类别;岗位名)
-	 * 
-	 * @param pNames
+	 * @param posName
 	 * @return
 	 */
-	private String getPositionName(String pNames) {
-		if (pNames == null) {
-			return null;
-		}
-
-		String[] arr = pNames.split(POSITION_CLASS_SEPARATOR);
-		int len = arr.length;
-		if (len == 0) {
-			return null;
-		}
-
-		// 最后是岗位名
-		return arr[len - 1];
+	private String getFullPosNames(String posName) {
+		return POSITION_CLASS_DEFAULT + POSITION_CLASS_SEPARATOR + posName;
 	}
 
 	/**
@@ -270,20 +246,23 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 		List<PositionModel> posToSyncUpdate = new ArrayList<PositionModel>();
 
 		for (PositionModel newPos : newList) {
-			// 岗位不存在新增
-			if (!fullList.contains(newPos)) {
-				posToSyncAdd.add(newPos);
-			} else {
-				String newPosNo = newPos.getpNo();
-				if (newPosNo != null) {
-					for (PositionModel fullPos : fullList) {
-						if (newPosNo.equals(fullPos.getpNo())) {
-							String newPosName = newPos.getpNames();
-							// 岗位名发生更新
-							if (newPosName != null && !newPosName.equals(fullPos.getpNames())) {
-								posToSyncUpdate.add(newPos);
+			String newPosName = newPos.getpNames();
+
+			if (newPosName != null) {
+				// 岗位不存在新增
+				if (!fullList.contains(newPos)) {
+					posToSyncAdd.add(newPos);
+				} else {
+					String newPosNo = newPos.getpNo();
+					if (newPosNo != null) {
+						for (PositionModel fullPos : fullList) {
+							if (newPosNo.equals(fullPos.getpNo())) {
+								// 岗位名发生更新
+								if (!newPosName.equals(fullPos.getpNames())) {
+									posToSyncUpdate.add(newPos);
+								}
+								break;
 							}
-							break;
 						}
 					}
 				}
@@ -307,12 +286,17 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 		List<PositionModel> tempList = new ArrayList<PositionModel>();
 		ResultEntity resultEntity = null;
 		for (PositionModel pos : posToSync) {
+			String tempPosName = pos.getpNames();
+			// 调用同步接口时需要带类别岗位名
+			pos.setpNames(getFullPosNames(tempPosName));
 			tempList.add(pos);
 
 			try {
 				resultEntity = positionService.syncPos(tempList, apikey, secretkey, baseUrl);
 
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+					// 全量集合中保存不带类别的岗位名
+					pos.setpNames(tempPosName);
 					positionList.add(pos);
 				} else {
 					printLog("岗位同步新增失败 ", resultEntity);
@@ -335,8 +319,7 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 		for (PositionModel pos : posToSync) {
 			try {
 				// 同步岗位名不需要带分级类别
-				resultEntity = positionService.changePosName(pos.getpNo(), getPositionName(pos.getpNames()), apikey,
-						secretkey, baseUrl);
+				resultEntity = positionService.changePosName(pos.getpNo(), pos.getpNames(), apikey, secretkey, baseUrl);
 
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					positionList.remove(pos);
@@ -400,10 +383,10 @@ public class ElionSyncService extends AbstractSyncService implements TestConfig 
 	 * @param mode
 	 */
 	private void removeExpiredOrgs(List<OuInfoModel> list, String mode) {
-		for (Iterator<OuInfoModel> iterator = list.iterator(); iterator.hasNext();) {
-			OuInfoModel org = iterator.next();
-			// 仅全量模式下执行
-			if (MODE_FULL.equals(mode)) {
+		// 仅全量模式下执行
+		if (MODE_FULL.equals(mode)) {
+			for (Iterator<OuInfoModel> iterator = list.iterator(); iterator.hasNext();) {
+				OuInfoModel org = iterator.next();
 				if (isOrgExpired(org)) {
 					iterator.remove();
 					logger.info("删除了过期组织：" + org.getOuName());
