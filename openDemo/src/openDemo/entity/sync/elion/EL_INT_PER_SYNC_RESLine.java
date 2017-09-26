@@ -160,7 +160,7 @@ public class EL_INT_PER_SYNC_RESLine  implements java.io.Serializable {
 	}
 
 	public String getUserName() {
-		return companyEmail;
+		return "el" + employeeID;
 	}
 
 	public String getCnName() {
@@ -172,7 +172,7 @@ public class EL_INT_PER_SYNC_RESLine  implements java.io.Serializable {
 	}
 
 	public String getMobile() {
-		return cellPhone;
+		return null;// 手机号不同步
 	}
 
 	public String getMail() {
