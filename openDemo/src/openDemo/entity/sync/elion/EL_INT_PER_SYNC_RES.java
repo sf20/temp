@@ -10,14 +10,14 @@ package openDemo.entity.sync.elion;
 public class EL_INT_PER_SYNC_RES  implements java.io.Serializable {
     private java.lang.String operation_Name;
 
-    private openDemo.entity.sync.elion.EL_INT_PER_SYNC_RESLine[] line;
+    private EL_INT_PER_SYNC_RESLine[] line;
 
     public EL_INT_PER_SYNC_RES() {
     }
 
     public EL_INT_PER_SYNC_RES(
            java.lang.String operation_Name,
-           openDemo.entity.sync.elion.EL_INT_PER_SYNC_RESLine[] line) {
+           EL_INT_PER_SYNC_RESLine[] line) {
            this.operation_Name = operation_Name;
            this.line = line;
     }
@@ -48,7 +48,7 @@ public class EL_INT_PER_SYNC_RES  implements java.io.Serializable {
      * 
      * @return line
      */
-    public openDemo.entity.sync.elion.EL_INT_PER_SYNC_RESLine[] getLine() {
+    public EL_INT_PER_SYNC_RESLine[] getLine() {
         return line;
     }
 
@@ -58,15 +58,15 @@ public class EL_INT_PER_SYNC_RES  implements java.io.Serializable {
      * 
      * @param line
      */
-    public void setLine(openDemo.entity.sync.elion.EL_INT_PER_SYNC_RESLine[] line) {
+    public void setLine(EL_INT_PER_SYNC_RESLine[] line) {
         this.line = line;
     }
 
-    public openDemo.entity.sync.elion.EL_INT_PER_SYNC_RESLine getLine(int i) {
+    public EL_INT_PER_SYNC_RESLine getLine(int i) {
         return this.line[i];
     }
 
-    public void setLine(int i, openDemo.entity.sync.elion.EL_INT_PER_SYNC_RESLine _value) {
+    public void setLine(int i, EL_INT_PER_SYNC_RESLine _value) {
         this.line[i] = _value;
     }
 
