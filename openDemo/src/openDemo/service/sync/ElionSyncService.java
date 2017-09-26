@@ -997,8 +997,7 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 		if (lines != null) {
 			tempList = (List<T>) Arrays.asList(lines);
 		} else {
-			// TODO
-			throw new IOException("获取客户接口[" + classType.getSimpleName() + "]数据错误！");
+			logger.warn("获取客户接口[" + classType.getSimpleName() + "]数据为空！");
 		}
 		return tempList;
 	}
