@@ -37,13 +37,13 @@ public class OuInfoDao extends GenericDaoImpl<OuInfoModel> {
 	@Override
 	Object[] getInsertObjectParamArray(OuInfoModel org) {
 		Object[] params = { org.getID(), org.getOuName(), org.getParentID(), org.getDescription(), org.getUsers(),
-				org.getIsSub(), org.getOrderIndex() };
+				org.getOrderIndex() };
 		return params;
 	}
 
 	@Override
 	Object[] getUpdateObjectParamArray(OuInfoModel org) {
-		Object[] params = { org.getOuName(), org.getParentID(), org.getDescription(), org.getUsers(), org.getIsSub(),
+		Object[] params = { org.getOuName(), org.getParentID(), org.getDescription(), org.getUsers(),
 				org.getOrderIndex(), org.getID() };
 		return params;
 	}
