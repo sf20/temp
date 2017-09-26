@@ -611,20 +611,20 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 			fromModel = fromList.get(i);
 
 			String entryTime = fromModel.getEntryTime();
-			if (entryTime != null) {
+			if (StringUtils.isNotEmpty(entryTime)) {
 				try {
 					toModel.setEntryTime(DATE_FORMAT.format(CUSTOMER_DATE_FORMAT.parse(entryTime)));
 				} catch (ParseException e) {
-					logger.warn("日期格式有误：" + fromModel.getID());
+					logger.warn("日期格式有误 " + fromModel.getID() + "：" + entryTime);
 				}
 			}
 
 			String birthday = fromModel.getBirthday();
-			if (birthday != null) {
+			if (StringUtils.isNotEmpty(birthday)) {
 				try {
 					toModel.setBirthday(DATE_FORMAT.format(CUSTOMER_DATE_FORMAT.parse(birthday)));
 				} catch (ParseException e) {
-					logger.warn("日期格式有误：" + fromModel.getID());
+					logger.warn("日期格式有误 " + fromModel.getID() + "：" + entryTime);
 				}
 			}
 
@@ -655,7 +655,16 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步新增失败 ", user.getID(), resultEntity);
+					// 忽略邮箱再同步一次
+					user.setMail(null);
+					tempList.set(0, user);
+					resultEntity = userService.userSync(islink, tempList, apikey, secretkey, baseUrl);
+					if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+						userInfoList.add(user);
+						logger.warn("该用户邮箱异常未同步：" + user.getID());
+					} else {
+						printLog("用户同步新增失败 ", user.getID(), resultEntity);
+					}
 				}
 			} catch (IOException e) {
 				logger.error("用户同步新增失败 " + user.getID(), e);
@@ -684,7 +693,17 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 					userInfoList.remove(user);
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步更新失败 ", user.getID(), resultEntity);
+					// 忽略邮箱再同步一次
+					user.setMail(null);
+					tempList.set(0, user);
+					resultEntity = userService.userSync(islink, tempList, apikey, secretkey, baseUrl);
+					if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
+						userInfoList.remove(user);
+						userInfoList.add(user);
+						logger.warn("该用户邮箱异常未同步：" + user.getID());
+					} else {
+						printLog("用户同步更新失败 ", user.getID(), resultEntity);
+					}
 				}
 			} catch (Exception e) {
 				logger.error("用户同步更新失败 " + user.getID(), e);
