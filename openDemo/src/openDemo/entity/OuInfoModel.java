@@ -37,9 +37,14 @@ public class OuInfoModel {
 	private List<String> users;
 
 	/**
+	 * 是否分支机构
+	 */
+	private boolean isSub;
+
+	/**
 	 * 排序索引?
 	 */
-	private Integer orderIndex;
+	private int orderIndex;
 
 	/**
 	 * 过期日期
@@ -96,11 +101,19 @@ public class OuInfoModel {
 		this.users = users;
 	}
 
-	public Integer getOrderIndex() {
+	public boolean getIsSub() {
+		return isSub;
+	}
+
+	public void setIsSub(boolean isSub) {
+		this.isSub = isSub;
+	}
+
+	public int getOrderIndex() {
 		return orderIndex;
 	}
 
-	public void setOrderIndex(Integer orderIndex) {
+	public void setOrderIndex(int orderIndex) {
 		this.orderIndex = orderIndex;
 	}
 
