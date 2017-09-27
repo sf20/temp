@@ -160,7 +160,7 @@ public class EL_INT_PER_SYNC_RESLine  implements java.io.Serializable {
 	}
 
 	public String getUserName() {
-		return "el" + employeeID;
+		return userID;
 	}
 
 	public String getCnName() {
@@ -180,11 +180,11 @@ public class EL_INT_PER_SYNC_RESLine  implements java.io.Serializable {
 	}
 
 	public String getOrgOuCode() {
-		return jobCode;
+		return departmentID;
 	}
 
 	public String getPostionNo() {
-		return departmentID;
+		return jobCode;
 	}
 	
 	public String getEntryTime() {
