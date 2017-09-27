@@ -86,19 +86,20 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 	private static final String DATA_TO_INDEX = "10000";
 	// 生效状态
 	private static final String EFFECTIVE_STATUS = "A";
+	// 员工主岗标志
+	private static final String EMPLOYEE_RECORD = "0";
 	// 全量增量区分
 	private static final String MODE_FULL = "1";
 	private static final String MODE_UPDATE = "2";
 	// 自定义map的key
 	private static final String MAPKEY_USER_SYNC_ADD = "userSyncAdd";
 	private static final String MAPKEY_USER_SYNC_UPDATE = "userSyncUpdate";
-	private static final String MAPKEY_USER_SYNC_ENABLE = "userSyncEnable";
-	private static final String MAPKEY_USER_SYNC_DISABLE = "userSyncDisable";
+	private static final String MAPKEY_USER_SYNC_DELETE = "userSyncDelete";
 	private static final String MAPKEY_ORG_SYNC_ADD = "orgSyncAdd";
 	private static final String MAPKEY_ORG_SYNC_UPDATE = "orgSyncUpdate";
 	private static final String MAPKEY_ORG_SYNC_DELETE = "orgSyncDelete";
 	private static final String MAPKEY_POS_SYNC_ADD = "posSyncAdd";
-	private static final String MAPKEY_POS_SYNC_UPDATE = "posSynccUpdate";
+	private static final String MAPKEY_POS_SYNC_UPDATE = "posSyncUpdate";
 	// 请求同步接口成功返回码
 	private static final String SYNC_CODE_SUCCESS = "0";
 	// 岗位类别的默认值
@@ -153,7 +154,7 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 			opUserSync(MODE_UPDATE, true);
 		} else {
 			// 用户全量同步
-			// opUserSync(MODE_FULL, true);
+			opUserSync(MODE_FULL, true);
 		}
 	}
 
@@ -536,18 +537,13 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 		List<UserInfoModel> newList = copyCreateEntityList(modelList, UserInfoModel.class);
 
 		changeDateFormatAndSex(modelList, newList);
+		removeExpiredUsers(newList, mode);
 
 		logger.info("用户同步Total Size: " + newList.size());
 		// 全量模式
 		if (MODE_FULL.equals(mode)) {
 			logger.info("用户同步新增Size: " + newList.size());
 			syncAddUserOneByOne(newList, islink);
-
-			List<UserInfoModel> expiredUsers = getExpiredUsers(newList);
-			if (expiredUsers.size() > 0) {
-				logger.info("用户同步禁用Size: " + expiredUsers.size());
-				syncDisableOneByOne(expiredUsers);
-			}
 		}
 		// 增量模式
 		else {
@@ -564,33 +560,32 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 				syncUpdateUserOneByOne(usersToSyncUpdate, islink);
 			}
 
-			List<UserInfoModel> usersToDisable = map.get(MAPKEY_USER_SYNC_DISABLE);
-			if (usersToDisable.size() > 0) {
-				syncDisableOneByOne(usersToDisable);
-			}
-
-			List<UserInfoModel> usersToEnable = map.get(MAPKEY_USER_SYNC_ENABLE);
-			if (usersToEnable.size() > 0) {
-				syncEnableOneByOne(usersToEnable);
+			List<UserInfoModel> usersToDelete = map.get(MAPKEY_USER_SYNC_DELETE);
+			if (usersToDelete.size() > 0) {
+				syncDeleteOneByOne(usersToDelete);
 			}
 		}
 
 	}
 
 	/**
-	 * 返回过期员工
+	 * 删除过期员工
 	 * 
 	 * @param list
-	 * @return
+	 * @param mode
 	 */
-	private List<UserInfoModel> getExpiredUsers(List<UserInfoModel> list) {
-		List<UserInfoModel> expiredUsers = new ArrayList<UserInfoModel>();
-		for (UserInfoModel user : list) {
-			if (isUserExpired(user)) {
-				expiredUsers.add(user);
+	private void removeExpiredUsers(List<UserInfoModel> list, String mode) {
+		// 仅全量模式下执行
+		if (MODE_FULL.equals(mode)) {
+			for (Iterator<UserInfoModel> iterator = list.iterator(); iterator.hasNext();) {
+				UserInfoModel user = iterator.next();
+				if (isUserExpired(user)) {
+					iterator.remove();
+					logger.info("删除了过期员工：" + user.getID());
+				}
 			}
+
 		}
-		return expiredUsers;
 	}
 
 	/**
@@ -715,54 +710,26 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 	}
 
 	/**
-	 * 逐个用户同步启用
+	 * 逐个用户同步删除
 	 * 
-	 * @param usersToEnable
+	 * @param usersToDelete
 	 */
-	private void syncEnableOneByOne(List<UserInfoModel> usersToEnable) {
+	private void syncDeleteOneByOne(List<UserInfoModel> usersToDelete) {
 		List<String> tempList = new ArrayList<String>();
 		ResultEntity resultEntity = null;
-
-		for (UserInfoModel user : usersToEnable) {
+		for (UserInfoModel user : usersToDelete) {
 			tempList.add(user.getUserName());
 
 			try {
-				resultEntity = userService.enabledusersSync(tempList, apikey, secretkey, baseUrl);
+				resultEntity = userService.deletedusersSync(tempList, apikey, secretkey, baseUrl);
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					userInfoList.remove(user);
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步启用失败 ", user.getID(), resultEntity);
+					printLog("用户同步删除失败 ", user.getID(), resultEntity);
 				}
 			} catch (IOException e) {
-				logger.error("用户同步启用失败  " + user.getID(), e);
-			}
-
-			tempList.clear();
-		}
-	}
-
-	/**
-	 * 逐个用户同步禁用
-	 * 
-	 * @param usersToDisable
-	 */
-	private void syncDisableOneByOne(List<UserInfoModel> usersToDisable) {
-		List<String> tempList = new ArrayList<String>();
-		ResultEntity resultEntity = null;
-		for (UserInfoModel user : usersToDisable) {
-			tempList.add(user.getUserName());
-
-			try {
-				resultEntity = userService.disabledusersSync(tempList, apikey, secretkey, baseUrl);
-				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-					userInfoList.remove(user);
-					userInfoList.add(user);
-				} else {
-					printLog("用户同步禁用失败 ", user.getID(), resultEntity);
-				}
-			} catch (IOException e) {
-				logger.error("用户同步禁用失败 " + user.getID(), e);
+				logger.error("用户同步删除失败 " + user.getID(), e);
 			}
 
 			tempList.clear();
@@ -841,7 +808,7 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 	 *            全量用户数据集合
 	 * @param newList
 	 *            最新获取用户数据集合
-	 * @return 包含 同步新增、更新、启用、禁用等用户集合的Map对象
+	 * @return 包含 同步新增、更新、删除等用户集合的Map对象
 	 */
 	private Map<String, List<UserInfoModel>> compareUserList(List<UserInfoModel> fullList,
 			List<UserInfoModel> newList) {
@@ -849,52 +816,36 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 
 		List<UserInfoModel> usersToSyncAdd = new ArrayList<UserInfoModel>();
 		List<UserInfoModel> usersToSyncUpdate = new ArrayList<UserInfoModel>();
-		List<UserInfoModel> usersToEnable = new ArrayList<UserInfoModel>();
-		List<UserInfoModel> usersToDisable = new ArrayList<UserInfoModel>();
+		List<UserInfoModel> usersToSyncDelete = new ArrayList<UserInfoModel>();
 
-		// 待更新用户
 		for (UserInfoModel newUser : newList) {
-			for (UserInfoModel fullUser : fullList) {
-				// 已经存在的用户比较
-				if (fullUser.equals(newUser)) {
-					if (!isUserExpired(fullUser)) {
-						if (isUserExpired(newUser)) {
-							// 用户过期禁用
-							usersToDisable.add(newUser);
-						} else {
-							// 存在用户更新
-							usersToSyncUpdate.add(newUser);
-						}
-					} else {
-						if (!isUserExpired(newUser)) {
-							// 用户重新启用
-							usersToEnable.add(newUser);
-						} else {
-							// 存在用户更新
-							usersToSyncUpdate.add(newUser);
-						}
-					}
-					break;
+			// 待新增用户
+			if (!fullList.contains(newUser)) {
+				if (!isUserExpired(newUser)) {
+					usersToSyncAdd.add(newUser);
+				} else {
+					logger.info("包含过期员工：" + newUser.getID());
 				}
 			}
-		}
-
-		// 待新增用户
-		for (UserInfoModel user : newList) {
-			if (!fullList.contains(user)) {
-				usersToSyncAdd.add(user);
+			// 已经存在的用户比较
+			else {
+				if (isUserExpired(newUser)) {
+					// 用户过期删除
+					usersToSyncDelete.add(newUser);
+				} else {
+					// 存在用户更新
+					usersToSyncUpdate.add(newUser);
+				}
 			}
 		}
 
 		map.put(MAPKEY_USER_SYNC_ADD, usersToSyncAdd);
 		map.put(MAPKEY_USER_SYNC_UPDATE, usersToSyncUpdate);
-		map.put(MAPKEY_USER_SYNC_ENABLE, usersToEnable);
-		map.put(MAPKEY_USER_SYNC_DISABLE, usersToDisable);
+		map.put(MAPKEY_USER_SYNC_DELETE, usersToSyncDelete);
 
 		logger.info("用户同步新增Size: " + usersToSyncAdd.size());
 		logger.info("用户同步更新Size: " + usersToSyncUpdate.size());
-		logger.info("用户同步启用Size: " + usersToEnable.size());
-		logger.info("用户同步禁用Size: " + usersToDisable.size());
+		logger.info("用户同步删除Size: " + usersToSyncDelete.size());
 
 		return map;
 	}
@@ -906,10 +857,14 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 	 * @return
 	 */
 	private boolean isUserExpired(UserInfoModel user) {
+		String userName = user.getUserName();
 		String status = user.getStatus();
+		// 该字段在请求到客户接口数据时已关联EmployeeRecord字段
+		String deleteStatus = user.getDeleteStatus();
 		String expireDate = user.getExpireDate();
-		// 用户状态为非生效或者已经离职的场合下过期
-		if (!EFFECTIVE_STATUS.equals(status) || StringUtils.isNotEmpty(expireDate)) {
+		// UserName为空或者用户状态为非生效或者非主岗或者已经离职的场合下过期
+		if (StringUtils.isEmpty(userName) || !EFFECTIVE_STATUS.equals(status) || !EMPLOYEE_RECORD.equals(deleteStatus)
+				|| StringUtils.isNotEmpty(expireDate)) {
 			return true;
 		} else {
 			return false;
