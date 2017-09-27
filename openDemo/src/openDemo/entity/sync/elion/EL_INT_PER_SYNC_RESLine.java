@@ -202,6 +202,10 @@ public class EL_INT_PER_SYNC_RESLine  implements java.io.Serializable {
 	public String getStatus() {
 		return HRStatus;
 	}
+
+	public String getDeleteStatus() {
+		return employeeRecord;
+	}
 	// =====BeanUtils复制属性用=====
 
     /**
