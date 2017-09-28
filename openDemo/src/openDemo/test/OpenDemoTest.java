@@ -47,7 +47,7 @@ public class OpenDemoTest implements ElionConfig {
 		// deletedusersTest();
 		//
 		// 6.同步组织单位: el/sync/ous
-		ousTest();
+		// ousTest();
 
 		// //7.同步删除组织单位: el/sync/deleteous 返回信息msg在data中
 		// deleteousTest();
@@ -82,7 +82,7 @@ public class OpenDemoTest implements ElionConfig {
 		p.setpNo("13579");
 		positionInfos.add(p);
 		ResultEntity resultEntity = posService.syncPos(positionInfos, apikey, secretkey, baseUrl);
-		// ResultEntity resultEntity = posService.changePosName("20170901","岗位测试",
+		// ResultEntity resultEntity = posService.changePosName("1357911","岗位测试a",
 		// apikey, secretkey, baseUrl);
 		print("岗位同步", resultEntity);
 	}
