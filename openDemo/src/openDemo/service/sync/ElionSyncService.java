@@ -169,6 +169,7 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 		List<PositionModel> newList = copyCreateEntityList(modelList, PositionModel.class);
 
 		removeExpiredPos(newList);
+		setFullPosNames(newList);
 
 		logger.info("岗位同步Total Size: " + newList.size());
 		// 全量模式
@@ -224,13 +225,43 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 	}
 
 	/**
-	 * 返回带类别岗位名
+	 * 设置岗位名为带类别岗位名
 	 * 
-	 * @param posName
+	 * @param newList
+	 */
+	private void setFullPosNames(List<PositionModel> newList) {
+		String prefix = POSITION_CLASS_DEFAULT + POSITION_CLASS_SEPARATOR;
+		for (PositionModel pos : newList) {
+			String pNameClass = pos.getpNameClass();
+			if (StringUtils.isBlank(pNameClass)) {
+				pos.setpNames(prefix + pos.getpNames());
+			} else {
+				// 替换岗位类别名中的特殊字符
+				pNameClass = pNameClass.replaceAll("&amp;", "&");
+				pos.setpNames(pNameClass + POSITION_CLASS_SEPARATOR + pos.getpNames());
+			}
+		}
+	}
+
+	/**
+	 * 从pNames中得到岗位名(pNames格式: 一级类别;二级类别;岗位名)
+	 * 
+	 * @param pNames
 	 * @return
 	 */
-	private String getFullPosNames(String posName) {
-		return POSITION_CLASS_DEFAULT + POSITION_CLASS_SEPARATOR + posName;
+	private String getPositionName(String pNames) {
+		if (pNames == null) {
+			return null;
+		}
+
+		String[] arr = pNames.split(POSITION_CLASS_SEPARATOR);
+		int len = arr.length;
+		if (len == 0) {
+			return null;
+		}
+
+		// 最后是岗位名
+		return arr[len - 1];
 	}
 
 	/**
@@ -248,23 +279,20 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 		List<PositionModel> posToSyncUpdate = new ArrayList<PositionModel>();
 
 		for (PositionModel newPos : newList) {
-			String newPosName = newPos.getpNames();
-
-			if (newPosName != null) {
-				// 岗位不存在新增
-				if (!fullList.contains(newPos)) {
-					posToSyncAdd.add(newPos);
-				} else {
-					String newPosNo = newPos.getpNo();
-					if (newPosNo != null) {
-						for (PositionModel fullPos : fullList) {
-							if (newPosNo.equals(fullPos.getpNo())) {
-								// 岗位名发生更新
-								if (!newPosName.equals(fullPos.getpNames())) {
-									posToSyncUpdate.add(newPos);
-								}
-								break;
+			// 岗位不存在新增
+			if (!fullList.contains(newPos)) {
+				posToSyncAdd.add(newPos);
+			} else {
+				String newPosNo = newPos.getpNo();
+				if (newPosNo != null) {
+					for (PositionModel fullPos : fullList) {
+						if (newPosNo.equals(fullPos.getpNo())) {
+							String newPosName = newPos.getpNames();
+							// 岗位名发生更新
+							if (!newPosName.equals(fullPos.getpNames())) {
+								posToSyncUpdate.add(newPos);
 							}
+							break;
 						}
 					}
 				}
@@ -288,23 +316,18 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 		List<PositionModel> tempList = new ArrayList<PositionModel>();
 		ResultEntity resultEntity = null;
 		for (PositionModel pos : posToSync) {
-			String tempPosName = pos.getpNames();
-			// 调用同步接口时需要带类别岗位名
-			pos.setpNames(getFullPosNames(tempPosName));
 			tempList.add(pos);
 
 			try {
 				resultEntity = positionService.syncPos(tempList, apikey, secretkey, baseUrl);
 
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
-					// 全量集合中保存不带类别的岗位名
-					pos.setpNames(tempPosName);
 					positionList.add(pos);
 				} else {
-					printLog("岗位同步新增失败 ", tempPosName, resultEntity);
+					printLog("岗位同步新增失败 ", pos.getpNames(), resultEntity);
 				}
 			} catch (IOException e) {
-				logger.error("岗位同步新增失败 " + tempPosName, e);
+				logger.error("岗位同步新增失败 " + pos.getpNames(), e);
 			}
 
 			tempList.clear();
@@ -321,7 +344,8 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 		for (PositionModel pos : posToSync) {
 			try {
 				// 同步岗位名不需要带分级类别
-				resultEntity = positionService.changePosName(pos.getpNo(), pos.getpNames(), apikey, secretkey, baseUrl);
+				resultEntity = positionService.changePosName(pos.getpNo(), getPositionName(pos.getpNames()), apikey,
+						secretkey, baseUrl);
 
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					positionList.remove(pos);
@@ -863,7 +887,7 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 		String deleteStatus = user.getDeleteStatus();
 		String expireDate = user.getExpireDate();
 		// UserName为空或者用户状态为非生效或者非主岗或者已经离职的场合下过期
-		if (StringUtils.isEmpty(userName) || !EFFECTIVE_STATUS.equals(status) || !EMPLOYEE_RECORD.equals(deleteStatus)
+		if (StringUtils.isBlank(userName) || !EFFECTIVE_STATUS.equals(status) || !EMPLOYEE_RECORD.equals(deleteStatus)
 				|| StringUtils.isNotEmpty(expireDate)) {
 			return true;
 		} else {

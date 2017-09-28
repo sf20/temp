@@ -63,6 +63,10 @@ public class EL_INT_JOBCD_SYNC_RESLine  implements java.io.Serializable {
 		return description;
 	}
 	
+	public String getpNameClass() {
+		return typeOfBusinessDescription;
+	}
+	
 	public String getStatus() {
 		return effectiveStatus;
 	}

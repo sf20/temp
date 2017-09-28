@@ -18,6 +18,11 @@ public class PositionModel {
 	private String pNames;
 
 	/**
+	 * 岗位类别
+	 */
+	private String pNameClass;
+	
+	/**
 	 * 岗位状态
 	 */
 	private String status;
@@ -41,6 +46,14 @@ public class PositionModel {
 
 	public void setpNames(String pNames) {
 		this.pNames = pNames;
+	}
+
+	public String getpNameClass() {
+		return pNameClass;
+	}
+
+	public void setpNameClass(String pNameClass) {
+		this.pNameClass = pNameClass;
 	}
 
 	public String getStatus() {
