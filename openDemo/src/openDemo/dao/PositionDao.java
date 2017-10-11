@@ -58,7 +58,7 @@ public class PositionDao extends GenericDaoImpl<PositionModel> {
 	String generateGetAllSql() {
 		StringBuffer sql = new StringBuffer();
 		sql.append(
-				"SELECT DISTINCT POSITIONNO AS pNo, POSITIONNAME AS pNames FROM CORE_POSITIONINFO WHERE ORGID = '57dac39f-aa0c-42dc-a64f-eae4618dd128' AND INFOTYPE = 'Item' and ISDELETED = 0");
+				"SELECT DISTINCT POSITIONNO AS pNo, POSITIONNAME AS pNames FROM CORE_POSITIONINFO WHERE ORGID = ? AND INFOTYPE = 'Item' and ISDELETED = 0");
 		return sql.toString();
 	};
 }

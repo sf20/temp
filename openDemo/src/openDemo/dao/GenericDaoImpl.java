@@ -42,6 +42,10 @@ public abstract class GenericDaoImpl<T> implements GenericDao<T> {
 		return new QueryRunner(dataSource).query(generateGetAllSql(), new BeanListHandler<>(entityClass));
 	}
 
+	public List<T> getAllById(String orgId) throws SQLException {
+		return new QueryRunner(dataSource).query(generateGetAllSql(), new BeanListHandler<>(entityClass), orgId);
+	}
+
 	@Override
 	public int getAllCount() throws SQLException {
 		return new QueryRunner(dataSource).query(generateGetAllCountSql(), new ScalarHandler<Long>()).intValue();
