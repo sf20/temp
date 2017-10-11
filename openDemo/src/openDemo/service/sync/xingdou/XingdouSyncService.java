@@ -15,7 +15,7 @@ import javax.xml.rpc.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import openDemo.config.TestConfig;
+import openDemo.config.XingdouConfig;
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
 import openDemo.entity.UserInfoModel;
@@ -24,7 +24,7 @@ import openDemo.entity.sync.xingdou.XingdouResData;
 import openDemo.entity.sync.xingdou.XingdouUserInfoModel;
 import openDemo.service.sync.AbstractSyncService2;
 
-public class XingdouSyncService extends AbstractSyncService2 implements TestConfig {
+public class XingdouSyncService extends AbstractSyncService2 implements XingdouConfig {
 	// 全量增量区分
 	private static final String MODE_FULL = "0";
 	private static final String MODE_UPDATE = "1";
