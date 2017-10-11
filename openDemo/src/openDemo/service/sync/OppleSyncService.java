@@ -209,7 +209,7 @@ public class OppleSyncService extends AbstractSyncService implements OppleConfig
 		List<PositionModel> positionListDB = new ArrayList<PositionModel>();
 		// 获取数据库岗位数据
 		PositionDao dao = new PositionDao();
-		positionListDB = dao.getAll();
+		positionListDB = dao.getAllById(apikey);
 
 		for (PositionModel newPos : newList) {
 			String newPosNames = newPos.getpNames();
