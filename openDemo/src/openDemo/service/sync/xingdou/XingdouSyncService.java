@@ -48,6 +48,7 @@ public class XingdouSyncService extends AbstractSyncService2 implements XingdouC
 		super.setBaseUrl(baseUrl);
 		super.setModeFull(MODE_FULL);
 		super.setModeUpdate(MODE_UPDATE);
+		super.setIsPosIdProvided(false);
 		super.setLogger(LOGGER);
 	}
 
@@ -149,12 +150,6 @@ public class XingdouSyncService extends AbstractSyncService2 implements XingdouC
 				tempModel.setSex("女");
 			}
 		}
-	}
-
-	@Override
-	protected Map<String, List<PositionModel>> comparePosList(List<PositionModel> fullList,
-			List<PositionModel> newList) {
-		return comparePosList2(fullList, newList);
 	}
 
 	@Override

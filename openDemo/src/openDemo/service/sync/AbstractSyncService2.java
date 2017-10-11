@@ -1,6 +1,7 @@
 package openDemo.service.sync;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -19,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import openDemo.dao.PositionDao;
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
 import openDemo.entity.ResultEntity;
@@ -60,6 +62,8 @@ public abstract class AbstractSyncService2 implements CustomTimerTask {
 	// 全量增量区分
 	private String modeFull = "1";// 默认为1
 	private String modeUpdate = "2";// 默认为2
+	// 是否提供岗位id标志
+	private boolean isPosIdProvided = true;// 默认为已提供
 	// 记录日志
 	private Logger logger = LogManager.getLogger();
 
@@ -81,6 +85,10 @@ public abstract class AbstractSyncService2 implements CustomTimerTask {
 
 	public void setModeUpdate(String modeUpdate) {
 		this.modeUpdate = modeUpdate;
+	}
+
+	public void setIsPosIdProvided(boolean isPosIdProvided) {
+		this.isPosIdProvided = isPosIdProvided;
 	}
 
 	public void setLogger(Logger logger) {
@@ -136,6 +144,12 @@ public abstract class AbstractSyncService2 implements CustomTimerTask {
 		List<PositionModel> newList = getPositionModelList(mode);
 
 		removeExpiredPos(newList);
+		if (!isPosIdProvided) {
+			// 仅全量模式下执行
+			if (modeFull.equals(mode)) {
+				compareDataWithDB(newList, apikey);
+			}
+		}
 		setFullPosNames(newList);
 
 		logger.info("岗位同步Total Size: " + newList.size());
@@ -146,7 +160,12 @@ public abstract class AbstractSyncService2 implements CustomTimerTask {
 		}
 		// 增量模式
 		else {
-			Map<String, List<PositionModel>> map = comparePosList(positionList, newList);
+			Map<String, List<PositionModel>> map = null;
+			if (isPosIdProvided) {
+				map = comparePosList1(positionList, newList);
+			} else {
+				map = comparePosList2(positionList, newList);
+			}
 
 			List<PositionModel> posToSyncAdd = map.get(MAPKEY_POS_SYNC_ADD);
 			if (posToSyncAdd != null && posToSyncAdd.size() > 0) {
@@ -215,6 +234,9 @@ public abstract class AbstractSyncService2 implements CustomTimerTask {
 
 		removeExpiredUsers(newList, mode);
 		changePropValues(newList);
+		if (!isPosIdProvided) {
+			setPositionNoToUser(newList);
+		}
 
 		logger.info("用户同步Total Size: " + newList.size());
 		// 全量模式
@@ -246,7 +268,7 @@ public abstract class AbstractSyncService2 implements CustomTimerTask {
 	}
 
 	/**
-	 * 岗位全量数据集合与最新获取岗位数据集合进行比较
+	 * 岗位全量数据集合与最新获取岗位数据集合进行比较(已提供岗位编号)
 	 * 
 	 * @param fullList
 	 *            全量岗位数据集合
@@ -254,7 +276,7 @@ public abstract class AbstractSyncService2 implements CustomTimerTask {
 	 *            最新获取岗位数据集合
 	 * @return
 	 */
-	protected Map<String, List<PositionModel>> comparePosList(List<PositionModel> fullList,
+	protected Map<String, List<PositionModel>> comparePosList1(List<PositionModel> fullList,
 			List<PositionModel> newList) {
 		Map<String, List<PositionModel>> map = new HashMap<String, List<PositionModel>>();
 		List<PositionModel> posToSyncAdd = new ArrayList<PositionModel>();
@@ -452,6 +474,31 @@ public abstract class AbstractSyncService2 implements CustomTimerTask {
 		}
 
 		return list;
+	}
+
+	/**
+	 * 关联岗位到用户
+	 * 
+	 * @param newList
+	 */
+	protected void setPositionNoToUser(List<UserInfoModel> newList) {
+
+		for (UserInfoModel user : newList) {
+			String pNameInUser = user.getPostionName();
+
+			if (pNameInUser != null) {
+				for (PositionModel pos : positionList) {
+					// 根据岗位名(不带岗位类别)进行查找
+					if (pNameInUser.equals(getPositionName(pos.getpNames()))) {
+						user.setPostionNo(pos.getpNo());
+						break;
+					}
+				}
+			} else {
+				// 岗位名为null时岗位编号设置为null
+				// user.setPostionNo(null);
+			}
+		}
 	}
 
 	/**
@@ -810,6 +857,37 @@ public abstract class AbstractSyncService2 implements CustomTimerTask {
 		}
 
 		return entityList;
+	}
+
+	/**
+	 * 将要同步的岗位数据和数据库中的岗位数据进行比较后替换岗位编号(已提供岗位编号不需要比较)
+	 * 
+	 * @param newList
+	 * @param apiKey
+	 * @throws SQLException
+	 */
+	protected void compareDataWithDB(List<PositionModel> newList, String apiKey) throws SQLException {
+		List<PositionModel> positionListDB = new ArrayList<PositionModel>();
+		// 获取数据库岗位数据
+		PositionDao dao = new PositionDao();
+		positionListDB = dao.getAllById(apiKey);
+
+		for (PositionModel newPos : newList) {
+			String newPosNames = newPos.getpNames();
+
+			if (newPosNames != null) {
+				for (PositionModel fullPos : positionListDB) {
+					// 岗位名存在时将岗位编号用数据库中岗位编号替换
+					if (newPosNames.equals(fullPos.getpNames())) {
+						newPos.setpNo(fullPos.getpNo());
+						break;
+					}
+				}
+			}
+
+		}
+
+		positionListDB = null;
 	}
 
 	/**
