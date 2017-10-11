@@ -20,8 +20,9 @@ import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
 import openDemo.entity.UserInfoModel;
 import openDemo.entity.sync.elion.EL_INT_COMMON_SYNC_REQ_TypeShape;
+import openDemo.entity.sync.elion.EL_INT_DEPT_FULLSYNC_RES;
+import openDemo.entity.sync.elion.EL_INT_DEPT_FULLSYNC_RESLine;
 import openDemo.entity.sync.elion.EL_INT_DEPT_SYNC_RES;
-import openDemo.entity.sync.elion.EL_INT_DEPT_SYNC_RESLine;
 import openDemo.entity.sync.elion.EL_INT_JOBCD_SYNC_RES;
 import openDemo.entity.sync.elion.EL_INT_JOBCD_SYNC_RESLine;
 import openDemo.entity.sync.elion.EL_INT_PER_SYNC_RES;
@@ -141,13 +142,13 @@ public class ElionSyncServiceTest {
 	static void deptFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException {
 		setPropsBeforeCall(MODE_FULL, call, DEPT_FULLSYNC_SOAP_ACTION, DEPT_FULLSYNC_OPERATION_NAME,
 				DEPT_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
-				EL_INT_DEPT_SYNC_RES.class);
+				EL_INT_DEPT_FULLSYNC_RES.class);
 
 		EL_INT_COMMON_SYNC_REQ_TypeShape req = new EL_INT_COMMON_SYNC_REQ_TypeShape();
 		req.setReqSystemID("99");
-		EL_INT_DEPT_SYNC_RES res = (EL_INT_DEPT_SYNC_RES) call.invoke(new java.lang.Object[] { req });
+		EL_INT_DEPT_FULLSYNC_RES res = (EL_INT_DEPT_FULLSYNC_RES) call.invoke(new java.lang.Object[] { req });
 
-		EL_INT_DEPT_SYNC_RESLine dept = res.getLine(0);
+		EL_INT_DEPT_FULLSYNC_RESLine dept = res.getLine(0);
 		OuInfoModel ouInfo = new OuInfoModel();
 		BeanUtils.copyProperties(ouInfo, dept);
 		System.out.println(

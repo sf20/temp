@@ -36,6 +36,7 @@ import openDemo.entity.PositionModel;
 import openDemo.entity.ResultEntity;
 import openDemo.entity.UserInfoModel;
 import openDemo.entity.sync.elion.EL_INT_COMMON_SYNC_REQ_TypeShape;
+import openDemo.entity.sync.elion.EL_INT_DEPT_FULLSYNC_RES;
 import openDemo.entity.sync.elion.EL_INT_DEPT_SYNC_RES;
 import openDemo.entity.sync.elion.EL_INT_DEPT_SYNC_RESLine;
 import openDemo.entity.sync.elion.EL_INT_JOBCD_SYNC_RES;
@@ -49,7 +50,7 @@ import openDemo.service.SyncUserService;
 public class ElionSyncService extends AbstractSyncService implements ElionConfig {
 	// 用户接口请求参数值
 	// 请求webservice的TargetEndpointAddress参数
-	private static String ENDPOINT_ADDRESS = "http://119.61.11.215:8080/PSIGW/PeopleSoftServiceListeningConnector/PSFT_HR";
+	private static String ENDPOINT_ADDRESS = "http://ehr.elion.com.cn/PSIGW/PeopleSoftServiceListeningConnector/PSFT_HR";
 	// 全量同步共通参数
 	private static String FULLSYNC_REQ_ELEMENT_NAME = "EL_INT_COMMON_FULLSYNC_REQ";
 	private static String FULLSYNC_REQ_ELEMENT_NAMASPACE = "http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INTERFACE.EL_INT_COMMON_FULLSYNC_REQ.V1";
@@ -946,15 +947,18 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 			if (MODE_FULL.equals(mode)) {
 				setPropsBeforeCall(mode, call, DEPT_FULLSYNC_SOAP_ACTION, DEPT_FULLSYNC_OPERATION_NAME,
 						DEPT_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
-						EL_INT_DEPT_SYNC_RES.class);
+						EL_INT_DEPT_FULLSYNC_RES.class);
+
+				EL_INT_DEPT_FULLSYNC_RES res = (EL_INT_DEPT_FULLSYNC_RES) call.invoke(new java.lang.Object[] { req });
+				lines = res.getLine();
 			} else {
 				setPropsBeforeCall(mode, call, DEPT_SYNC_SOAP_ACTION, DEPT_SYNC_OPERATION_NAME,
 						DEPT_SYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class,
 						EL_INT_DEPT_SYNC_RES.class);
-			}
 
-			EL_INT_DEPT_SYNC_RES res = (EL_INT_DEPT_SYNC_RES) call.invoke(new java.lang.Object[] { req });
-			lines = res.getLine();
+				EL_INT_DEPT_SYNC_RES res = (EL_INT_DEPT_SYNC_RES) call.invoke(new java.lang.Object[] { req });
+				lines = res.getLine();
+			}
 		}
 		// 请求人员数据
 		else if (classType.isAssignableFrom(EL_INT_PER_SYNC_RESLine.class)) {
@@ -973,10 +977,10 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 		}
 
 		List<T> tempList = new ArrayList<T>();
-		if (lines != null) {
+		if (lines != null && lines.length > 0) {
 			tempList = (List<T>) Arrays.asList(lines);
 		} else {
-			logger.warn("获取客户接口[" + classType.getSimpleName() + "]数据为空！");
+			logger.info("获取客户接口[" + classType.getSimpleName() + "]数据为空！");
 		}
 		return tempList;
 	}

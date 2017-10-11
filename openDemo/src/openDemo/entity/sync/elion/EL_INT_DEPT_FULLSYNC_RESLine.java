@@ -1,5 +1,5 @@
 /**
- * EL_INT_DEPT_SYNC_RESLine.java
+ * EL_INT_DEPT_FULLSYNC_RESLine.java
  *
  * This file was auto-generated from WSDL
  * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
@@ -7,8 +7,8 @@
 
 package openDemo.entity.sync.elion;
 
-public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
-    private java.lang.String setId;
+public class EL_INT_DEPT_FULLSYNC_RESLine  implements java.io.Serializable {
+    private java.lang.String setID;
 
     private java.lang.String deptId;
 
@@ -38,15 +38,13 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
     private java.lang.String managerName;
 
-    private java.lang.String actionCode;
-
     private java.lang.String sequenceNbr;
 
-    public EL_INT_DEPT_SYNC_RESLine() {
+    public EL_INT_DEPT_FULLSYNC_RESLine() {
     }
 
-    public EL_INT_DEPT_SYNC_RESLine(
-           java.lang.String setId,
+    public EL_INT_DEPT_FULLSYNC_RESLine(
+           java.lang.String setID,
            java.lang.String deptId,
            java.lang.String effectiveDate,
            java.lang.String effectiveStatus,
@@ -61,9 +59,8 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
            java.lang.String companyDescr,
            java.lang.String managerId,
            java.lang.String managerName,
-           java.lang.String actionCode,
            java.lang.String sequenceNbr) {
-           this.setId = setId;
+           this.setID = setID;
            this.deptId = deptId;
            this.effectiveDate = effectiveDate;
            this.effectiveStatus = effectiveStatus;
@@ -78,7 +75,6 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
            this.companyDescr = companyDescr;
            this.managerId = managerId;
            this.managerName = managerName;
-           this.actionCode = actionCode;
            this.sequenceNbr = sequenceNbr;
     }
 
@@ -101,27 +97,27 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 	// =====BeanUtils复制属性用=====
 
     /**
-     * Gets the setId value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the setID value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
-     * @return setId
+     * @return setID
      */
-    public java.lang.String getSetId() {
-        return setId;
+    public java.lang.String getSetID() {
+        return setID;
     }
 
 
     /**
-     * Sets the setId value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the setID value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
-     * @param setId
+     * @param setID
      */
-    public void setSetId(java.lang.String setId) {
-        this.setId = setId;
+    public void setSetID(java.lang.String setID) {
+        this.setID = setID;
     }
 
 
     /**
-     * Gets the deptId value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the deptId value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @return deptId
      */
@@ -131,7 +127,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the deptId value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the deptId value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @param deptId
      */
@@ -141,7 +137,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the effectiveDate value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the effectiveDate value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @return effectiveDate
      */
@@ -151,7 +147,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the effectiveDate value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the effectiveDate value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @param effectiveDate
      */
@@ -161,7 +157,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the effectiveStatus value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the effectiveStatus value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @return effectiveStatus
      */
@@ -171,7 +167,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the effectiveStatus value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the effectiveStatus value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @param effectiveStatus
      */
@@ -181,7 +177,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the deptDescr value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the deptDescr value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @return deptDescr
      */
@@ -191,7 +187,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the deptDescr value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the deptDescr value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @param deptDescr
      */
@@ -201,7 +197,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the parentDeptId value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the parentDeptId value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @return parentDeptId
      */
@@ -211,7 +207,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the parentDeptId value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the parentDeptId value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @param parentDeptId
      */
@@ -221,7 +217,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the parentDeptDescr value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the parentDeptDescr value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @return parentDeptDescr
      */
@@ -231,7 +227,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the parentDeptDescr value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the parentDeptDescr value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @param parentDeptDescr
      */
@@ -241,7 +237,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the deptTypeCode value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the deptTypeCode value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @return deptTypeCode
      */
@@ -251,7 +247,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the deptTypeCode value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the deptTypeCode value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @param deptTypeCode
      */
@@ -261,7 +257,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the deptTypeDescr value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the deptTypeDescr value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @return deptTypeDescr
      */
@@ -271,7 +267,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the deptTypeDescr value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the deptTypeDescr value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @param deptTypeDescr
      */
@@ -281,7 +277,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the locationCode value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the locationCode value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @return locationCode
      */
@@ -291,7 +287,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the locationCode value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the locationCode value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @param locationCode
      */
@@ -301,7 +297,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the locationDescr value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the locationDescr value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @return locationDescr
      */
@@ -311,7 +307,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the locationDescr value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the locationDescr value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @param locationDescr
      */
@@ -321,7 +317,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the companyCode value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the companyCode value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @return companyCode
      */
@@ -331,7 +327,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the companyCode value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the companyCode value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @param companyCode
      */
@@ -341,7 +337,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the companyDescr value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the companyDescr value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @return companyDescr
      */
@@ -351,7 +347,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the companyDescr value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the companyDescr value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @param companyDescr
      */
@@ -361,7 +357,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the managerId value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the managerId value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @return managerId
      */
@@ -371,7 +367,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the managerId value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the managerId value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @param managerId
      */
@@ -381,7 +377,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the managerName value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the managerName value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @return managerName
      */
@@ -391,7 +387,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the managerName value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the managerName value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @param managerName
      */
@@ -401,27 +397,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Gets the actionCode value for this EL_INT_DEPT_SYNC_RESLine.
-     * 
-     * @return actionCode
-     */
-    public java.lang.String getActionCode() {
-        return actionCode;
-    }
-
-
-    /**
-     * Sets the actionCode value for this EL_INT_DEPT_SYNC_RESLine.
-     * 
-     * @param actionCode
-     */
-    public void setActionCode(java.lang.String actionCode) {
-        this.actionCode = actionCode;
-    }
-
-
-    /**
-     * Gets the sequenceNbr value for this EL_INT_DEPT_SYNC_RESLine.
+     * Gets the sequenceNbr value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @return sequenceNbr
      */
@@ -431,7 +407,7 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
 
     /**
-     * Sets the sequenceNbr value for this EL_INT_DEPT_SYNC_RESLine.
+     * Sets the sequenceNbr value for this EL_INT_DEPT_FULLSYNC_RESLine.
      * 
      * @param sequenceNbr
      */
@@ -441,8 +417,8 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
-        if (!(obj instanceof EL_INT_DEPT_SYNC_RESLine)) return false;
-        EL_INT_DEPT_SYNC_RESLine other = (EL_INT_DEPT_SYNC_RESLine) obj;
+        if (!(obj instanceof EL_INT_DEPT_FULLSYNC_RESLine)) return false;
+        EL_INT_DEPT_FULLSYNC_RESLine other = (EL_INT_DEPT_FULLSYNC_RESLine) obj;
         if (obj == null) return false;
         if (this == obj) return true;
         if (__equalsCalc != null) {
@@ -451,9 +427,9 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
         __equalsCalc = obj;
         boolean _equals;
         _equals = true && 
-            ((this.setId==null && other.getSetId()==null) || 
-             (this.setId!=null &&
-              this.setId.equals(other.getSetId()))) &&
+            ((this.setID==null && other.getSetID()==null) || 
+             (this.setID!=null &&
+              this.setID.equals(other.getSetID()))) &&
             ((this.deptId==null && other.getDeptId()==null) || 
              (this.deptId!=null &&
               this.deptId.equals(other.getDeptId()))) &&
@@ -496,9 +472,6 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
             ((this.managerName==null && other.getManagerName()==null) || 
              (this.managerName!=null &&
               this.managerName.equals(other.getManagerName()))) &&
-            ((this.actionCode==null && other.getActionCode()==null) || 
-             (this.actionCode!=null &&
-              this.actionCode.equals(other.getActionCode()))) &&
             ((this.sequenceNbr==null && other.getSequenceNbr()==null) || 
              (this.sequenceNbr!=null &&
               this.sequenceNbr.equals(other.getSequenceNbr())));
@@ -513,8 +486,8 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
         }
         __hashCodeCalc = true;
         int _hashCode = 1;
-        if (getSetId() != null) {
-            _hashCode += getSetId().hashCode();
+        if (getSetID() != null) {
+            _hashCode += getSetID().hashCode();
         }
         if (getDeptId() != null) {
             _hashCode += getDeptId().hashCode();
@@ -558,9 +531,6 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
         if (getManagerName() != null) {
             _hashCode += getManagerName().hashCode();
         }
-        if (getActionCode() != null) {
-            _hashCode += getActionCode().hashCode();
-        }
         if (getSequenceNbr() != null) {
             _hashCode += getSequenceNbr().hashCode();
         }
@@ -570,13 +540,13 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
 
     // Type metadata
     private static org.apache.axis.description.TypeDesc typeDesc =
-        new org.apache.axis.description.TypeDesc(EL_INT_DEPT_SYNC_RESLine.class, true);
+        new org.apache.axis.description.TypeDesc(EL_INT_DEPT_FULLSYNC_RESLine.class, true);
 
     static {
         typeDesc.setXmlType(new javax.xml.namespace.QName("http://xmlns.oracle.com/Enterprise/Tools/schemas/EL_INT_DEPT_SYNC_RES.V1", ">>EL_INT_JOBCD_SYNC_RES>Line"));
         org.apache.axis.description.ElementDesc elemField = new org.apache.axis.description.ElementDesc();
-        elemField.setFieldName("setId");
-        elemField.setXmlName(new javax.xml.namespace.QName("", "SetId"));
+        elemField.setFieldName("setID");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "SetID"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setNillable(false);
         typeDesc.addFieldDesc(elemField);
@@ -661,12 +631,6 @@ public class EL_INT_DEPT_SYNC_RESLine  implements java.io.Serializable {
         elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("managerName");
         elemField.setXmlName(new javax.xml.namespace.QName("", "ManagerName"));
-        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
-        elemField.setNillable(false);
-        typeDesc.addFieldDesc(elemField);
-        elemField = new org.apache.axis.description.ElementDesc();
-        elemField.setFieldName("actionCode");
-        elemField.setXmlName(new javax.xml.namespace.QName("", "ActionCode"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setNillable(false);
         typeDesc.addFieldDesc(elemField);
