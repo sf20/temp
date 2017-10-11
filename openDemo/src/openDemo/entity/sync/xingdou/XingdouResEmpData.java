@@ -6,16 +6,16 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "HrData")
-public class XingdouResData<T> {
+public class XingdouResEmpData {
 
-	private List<T> list;
+	private List<XingdouUserInfoModel> list;
 
 	@XmlElement(name = "Table")
-	public List<T> getList() {
+	public List<XingdouUserInfoModel> getList() {
 		return list;
 	}
 
-	public void setList(List<T> list) {
+	public void setList(List<XingdouUserInfoModel> list) {
 		this.list = list;
 	}
 

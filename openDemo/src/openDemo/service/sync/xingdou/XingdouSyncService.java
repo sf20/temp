@@ -20,7 +20,8 @@ import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
 import openDemo.entity.UserInfoModel;
 import openDemo.entity.sync.xingdou.XingdouOuInfoModel;
-import openDemo.entity.sync.xingdou.XingdouResData;
+import openDemo.entity.sync.xingdou.XingdouResDeptData;
+import openDemo.entity.sync.xingdou.XingdouResEmpData;
 import openDemo.entity.sync.xingdou.XingdouUserInfoModel;
 import openDemo.service.sync.AbstractSyncService2;
 
@@ -38,6 +39,9 @@ public class XingdouSyncService extends AbstractSyncService2 implements XingdouC
 	// 记录日志
 	private static final Logger LOGGER = LogManager.getLogger(XingdouSyncService.class);
 
+	private WebServiceLocator locator = new WebServiceLocator();
+	private List<UserInfoModel> sharedModelList;
+
 	public XingdouSyncService() {
 		super.setApikey(apikey);
 		super.setSecretkey(secretkey);
@@ -47,50 +51,64 @@ public class XingdouSyncService extends AbstractSyncService2 implements XingdouC
 		super.setLogger(LOGGER);
 	}
 
-	private <T> List<T> getDataModelList(String mode, Class<T> classType)
+	private <T> List getDataModelList(String mode, Class<T> listClassType)
 			throws ServiceException, RemoteException, JAXBException {
 		// 调用WebService对象
-		WebServiceLocator locator = new WebServiceLocator();
 		WebServiceSoap service = locator.getWebServiceSoap();
 		// 调用login方法取得凭证
 		String sessionID = service.login(LOGIN_PARAM_S1, LOGIN_PARAM_S2);
 
 		// 读取数据总数
 		int count = 0;
-		if (classType.isAssignableFrom(XingdouOuInfoModel.class)) {
+		List retList = new ArrayList();
+		if (listClassType.isAssignableFrom(XingdouOuInfoModel.class)) {
 			if (MODE_FULL.equals(mode)) {
 				count = service.orgBeginGetDept2(sessionID, MODE_FULL, null);
 			} else {
 				count = service.orgBeginGetDept2(sessionID, MODE_UPDATE,
 						CUSTOM_DATE_FORMAT.format(getYesterdayDate(new Date())));
 			}
-		} else if (classType.isAssignableFrom(XingdouUserInfoModel.class)) {
+
+			if (count > 0) {
+				// 返回xml绑定java对象
+				JAXBContext context = JAXBContext.newInstance(XingdouResDeptData.class);
+				// 读取数据
+				String segment = service.getSegment(sessionID, 1, count);
+
+				// xml解析为java对象
+				XingdouResDeptData resData = (XingdouResDeptData) context.createUnmarshaller()
+						.unmarshal(new StringReader(segment));
+
+				retList = resData.getList();
+			}
+		} else if (listClassType.isAssignableFrom(XingdouUserInfoModel.class)) {
 			if (MODE_FULL.equals(mode)) {
 				count = service.empBeginGetEmployee2(sessionID, MODE_FULL, null);
 			} else {
 				count = service.empBeginGetEmployee2(sessionID, MODE_UPDATE,
 						CUSTOM_DATE_FORMAT.format(getYesterdayDate(new Date())));
 			}
+
+			if (count > 0) {
+				// 返回xml绑定java对象
+				JAXBContext context = JAXBContext.newInstance(XingdouResEmpData.class);
+				// 读取数据
+				String segment = service.getSegment(sessionID, 1, count);
+
+				// xml解析为java对象
+				XingdouResEmpData resData = (XingdouResEmpData) context.createUnmarshaller()
+						.unmarshal(new StringReader(segment));
+
+				retList = resData.getList();
+			}
 		}
 
-		List<T> list = new ArrayList<T>();
-		if (count > 0) {
-			// 返回xml绑定java对象
-			JAXBContext context = JAXBContext.newInstance(new XingdouResData<T>().getClass());
-			// 读取数据
-			String segment = service.getSegment(sessionID, 1, count);
-
-			// xml解析为java对象
-			@SuppressWarnings("unchecked")
-			XingdouResData<T> resData = (XingdouResData<T>) context.createUnmarshaller()
-					.unmarshal(new StringReader(segment));
-
-			list = resData.getList();
-		}
 		// 清除服务器上缓存
 		service.clearCache(sessionID);
+		// 注销凭证
+		service.logOut(sessionID);
 
-		return list;
+		return retList;
 	}
 
 	@Override
@@ -141,15 +159,19 @@ public class XingdouSyncService extends AbstractSyncService2 implements XingdouC
 
 	@Override
 	protected List<PositionModel> getPositionModelList(String mode) throws Exception {
-		List<XingdouUserInfoModel> dataModelList = getDataModelList(mode, XingdouUserInfoModel.class);
+		List<XingdouUserInfoModel> dataModelList = (List<XingdouUserInfoModel>) getDataModelList(mode,
+				XingdouUserInfoModel.class);
 		List<UserInfoModel> newList = copyCreateEntityList(dataModelList, UserInfoModel.class);
+		// 请求接口数据复用
+		sharedModelList = newList;
 
 		return getPosListFromUsers(newList);
 	}
 
 	@Override
 	protected List<OuInfoModel> getOuInfoModelList(String mode) throws Exception {
-		List<XingdouOuInfoModel> dataModelList = getDataModelList(mode, XingdouOuInfoModel.class);
+		List<XingdouOuInfoModel> dataModelList = (List<XingdouOuInfoModel>) getDataModelList(mode,
+				XingdouOuInfoModel.class);
 		List<OuInfoModel> newList = copyCreateEntityList(dataModelList, OuInfoModel.class);
 
 		return newList;
@@ -157,10 +179,8 @@ public class XingdouSyncService extends AbstractSyncService2 implements XingdouC
 
 	@Override
 	protected List<UserInfoModel> getUserInfoModelList(String mode) throws Exception {
-		List<XingdouUserInfoModel> dataModelList = getDataModelList(mode, XingdouUserInfoModel.class);
-		List<UserInfoModel> newList = copyCreateEntityList(dataModelList, UserInfoModel.class);
-
-		return newList;
+		// 人员同步请求数据与岗位同步时请求数据一致
+		return sharedModelList;
 	}
 
 }
