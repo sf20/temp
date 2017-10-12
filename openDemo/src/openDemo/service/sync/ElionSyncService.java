@@ -644,7 +644,7 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 				try {
 					toModel.setBirthday(DATE_FORMAT.format(CUSTOMER_DATE_FORMAT.parse(birthday)));
 				} catch (ParseException e) {
-					logger.warn("日期格式有误 " + fromModel.getID() + "：" + entryTime);
+					logger.warn("日期格式有误 " + fromModel.getID() + "：" + birthday);
 				}
 			}
 
