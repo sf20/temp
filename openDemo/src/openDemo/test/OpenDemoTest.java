@@ -223,7 +223,7 @@ public class OpenDemoTest implements ElionConfig {
 
 	void print(String name, ResultEntity resultEntity) {
 		System.out.println(name + ":" + resultEntity.getCode() + "==" + resultEntity.getData() + "=="
-				+ resultEntity.getMessage() + "==" + resultEntity.getTotalCount());
+				+ resultEntity.getMessage() + "==" + resultEntity.getTotalcount());
 	}
 
 }

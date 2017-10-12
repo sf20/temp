@@ -28,7 +28,7 @@ public class ResultEntity {
 	/**
 	 * 记录总条数
 	 */
-	private Integer totalCount;
+	private int totalcount;
 	
 	/**
 	 * 成功执行后返回的数据(Json格式字符串)
@@ -51,12 +51,12 @@ public class ResultEntity {
 		this.message = message;
 	}
 
-	public Integer getTotalCount() {
-		return totalCount;
+	public int getTotalcount() {
+		return totalcount;
 	}
 
-	public void setTotalCount(Integer totalCount) {
-		this.totalCount = totalCount;
+	public void setTotalcount(int totalcount) {
+		this.totalcount = totalcount;
 	}
 
 	public String getData() {
