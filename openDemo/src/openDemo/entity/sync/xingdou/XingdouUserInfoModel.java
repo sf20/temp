@@ -10,6 +10,8 @@ public class XingdouUserInfoModel {
 	private String orgOuCode;
 	private String postionName;
 	private String status;
+	private String entryTime;
+	private String birthday;
 
 	@XmlElement(name = "EmpID")
 	public String getID() {
@@ -71,6 +73,24 @@ public class XingdouUserInfoModel {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	@XmlElement(name = "Timetoenter")
+	public String getEntryTime() {
+		return entryTime;
+	}
+
+	public void setEntryTime(String entryTime) {
+		this.entryTime = entryTime;
+	}
+
+	@XmlElement(name = "Birth")
+	public String getBirthday() {
+		return birthday;
+	}
+
+	public void setBirthday(String birthday) {
+		this.birthday = birthday;
 	}
 
 }

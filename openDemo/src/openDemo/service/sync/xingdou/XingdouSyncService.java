@@ -6,12 +6,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.rpc.ServiceException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -141,6 +141,17 @@ public class XingdouSyncService extends AbstractSyncService2 implements XingdouC
 	@Override
 	protected void changePropValues(List<UserInfoModel> newList) {
 		for (UserInfoModel tempModel : newList) {
+			// 入职日期修改
+			String entryTime = tempModel.getEntryTime();
+			if (StringUtils.isNotEmpty(entryTime)) {
+				tempModel.setEntryTime(entryTime.substring(0, 10));// yyyy-MM-dd共10位
+			}
+
+			// 出生日期修改
+			String birthday = tempModel.getBirthday();
+			if (StringUtils.isNotEmpty(birthday)) {
+				tempModel.setBirthday(birthday.substring(0, 10));// yyyy-MM-dd共10位
+			}
 
 			// 性别字符串转换 1：男 2：女
 			String sex = tempModel.getSex();
