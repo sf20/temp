@@ -29,8 +29,6 @@ public class SyncTimerService {
 	private int timerExecHour = 23;
 	private int timerExecMinute = 00;
 	private int timerExecSecond = 00;
-	// 线程池数量
-	private static final int CORE_POOL_SIZE = 1;
 
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static final Logger logger = LogManager.getLogger(SyncTimerService.class);
@@ -85,7 +83,7 @@ public class SyncTimerService {
 
 	private void addTimingService(final CustomTimerTask timerTask) {
 		final String className = timerTask.getClass().getSimpleName();
-		executor = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+		executor = Executors.newSingleThreadScheduledExecutor();
 
 		TimerTask task = new TimerTask() {
 			@Override
