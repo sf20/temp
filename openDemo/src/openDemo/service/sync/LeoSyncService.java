@@ -301,7 +301,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					positionList.add(pos);
 				} else {
-					printLog("岗位同步新增失败 ", resultEntity);
+					printLog("岗位同步新增失败 ", pos.getpNames(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("岗位同步新增失败 " + pos.getpNames(), e);
@@ -328,7 +328,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 					positionList.remove(pos);
 					positionList.add(pos);
 				} else {
-					printLog("岗位同步更新失败 ", resultEntity);
+					printLog("岗位同步更新失败 ", pos.getpNames(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("岗位同步更新失败 " + pos.getpNames(), e);
@@ -432,7 +432,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					ouInfoList.remove(org);
 				} else {
-					printLog("组织同步删除失败 ", resultEntity);
+					printLog("组织同步删除失败 ", org.getOuName(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("组织同步删除失败 " + org.getOuName(), e);
@@ -461,7 +461,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 					ouInfoList.remove(org);
 					ouInfoList.add(org);
 				} else {
-					printLog("组织同步更新失败 ", resultEntity);
+					printLog("组织同步更新失败 ", org.getOuName(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("组织同步更新失败 " + org.getOuName(), e);
@@ -488,7 +488,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					ouInfoList.add(org);
 				} else {
-					printLog("组织同步新增失败 ", resultEntity);
+					printLog("组织同步新增失败 ", org.getOuName(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("组织同步新增失败 " + org.getOuName(), e);
@@ -664,7 +664,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 				if (SYNC_CODE_SUCCESS.equals(resultEntity.getCode())) {
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步新增失败 ", resultEntity);
+					printLog("用户同步新增失败 ", user.getID(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("用户同步新增失败 " + user.getID(), e);
@@ -693,7 +693,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 					userInfoList.remove(user);
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步更新失败 ", resultEntity);
+					printLog("用户同步更新失败 ", user.getID(), resultEntity);
 				}
 			} catch (Exception e) {
 				logger.error("用户同步更新失败 " + user.getID(), e);
@@ -722,7 +722,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 					userInfoList.remove(user);
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步启用失败 ", resultEntity);
+					printLog("用户同步启用失败 ", user.getID(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("用户同步启用失败  " + user.getID(), e);
@@ -749,7 +749,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 					userInfoList.remove(user);
 					userInfoList.add(user);
 				} else {
-					printLog("用户同步禁用失败 ", resultEntity);
+					printLog("用户同步禁用失败 ", user.getID(), resultEntity);
 				}
 			} catch (IOException e) {
 				logger.error("用户同步禁用失败 " + user.getID(), e);
@@ -1068,10 +1068,10 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 	 * 同步返回错误信息日志记录
 	 * 
 	 * @param type
+	 * @param errKey
 	 * @param resultEntity
 	 */
-	private void printLog(String type, ResultEntity resultEntity) {
-		// TODO
-		logger.error(type + "错误信息：" + resultEntity.getCode() + "-" + resultEntity.getMessage());
+	protected void printLog(String type, String errKey, ResultEntity resultEntity) {
+		logger.error(type + "ID：" + errKey + " 错误信息：" + resultEntity.getCode() + "-" + resultEntity.getMessage());
 	}
 }
