@@ -17,12 +17,12 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-import openDemo.config.TestConfig;
+import openDemo.config.AlignConfig;
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
 import openDemo.entity.UserInfoModel;
 
-public class AllinpaySyncService extends AbstractSyncService2 implements TestConfig {
+public class AllinpaySyncService extends AbstractSyncService2 implements AlignConfig {
 	// 全量增量区分
 	private static final String MODE_FULL = "0";
 	private static final String MODE_UPDATE = "1";
@@ -109,10 +109,18 @@ public class AllinpaySyncService extends AbstractSyncService2 implements TestCon
 	 * @throws Exception
 	 */
 	private List<String> downloadAsString(String fileName) throws Exception {
-		// 建立连接
-		sftpConnect(HOST, PORT, USERNAME, PASSWORD);
-		// 获取文件
-		return readLines(channelSftp.get(fileName), CHARSET_GBK, CHARSET_UTF8);
+		List<String> lines = null;
+		try {
+			// 建立连接
+			sftpConnect(HOST, PORT, USERNAME, PASSWORD);
+			// 获取文件
+			lines = readLines(channelSftp.get(fileName), CHARSET_GBK, CHARSET_UTF8);
+		} finally {
+			// 断开连接
+			sftpDisconnect();
+		}
+
+		return lines;
 	}
 
 	/**
