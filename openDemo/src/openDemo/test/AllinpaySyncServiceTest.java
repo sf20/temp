@@ -13,6 +13,9 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
+import openDemo.entity.OuInfoModel;
+import openDemo.entity.PositionModel;
+import openDemo.entity.UserInfoModel;
 import openDemo.service.sync.AllinpaySyncService;
 
 public class AllinpaySyncServiceTest {
@@ -32,10 +35,11 @@ public class AllinpaySyncServiceTest {
 
 	public static void main(String[] args) throws Exception {
 		// getDataTest();
+		// getDataModelTest();
 		syncTest();
 	}
 
-	private static void syncTest() {
+	static void syncTest() {
 		AllinpaySyncService service = new AllinpaySyncService();
 		try {
 			service.sync();
@@ -44,7 +48,37 @@ public class AllinpaySyncServiceTest {
 		}
 	}
 
-	private static void getDataTest() throws Exception {
+	static void getDataModelTest() throws Exception {
+		AllinpaySyncService service = new AllinpaySyncService();
+
+		List<PositionModel> positionModelList = service.getPositionModelList(null);
+		System.out.println(positionModelList.size());
+		// for (PositionModel pos : positionModelList) {
+		// System.out.println(pos.getpNo() + "=" + pos.getpNames());
+		// }
+
+		List<OuInfoModel> ouInfoModelList = service.getOuInfoModelList(null);
+		System.out.println(ouInfoModelList.size());
+		// for (OuInfoModel dept : ouInfoModelList) {
+		// System.out
+		// .println(dept.getID() + "=" + dept.getOuName() + "=" + dept.getParentID() +
+		// "=" + dept.getStatus());
+		// }
+
+		List<UserInfoModel> userInfoModelList = service.getUserInfoModelList(null);
+		System.out.println(userInfoModelList.size());
+		// for (UserInfoModel user : userInfoModelList) {
+		// System.out.println(user.getID() + "=" + user.getUserName() + "=" +
+		// user.getCnName() + "=" + user.getSex()
+		// + "=" + user.getBirthday() + "=" + user.getOrgOuCode() + "=" +
+		// user.getPostionName() + "="
+		// + user.getMobile() + "=" + user.getMail() + "=" + user.getEntryTime() + "=" +
+		// user.getStatus() + "="
+		// + user.getDeleteStatus());
+		// }
+	}
+
+	static void getDataTest() throws Exception {
 		List<String> list = downloadAsString(POSITION_FILE);
 		System.out.println(list.size());
 		for (String s : list) {

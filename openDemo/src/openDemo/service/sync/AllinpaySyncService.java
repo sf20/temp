@@ -17,12 +17,12 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-import openDemo.config.AlignConfig;
+import openDemo.config.AllinpayConfig;
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
 import openDemo.entity.UserInfoModel;
 
-public class AllinpaySyncService extends AbstractSyncService2 implements AlignConfig {
+public class AllinpaySyncService extends AbstractSyncService2 implements AllinpayConfig {
 	// 全量增量区分
 	private static final String MODE_FULL = "0";
 	private static final String MODE_UPDATE = "1";
@@ -40,6 +40,8 @@ public class AllinpaySyncService extends AbstractSyncService2 implements AlignCo
 	private static final String USERINFO_FILE = "ywlinkman.txt";
 	// 分隔符
 	private static final String SEPARATOR = "|";
+	// 分隔符正则转译
+	private static final String SEPARATOR_REGEX = "\\|";
 	// 记录日志
 	private static final Logger LOGGER = LogManager.getLogger(AllinpaySyncService.class);
 	// sftp连接对象
@@ -213,7 +215,7 @@ public class AllinpaySyncService extends AbstractSyncService2 implements AlignCo
 	}
 
 	@Override
-	protected List<PositionModel> getPositionModelList(String mode) throws Exception {
+	public List<PositionModel> getPositionModelList(String mode) throws Exception {
 		List<PositionModel> modelList = new ArrayList<PositionModel>();
 		List<String> lines = downloadAsString(POSITION_FILE);
 
@@ -222,7 +224,7 @@ public class AllinpaySyncService extends AbstractSyncService2 implements AlignCo
 			if (StringUtils.isBlank(line) || !line.contains(SEPARATOR)) {
 				continue;
 			}
-			tempStrArr = line.split(SEPARATOR);
+			tempStrArr = line.split(SEPARATOR_REGEX);
 
 			PositionModel pos = new PositionModel();
 			pos.setpNo(tempStrArr[0]);
@@ -235,7 +237,7 @@ public class AllinpaySyncService extends AbstractSyncService2 implements AlignCo
 	}
 
 	@Override
-	protected List<OuInfoModel> getOuInfoModelList(String mode) throws Exception {
+	public List<OuInfoModel> getOuInfoModelList(String mode) throws Exception {
 		List<OuInfoModel> modelList = new ArrayList<OuInfoModel>();
 		List<String> lines = downloadAsString(OUINFO_FILE);
 
@@ -244,7 +246,11 @@ public class AllinpaySyncService extends AbstractSyncService2 implements AlignCo
 			if (StringUtils.isBlank(line) || !line.contains(SEPARATOR)) {
 				continue;
 			}
-			tempStrArr = line.split(SEPARATOR);
+			tempStrArr = line.split(SEPARATOR_REGEX);
+
+			if (tempStrArr.length != 4) {
+				continue;
+			}
 
 			OuInfoModel ouInfo = new OuInfoModel();
 			ouInfo.setID(tempStrArr[0]);
@@ -258,7 +264,7 @@ public class AllinpaySyncService extends AbstractSyncService2 implements AlignCo
 	}
 
 	@Override
-	protected List<UserInfoModel> getUserInfoModelList(String mode) throws Exception {
+	public List<UserInfoModel> getUserInfoModelList(String mode) throws Exception {
 		List<UserInfoModel> modelList = new ArrayList<UserInfoModel>();
 		List<String> lines = downloadAsString(USERINFO_FILE);
 
@@ -267,7 +273,11 @@ public class AllinpaySyncService extends AbstractSyncService2 implements AlignCo
 			if (StringUtils.isBlank(line) || !line.contains(SEPARATOR)) {
 				continue;
 			}
-			tempStrArr = line.split(SEPARATOR);
+			tempStrArr = line.split(SEPARATOR_REGEX);
+
+			if (tempStrArr.length != 12) {
+				continue;
+			}
 
 			UserInfoModel userInfo = new UserInfoModel();
 			userInfo.setID(tempStrArr[0]);
