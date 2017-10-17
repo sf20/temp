@@ -940,10 +940,12 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 	private <T> List<T> getDataModelList(String mode, String requestUrl, Class<T> classType) throws IOException {
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put(REQUEST_PARAM_FROM, getTimestamp(mode));
+		// 用于认证的header信息
+		List<Header> authHeader = getAuthHeader();
 
 		List<T> tempList = new ArrayList<T>();
 		// 首次请求
-		Map<Integer, List<T>> dataMap = requestGetData(requestUrl, paramMap, classType);
+		Map<Integer, List<T>> dataMap = requestGetData(requestUrl, paramMap, authHeader, classType);
 		tempList.addAll(dataMap.values().iterator().next());
 
 		// 获取total值后请求全部数据
@@ -951,7 +953,7 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 		for (int i = 0; i < calcRequestTimes(total, DEFAULT_PAGE_SIZE) - 1; i++) {
 			// 请求页码从2开始
 			paramMap.put(REQUEST_PARAM_PAGE, i + 2);
-			dataMap = requestGetData(requestUrl, paramMap, classType);
+			dataMap = requestGetData(requestUrl, paramMap, authHeader, classType);
 			tempList.addAll(dataMap.values().iterator().next());
 		}
 
@@ -963,13 +965,14 @@ public class LeoSyncService extends AbstractSyncService implements LeoConfig {
 	 * 
 	 * @param requestUrl
 	 * @param paramMap
+	 * @param headers
 	 * @param classType
 	 * @return Map集合 key：返回数据total值 value：岗位或组织或人员数据集合
 	 * @throws IOException
 	 */
 	private <T> Map<Integer, List<T>> requestGetData(String requestUrl, Map<String, Object> paramMap,
-			Class<T> classType) throws IOException {
-		String jsonString = HttpClientUtil4Sync.doGet(requestUrl, paramMap, getAuthHeader());
+			List<Header> headers, Class<T> classType) throws IOException {
+		String jsonString = HttpClientUtil4Sync.doGet(requestUrl, paramMap, headers);
 		// logger.info(jsonString);
 
 		// 将json字符串转为用户json对象数据模型

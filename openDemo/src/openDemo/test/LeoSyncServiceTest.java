@@ -130,7 +130,8 @@ public class LeoSyncServiceTest {
 
 		JsonNode jsonNode = mapper.readTree(HttpClientUtil4Sync.doPost(url, paramMap));
 		String token = jsonNode.get("data").get("token").asText();
-		// System.out.println(token);
+		String exp = jsonNode.get("data").get("exp").asText();
+		System.out.println(exp);
 
 		return token;
 	}
