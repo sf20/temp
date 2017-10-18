@@ -25,6 +25,7 @@ import org.apache.axis.description.OperationDesc;
 import org.apache.axis.description.ParameterDesc;
 import org.apache.axis.message.SOAPHeaderElement;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -84,7 +85,8 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 	// 请求数据参数
 	private static final String DATA_SOURCE_ESB = "99";
 	private static final String DATA_FROM_INDEX = "1";
-	private static final String DATA_TO_INDEX = "10000";
+	private static final String DATA_TO_INDEX = "5000";
+	private static final int PAGE_SIZE = 5000;
 	// 生效状态
 	private static final String EFFECTIVE_STATUS = "A";
 	// 员工主岗标志
@@ -974,6 +976,20 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 
 			EL_INT_PER_SYNC_RES res = (EL_INT_PER_SYNC_RES) call.invoke(new java.lang.Object[] { req });
 			lines = res.getLine();
+
+			// 人员数据较多进行多次获取
+			int i = 1;
+			Object[] tempLines = lines;
+			while (tempLines != null) {
+				req.setParam1(String.valueOf(PAGE_SIZE * i));
+				req.setParam2(String.valueOf(PAGE_SIZE * (i + 1)));
+
+				res = (EL_INT_PER_SYNC_RES) call.invoke(new java.lang.Object[] { req });
+				tempLines = res.getLine();
+				// 数组合并
+				lines = ArrayUtils.addAll(lines, tempLines);
+				i++;
+			}
 		}
 
 		List<T> tempList = new ArrayList<T>();
