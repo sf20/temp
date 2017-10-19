@@ -46,14 +46,15 @@ public abstract class AbstractSyncService2 implements CustomTimerTask {
 	public static final String POSITION_CLASS_SEPARATOR = ";";
 	// 日期格式化用
 	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
 	// 请求同步接口的service
-	public SyncPositionService positionService = new SyncPositionService();
-	public SyncOrgService orgService = new SyncOrgService();
-	public SyncUserService userService = new SyncUserService();
+	private SyncPositionService positionService = new SyncPositionService();
+	private SyncOrgService orgService = new SyncOrgService();
+	private SyncUserService userService = new SyncUserService();
 	// 用于存放请求获取到的数据的集合
-	public List<PositionModel> positionList = new LinkedList<PositionModel>();
-	public List<OuInfoModel> ouInfoList = new LinkedList<OuInfoModel>();
-	public List<UserInfoModel> userInfoList = new LinkedList<UserInfoModel>();
+	private List<PositionModel> positionList = new LinkedList<PositionModel>();
+	private List<OuInfoModel> ouInfoList = new LinkedList<OuInfoModel>();
+	private List<UserInfoModel> userInfoList = new LinkedList<UserInfoModel>();
 
 	// 参数配置
 	private String apikey;
@@ -65,7 +66,7 @@ public abstract class AbstractSyncService2 implements CustomTimerTask {
 	// 是否提供岗位id标志
 	private boolean isPosIdProvided = true;// 默认为已提供
 	// 记录日志
-	private Logger logger = LogManager.getLogger();
+	private Logger logger = LogManager.getLogger(AbstractSyncService2.class);
 
 	public void setApikey(String apikey) {
 		this.apikey = apikey;
