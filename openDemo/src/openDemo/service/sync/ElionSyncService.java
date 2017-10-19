@@ -981,7 +981,7 @@ public class ElionSyncService extends AbstractSyncService implements ElionConfig
 			int i = 1;
 			Object[] tempLines = lines;
 			while (tempLines != null) {
-				req.setParam1(String.valueOf(PAGE_SIZE * i));
+				req.setParam1(String.valueOf(PAGE_SIZE * i + 1));
 				req.setParam2(String.valueOf(PAGE_SIZE * (i + 1)));
 
 				res = (EL_INT_PER_SYNC_RES) call.invoke(new java.lang.Object[] { req });
