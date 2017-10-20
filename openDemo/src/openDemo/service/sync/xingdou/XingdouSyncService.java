@@ -37,7 +37,7 @@ public class XingdouSyncService extends AbstractSyncService2 implements XingdouC
 	// 用户接口要求时间格式
 	private static final SimpleDateFormat CUSTOM_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 	// 记录日志
-	private static final Logger LOGGER = LogManager.getLogger(XingdouSyncService.class);
+	private Logger logger = LogManager.getLogger(XingdouSyncService.class);
 
 	private WebServiceLocator locator = new WebServiceLocator();
 	private List<UserInfoModel> sharedModelList;
@@ -49,7 +49,7 @@ public class XingdouSyncService extends AbstractSyncService2 implements XingdouC
 		super.setModeFull(MODE_FULL);
 		super.setModeUpdate(MODE_UPDATE);
 		super.setIsPosIdProvided(false);
-		super.setLogger(LOGGER);
+		super.setLogger(logger);
 	}
 
 	private <T> List getDataModelList(String mode, Class<T> listClassType)
