@@ -10,15 +10,16 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
 
 import org.apache.axis.client.Call;
+import org.apache.axis.client.Service;
 import org.apache.axis.description.OperationDesc;
 import org.apache.axis.description.ParameterDesc;
 import org.apache.axis.message.SOAPHeaderElement;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.w3c.dom.DOMException;
 
 import openDemo.entity.OuInfoModel;
 import openDemo.entity.PositionModel;
-import openDemo.entity.UserInfoModel;
 import openDemo.entity.sync.elion.EL_INT_COMMON_SYNC_REQ_TypeShape;
 import openDemo.entity.sync.elion.EL_INT_DEPT_FULLSYNC_RES;
 import openDemo.entity.sync.elion.EL_INT_DEPT_FULLSYNC_RESLine;
@@ -65,11 +66,11 @@ public class ElionSyncServiceTest {
 
 	private static final String MODE_FULL = "1";
 	private static final String MODE_UPDATE = "2";
+	static Service service = new Service();
 
 	public static void main(String[] args) throws ServiceException, RemoteException, ReflectiveOperationException {
-		// Service service = new Service();
-		// Call call = (Call) service.createCall();
-		// call.setTargetEndpointAddress(ENDPOINT_ADDRESS);
+		Call call = (Call) service.createCall();
+		call.setTargetEndpointAddress(ENDPOINT_ADDRESS);
 		// jobFullSyncTest(call);
 		// jobSyncTest(call);
 		// deptFullSyncTest(call);
@@ -109,23 +110,46 @@ public class ElionSyncServiceTest {
 		System.out.println(res.getOperation_Name());
 	}
 
-	static void empFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException {
+	static void empFullSyncTest(Call call) throws RemoteException, ReflectiveOperationException, ServiceException {
 		setPropsBeforeCall(MODE_FULL, call, EMP_FULLSYNC_SOAP_ACTION, EMP_FULLSYNC_OPERATION_NAME,
 				EMP_FULLSYNC_RES_ELEMENT_NAMASPACE, EL_INT_COMMON_SYNC_REQ_TypeShape.class, EL_INT_PER_SYNC_RES.class);
 
 		EL_INT_COMMON_SYNC_REQ_TypeShape req = new EL_INT_COMMON_SYNC_REQ_TypeShape();
 		req.setParam1("1");
-		req.setParam2("23");
+		req.setParam2("5000");
 		req.setReqSystemID("99");
 		EL_INT_PER_SYNC_RES res = (EL_INT_PER_SYNC_RES) call.invoke(new java.lang.Object[] { req });
 
-		EL_INT_PER_SYNC_RESLine emp = res.getLine(0);
-		UserInfoModel userInfo = new UserInfoModel();
-		BeanUtils.copyProperties(userInfo, emp);
-		System.out.println(
-				userInfo.getID() + "=" + userInfo.getUserName() + "=" + userInfo.getCnName() + "=" + userInfo.getSex()
-						+ "=" + userInfo.getMail() + "=" + userInfo.getMobile() + "=" + userInfo.getOrgOuCode() + "="
-						+ userInfo.getPostionNo() + "=" + userInfo.getExpireDate() + "=" + userInfo.getStatus());
+		EL_INT_PER_SYNC_RESLine[] lines = res.getLine();
+		System.out.println(lines.length);
+
+		// 人员数据较多进行多次获取
+		int i = 1;
+		Object[] tempLines = lines;
+		while (tempLines != null) {
+			// call.clearOperation();
+
+			req.setParam1(String.valueOf(5000 * i + 1));
+			req.setParam2(String.valueOf(5000 * (i + 1)));
+
+			res = (EL_INT_PER_SYNC_RES) call.invoke(new java.lang.Object[] { req });
+			tempLines = res.getLine();
+			lines = (EL_INT_PER_SYNC_RESLine[]) ArrayUtils.addAll(lines, tempLines);
+			i++;
+		}
+		System.out.println(lines.length);
+
+		// EL_INT_PER_SYNC_RESLine emps = res.getLine(0);
+		// UserInfoModel userInfo = new UserInfoModel();
+		// BeanUtils.copyProperties(userInfo, emps);
+		// System.out.println(
+		// userInfo.getID() + "=" + userInfo.getUserName() + "=" +
+		// userInfo.getCnName()
+		// + "=" + userInfo.getSex()
+		// + "=" + userInfo.getMail() + "=" + userInfo.getMobile() + "=" +
+		// userInfo.getOrgOuCode() + "="
+		// + userInfo.getPostionNo() + "=" + userInfo.getExpireDate() + "=" +
+		// userInfo.getStatus());
 	}
 
 	static void deptSyncTest(Call call) throws RemoteException {
